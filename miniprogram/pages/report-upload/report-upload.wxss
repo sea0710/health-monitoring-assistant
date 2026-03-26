@@ -1,0 +1,290 @@
+.container {
+  min-height: 100vh;
+  padding: 16px;
+  padding-bottom: 100px;
+  background: #f8faf9;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin-left: -8px;
+}
+
+.back-icon {
+  font-size: 20px;
+  color: #14b8a6;
+  margin-right: 4px;
+}
+
+.back-text {
+  font-size: 14px;
+  color: #14b8a6;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.placeholder {
+  width: 60px;
+}
+
+.upload-section {
+  padding: 16px 0;
+}
+
+.upload-area {
+  width: 100%;
+  min-height: 300px;
+  background: #ffffff;
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.preview-image {
+  width: 100%;
+  height: 300px;
+}
+
+.result-section {
+  padding: 16px 0;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.result-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.edit-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.form-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.input-row:last-child {
+  border-bottom: none;
+}
+
+.input-label {
+  font-size: 14px;
+  color: #374151;
+}
+
+.picker-field {
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.picker-value {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.input-field-inline {
+  text-align: right;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.indicators-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.indicator-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.indicator-item:last-child {
+  border-bottom: none;
+}
+
+.indicator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.indicator-name {
+  font-size: 14px;
+  color: #374151;
+}
+
+.indicator-unit {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.indicator-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.indicator-value {
+  width: 80px;
+  height: 36px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.indicator-value.abnormal {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.reference-range {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.indicator-status {
+  margin-top: 8px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.I {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.status-badge.II {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+}
+
+.status-badge.III {
+  background: rgba(234, 88, 12, 0.1);
+  color: #c2410c;
+}
+
+.status-badge.IV {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  background: #14b8a6;
+  border-radius: 24px;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-primary:active {
+  background: #0f766e;
+}
+
+.btn-secondary {
+  width: 100%;
+  height: 48px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.disclaimer {
+  padding: 16px 0;
+  text-align: center;
+}
+
+.disclaimer-text {
+  font-size: 12px;
+  color: #9ca3af;
+  line-height: 1.6;
+}

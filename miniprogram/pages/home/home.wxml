@@ -1,0 +1,87 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的病历夹</text>
+    <view class="add-btn" bindtap="handleAddReport">
+      <text class="add-icon">+</text>
+    </view>
+  </view>
+
+  <view class="quick-actions">
+    <view class="action-card" bindtap="handleQuickAccess" data-path="/pages/reference/reference">
+      <view class="action-icon-wrapper action-icon-primary">
+        <image src="/images/icon-book.svg" class="action-icon"></image>
+      </view>
+      <view class="action-content">
+        <text class="action-title">分级速查</text>
+        <text class="action-desc">WHO分级标准</text>
+      </view>
+    </view>
+    <view class="action-card" bindtap="handleQuickAccess" data-path="/pages/reminder/reminder">
+      <view class="action-icon-wrapper action-icon-warning">
+        <image src="/images/icon-bell.svg" class="action-icon"></image>
+      </view>
+      <view class="action-content">
+        <text class="action-title">提醒设置</text>
+        <text class="action-desc">复查提醒管理</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="patient-card">
+    <view class="patient-info">
+      <view class="patient-main">
+        <text class="patient-label">患者姓名</text>
+        <text class="patient-name">{{patient.name || '未知患者'}}</text>
+      </view>
+      <view class="patient-stats">
+        <text class="stats-label">报告总数</text>
+        <text class="stats-value">{{reports.length}}</text>
+      </view>
+    </view>
+    <view class="patient-meta">
+      <view class="meta-row">
+        <text>最近检测：{{latestReport.test_time || '暂无记录'}}</text>
+      </view>
+      <view class="meta-row" wx:if="{{nextReminder}}">
+        <image src="/images/icon-bell-small.svg" class="bell-icon"></image>
+        <text>下次提醒：{{nextReminder}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="reports-section">
+    <text class="section-title">历史报告</text>
+    
+    <view class="reports-list" wx:if="{{reports.length > 0}}">
+      <view 
+        class="report-item" 
+        wx:for="{{reports}}" 
+        wx:key="report_id"
+        bindtap="handleReportClick"
+        data-id="{{item.report_id}}"
+      >
+        <view class="report-header">
+          <view class="report-tags">
+            <text class="report-type">{{item.report_type}}</text>
+            <text class="report-date">{{item.test_time}}</text>
+          </view>
+        </view>
+        <view class="report-content">
+          <view class="report-badge {{item.abnormal_count > 0 ? 'badge-warning' : 'badge-success'}}">
+            <text>{{item.abnormal_count > 0 ? item.abnormal_count + '项异常' : '指标正常'}}</text>
+          </view>
+          <text class="report-summary" wx:if="{{item.abnormal_count > 0}}">{{item.abnormal_summary}}</text>
+        </view>
+        <view class="report-arrow">
+          <text>›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:else>
+      <image src="/images/icon-file-empty.svg" class="empty-icon"></image>
+      <text class="empty-title">暂无报告</text>
+      <text class="empty-desc">点击右上角添加第一份报告</text>
+    </view>
+  </view>
+</view>

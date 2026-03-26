@@ -1,0 +1,84 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="handleBack">
+      <text class="back-icon">‹</text>
+      <text class="back-text">返回</text>
+    </view>
+    <text class="title">上传报告</text>
+    <view class="placeholder"></view>
+  </view>
+
+  <view class="upload-section" wx:if="{{!ocrResult}}">
+    <view class="upload-area" bindtap="handleChooseImage">
+      <image wx:if="{{previewImage}}" src="{{previewImage}}" class="preview-image" mode="aspectFit"></image>
+      <view wx:else class="upload-placeholder">
+        <image src="/images/icon-camera.svg" class="upload-icon"></image>
+        <text class="upload-text">点击上传血常规报告</text>
+        <text class="upload-hint">支持拍照或从相册选择</text>
+      </view>
+    </view>
+
+    <button wx:if="{{previewImage}}" class="btn-primary mt-4" bindtap="handleOCR" loading="{{isRecognizing}}">
+      {{isRecognizing ? '识别中...' : '开始识别'}}
+    </button>
+  </view>
+
+  <view class="result-section" wx:if="{{ocrResult}}">
+    <view class="result-header">
+      <text class="result-title">识别结果</text>
+      <text class="edit-hint">可手动修改识别结果</text>
+    </view>
+
+    <view class="form-card">
+      <view class="input-row">
+        <text class="input-label">检测日期</text>
+        <picker mode="date" value="{{testTime}}" bindchange="onTestTimeChange">
+          <view class="picker-field">
+            <text class="picker-value">{{testTime}}</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="input-row">
+        <text class="input-label">检测医院</text>
+        <input class="input-field-inline" value="{{hospital}}" bindinput="onHospitalInput" placeholder="请输入医院名称" />
+      </view>
+    </view>
+
+    <view class="indicators-card">
+      <text class="card-title">血常规指标</text>
+      
+      <view class="indicator-item" wx:for="{{indicators}}" wx:key="code">
+        <view class="indicator-header">
+          <text class="indicator-name">{{item.name}}</text>
+          <text class="indicator-unit">{{item.unit}}</text>
+        </view>
+        <view class="indicator-input-row">
+          <input 
+            class="indicator-value {{item.isAbnormal ? 'abnormal' : ''}}" 
+            type="digit" 
+            value="{{item.value}}" 
+            bindinput="onIndicatorValueInput"
+            data-code="{{item.code}}"
+          />
+          <text class="reference-range">参考: {{item.referenceMin}}-{{item.referenceMax}}</text>
+        </view>
+        <view class="indicator-status" wx:if="{{item.isAbnormal}}">
+          <text class="status-badge {{item.abnormalLevel}}">{{item.abnormalLevelName}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button class="btn-primary" bindtap="handleSave" loading="{{isSaving}}">
+      {{isSaving ? '保存中...' : '保存报告'}}
+    </button>
+
+    <button class="btn-secondary mt-3" bindtap="handleReset">
+      重新上传
+    </button>
+  </view>
+
+  <view class="disclaimer">
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议</text>
+  </view>
+</view>

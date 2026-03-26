@@ -1,0 +1,63 @@
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="handleBack">
+      <text class="back-icon">‹</text>
+      <text class="back-text">返回</text>
+    </view>
+    <text class="title">报告详情</text>
+    <view class="placeholder"></view>
+  </view>
+
+  <view class="report-info-card">
+    <view class="info-row">
+      <text class="info-label">检测日期</text>
+      <text class="info-value">{{report.test_time}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">检测医院</text>
+      <text class="info-value">{{report.test_hospital || '未填写'}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">报告类型</text>
+      <text class="info-value">{{report.report_type}}</text>
+    </view>
+  </view>
+
+  <view class="indicators-section">
+    <text class="section-title">血常规指标</text>
+    
+    <view class="indicator-card {{item.is_abnormal ? 'abnormal' : 'normal'}}" wx:for="{{indicators}}" wx:key="indicator_id">
+      <view class="indicator-main">
+        <view class="indicator-left">
+          <text class="indicator-name">{{item.indicator_name}}</text>
+          <text class="indicator-code">{{item.indicator_code}}</text>
+        </view>
+        <view class="indicator-right">
+          <text class="indicator-value">{{item.test_value}}</text>
+          <text class="indicator-unit">{{item.unit}}</text>
+        </view>
+      </view>
+      <view class="indicator-footer">
+        <view class="reference-range">
+          <text>参考范围: {{item.reference_min}} - {{item.reference_max}} {{item.unit}}</text>
+        </view>
+        <view class="indicator-status" wx:if="{{item.is_abnormal}}">
+          <text class="status-badge {{item.abnormal_level}}">{{item.abnormal_level}}度抑制</text>
+        </view>
+        <view class="indicator-status" wx:else>
+          <text class="status-badge normal">正常</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="trend-link" bindtap="handleViewTrend">
+    <text class="trend-text">查看指标趋势图</text>
+    <text class="trend-arrow">›</text>
+  </view>
+
+  <view class="disclaimer-card">
+    <text class="disclaimer-title">温馨提示</text>
+    <text class="disclaimer-content">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断。如有异常请及时就医。</text>
+  </view>
+</view>

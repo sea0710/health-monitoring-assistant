@@ -1,0 +1,181 @@
+.container {
+  min-height: 100vh;
+  padding: 16px;
+  padding-bottom: 100px;
+  background: #f8faf9;
+}
+
+.header {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.indicator-tabs {
+  margin-bottom: 16px;
+}
+
+.tabs-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.tabs-list {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.tab-item {
+  display: inline-flex;
+  padding: 10px 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.tab-item.active {
+  background: #14b8a6;
+  border-color: #14b8a6;
+  color: #ffffff;
+}
+
+.content-section {
+  margin-bottom: 16px;
+}
+
+.description-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.description-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.description-text {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.8;
+}
+
+.grades-section {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.grade-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid #22c55e;
+}
+
+.grade-card.normal {
+  border-left-color: #22c55e;
+}
+
+.grade-card.I {
+  border-left-color: #f59e0b;
+}
+
+.grade-card.II {
+  border-left-color: #f97316;
+}
+
+.grade-card.III {
+  border-left-color: #ea580c;
+}
+
+.grade-card.IV {
+  border-left-color: #dc2626;
+}
+
+.grade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.grade-level {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.grade-range {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.grade-suggestion {
+  font-size: 14px;
+  color: #374151;
+}
+
+.tips-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.tips-list {
+  margin-top: 12px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.tip-item:last-child {
+  margin-bottom: 0;
+}
+
+.tip-bullet {
+  color: #14b8a6;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.tip-text {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.disclaimer {
+  padding: 16px 0;
+  text-align: center;
+}
+
+.disclaimer-text {
+  font-size: 12px;
+  color: #9ca3af;
+  line-height: 1.6;
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "指标趋势",
+  "usingComponents": {
+    "ec-canvas": "../../components/ec-canvas/ec-canvas"
+  }
+}

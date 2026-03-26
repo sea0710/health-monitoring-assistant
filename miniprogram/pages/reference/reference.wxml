@@ -1,0 +1,55 @@
+<view class="container">
+  <view class="header">
+    <text class="title">分级速查</text>
+  </view>
+
+  <view class="indicator-tabs">
+    <scroll-view scroll-x class="tabs-scroll">
+      <view class="tabs-list">
+        <view 
+          class="tab-item {{currentCode === item.code ? 'active' : ''}}" 
+          wx:for="{{references}}" 
+          wx:key="code"
+          bindtap="handleTabChange"
+          data-code="{{item.code}}"
+        >
+          <text>{{item.code}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="content-section" wx:if="{{currentReference}}">
+    <view class="description-card">
+      <text class="description-title">{{currentReference.name}}</text>
+      <text class="description-text">{{currentReference.description}}</text>
+    </view>
+
+    <view class="grades-section">
+      <text class="section-title">WHO骨髓抑制分级标准</text>
+      
+      <view class="grade-card {{item.level}}" wx:for="{{currentReference.grades}}" wx:key="level">
+        <view class="grade-header">
+          <text class="grade-level">{{item.levelName}}</text>
+          <text class="grade-range">{{item.range}}</text>
+        </view>
+        <text class="grade-suggestion">{{item.suggestion}}</text>
+      </view>
+    </view>
+
+    <view class="tips-section" wx:if="{{currentReference.careTips}}">
+      <text class="section-title">居家护理建议</text>
+      
+      <view class="tips-list">
+        <view class="tip-item" wx:for="{{currentReference.careTips}}" wx:key="index">
+          <text class="tip-bullet">•</text>
+          <text class="tip-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="disclaimer">
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议</text>
+  </view>
+</view>

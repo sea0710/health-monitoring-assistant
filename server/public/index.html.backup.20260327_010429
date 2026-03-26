@@ -1,0 +1,3878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>愈见 - 血常规监测助手</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #14b8a6;
+      --primary-dark: #0f766e;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --critical: #dc2626;
+      --bg: #f8faf9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border: #e5e7eb;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .page {
+      display: none;
+      padding: 16px;
+      padding-bottom: 80px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .back-btn:hover {
+      opacity: 0.8;
+    }
+
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 0 32px;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+      margin-bottom: 16px;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .app-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .app-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .form-section {
+      padding-top: 16px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 16px;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 24px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-warning {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .patient-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+    }
+
+    .patient-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .patient-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .action-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-card:hover {
+      border-color: var(--primary);
+    }
+
+    .action-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .action-icon-primary {
+      background: rgba(20, 184, 166, 0.1);
+      color: var(--primary);
+    }
+
+    .action-icon-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .action-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .action-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .report-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .report-item:hover {
+      border-color: var(--primary);
+    }
+
+    .report-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .report-type {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .report-date {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .report-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 0;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .empty-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      z-index: 100;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .tab-item.active {
+      color: var(--primary);
+    }
+
+    .tab-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .tab-text {
+      font-size: 12px;
+    }
+
+    .add-btn {
+      position: fixed;
+      bottom: 80px;
+      right: calc(50% - 195px);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+      z-index: 99;
+    }
+
+    .add-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .gender-selector {
+      display: flex;
+      gap: 12px;
+    }
+
+    .gender-option {
+      flex: 1;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .gender-option.active {
+      background: rgba(20, 184, 166, 0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .picker-field {
+      height: 48px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    /* 病历夹页面样式 */
+    .home-header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 15px 15px;
+    }
+
+    .home-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .home-add-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary);
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .home-add-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .quick-access-section {
+      padding: 0 15px 15px;
+    }
+
+    .quick-access-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .quick-access-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: white;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .quick-access-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quick-access-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .quick-access-icon-primary {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--primary);
+    }
+
+    .quick-access-icon-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .quick-access-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .quick-access-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 2px;
+    }
+
+    .quick-access-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .patient-card-section {
+      padding: 0 15px 15px;
+    }
+
+    .patient-info-card {
+      background: hsl(174 60% 45%);
+      border-radius: 16px;
+      padding: 20px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .patient-info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .patient-info-label {
+      font-size: 12px;
+      opacity: 0.8;
+      margin: 0 0 4px;
+    }
+
+    .patient-info-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .patient-info-right {
+      text-align: right;
+    }
+
+    .patient-info-count {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .patient-info-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .patient-info-recent {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .patient-info-arrow {
+      width: 16px;
+      height: 16px;
+    }
+
+    .patient-info-reminder {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .patient-info-bell {
+      width: 14px;
+      height: 14px;
+    }
+
+    .reports-section {
+      padding: 0 15px;
+    }
+
+    .reports-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--text);
+    }
+
+    .reports-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .report-item-new {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .report-item-new:last-child {
+      border-bottom: none;
+    }
+
+    .report-item-new:active {
+      background: var(--bg-secondary);
+    }
+
+    .report-info-left {
+      flex: 1;
+    }
+
+    .report-date {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .report-hospital {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .report-status-tag {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .report-status-tag.normal {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .report-status-tag.abnormal {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .report-status-tag.danger {
+      background: rgba(249, 115, 22, 0.1);
+      color: #ea580c;
+    }
+
+    .report-status-tag.critical {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+    }
+
+    .empty-reports {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .empty-reports-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .empty-reports-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .indicator-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--success);
+    }
+
+    .indicator-card.abnormal {
+      border-left-color: var(--warning);
+    }
+
+    .indicator-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .indicator-code {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .indicator-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .indicator-card.abnormal .indicator-value {
+      color: var(--warning);
+    }
+
+    .indicator-unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-left: 4px;
+    }
+
+    .reference-range {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .grade-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--success);
+    }
+
+    .grade-card.I { border-left-color: var(--warning); }
+    .grade-card.II { border-left-color: #f97316; }
+    .grade-card.III { border-left-color: #ea580c; }
+    .grade-card.IV { border-left-color: var(--critical); }
+
+    .grade-level {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .grade-range {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .grade-suggestion {
+      font-size: 14px;
+      color: var(--text);
+      margin-top: 8px;
+    }
+
+    .tips-section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .tip-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .tip-bullet {
+      color: var(--primary);
+      margin-right: 8px;
+      font-weight: bold;
+    }
+
+    .tip-text {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .disclaimer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 报告详情页新样式 */
+    .report-detail-content {
+      padding: 15px;
+      padding-bottom: 100px;
+    }
+
+    .report-info-card-new {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-row-new {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .info-label-new {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .info-value-new {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .info-divider-new {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .indicator-detail-card-new {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-top: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .indicator-detail-card-new.normal-bg {
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .indicator-detail-card-new.warning-bg {
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .indicator-detail-card-new.danger-bg {
+      background: rgba(249, 115, 22, 0.05);
+    }
+
+    .indicator-detail-card-new.critical-bg {
+      background: rgba(220, 38, 38, 0.05);
+    }
+
+    .card-header-new {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title-new {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .level-badge-new {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+      border: 1px solid transparent;
+    }
+
+    .level-badge-new.normal {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .level-badge-new.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .level-badge-new.danger {
+      background: rgba(249, 115, 22, 0.1);
+      color: #ea580c;
+      border-color: rgba(249, 115, 22, 0.2);
+    }
+
+    .level-badge-new.critical {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border-color: rgba(220, 38, 38, 0.2);
+    }
+
+    .core-indicator-item-new {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .core-indicator-item-new.abnormal-item {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .indicator-main-row-new {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .indicator-info-new {
+      flex: 1;
+    }
+
+    .indicator-name-new {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .indicator-ref-new {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .indicator-value-section-new {
+      text-align: right;
+    }
+
+    .indicator-value-new {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'SF Mono', monospace;
+    }
+
+    .indicator-value-new.normal { color: #10b981; }
+    .indicator-value-new.warning { color: #f59e0b; }
+    .indicator-value-new.danger { color: #ea580c; }
+    .indicator-value-new.critical { color: #dc2626; }
+
+    .indicator-unit-new {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-left: 2px;
+    }
+
+    .indicator-level-badge-new {
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .advice-section-new {
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .advice-label-new {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .advice-content-new {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .discharge-advice-new {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .discharge-advice-new .advice-content-new {
+      color: #ea580c;
+    }
+
+    .discharge-advice-new {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .discharge-advice-new .advice-content-new {
+      color: #ea580c;
+    }
+
+    .view-reference-link-new {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .view-reference-link-new span {
+      font-size: 12px;
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .level-legend-new {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .legend-title-new {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .legend-badges-new {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .legend-badge-new {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .legend-badge-new.normal {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .legend-badge-new.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .legend-badge-new.danger {
+      background: rgba(249, 115, 22, 0.1);
+      color: #ea580c;
+    }
+
+    .legend-badge-new.critical {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+    }
+
+    .disclaimer-card-new {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 16px;
+      margin-top: 16px;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 12px;
+    }
+
+    .floating-trend-btn-new {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      cursor: pointer;
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+
+    .floating-trend-btn-new:active {
+      transform: scale(0.95);
+    }
+
+    .trend-icon-svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .floating-trend-label-new {
+      position: fixed;
+      bottom: 60px;
+      right: 18px;
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      z-index: 100;
+    }
+
+    .header-action {
+      font-size: 14px;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .report-info-card {
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .info-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .indicator-detail-card {
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .indicator-detail-card.normal-bg {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    }
+
+    .indicator-detail-card.warning-bg {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .indicator-detail-card.danger-bg {
+      background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+    }
+
+    .indicator-detail-card.critical-bg {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .level-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .level-badge.normal {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .level-badge.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .level-badge.danger {
+      background: rgba(249, 115, 22, 0.1);
+      color: #ea580c;
+      border: 1px solid rgba(249, 115, 22, 0.2);
+    }
+
+    .level-badge.critical {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .core-indicator-item {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .core-indicator-item.abnormal-item {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .indicator-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .indicator-info {
+      flex: 1;
+    }
+
+    .indicator-name-new {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .indicator-ref {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .indicator-value-section {
+      text-align: right;
+    }
+
+    .indicator-value-new {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'SF Mono', monospace;
+    }
+
+    .indicator-value-new.normal { color: #10b981; }
+    .indicator-value-new.warning { color: #f59e0b; }
+    .indicator-value-new.danger { color: #ea580c; }
+    .indicator-value-new.critical { color: #dc2626; }
+
+    .indicator-unit-new {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-left: 2px;
+    }
+
+    .indicator-level-badge {
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .advice-section {
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .advice-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .advice-content {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .discharge-advice {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .discharge-advice .advice-content {
+      color: #ea580c;
+    }
+
+    .view-reference-link {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .view-reference-link span {
+      font-size: 12px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .level-legend {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .legend-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .legend-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .legend-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .legend-badge.normal {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .legend-badge.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .legend-badge.danger {
+      background: rgba(249, 115, 22, 0.1);
+      color: #ea580c;
+    }
+
+    .legend-badge.critical {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+    }
+
+    .disclaimer-card {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 16px;
+      margin: 16px 0;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 12px;
+    }
+
+    .floating-trend-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      cursor: pointer;
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+
+    .floating-trend-btn:active {
+      transform: scale(0.95);
+    }
+
+    .trend-icon {
+      font-size: 24px;
+    }
+
+    .floating-trend-label {
+      position: fixed;
+      bottom: 60px;
+      right: 18px;
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      z-index: 100;
+    }
+
+    /* 分级速查页面新样式 */
+    .header-blur {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      height: 60px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .header-placeholder {
+      width: 60px;
+    }
+
+    .reference-nav-bar {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 15px;
+      height: 56px;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .reference-nav-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .reference-nav-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .reference-nav-item {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: none;
+    }
+
+    .reference-nav-item.active {
+      background: #0d9488;
+      color: white;
+    }
+
+    .reference-content {
+      padding: 15px;
+      padding-top: 131px;
+      padding-bottom: 80px;
+      overflow-x: auto;
+    }
+
+    .grade-table {
+      min-width: 100%;
+      max-width: 100%;
+    }
+
+    .reference-card {
+      background: white;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .reference-card-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.15s ease;
+    }
+
+    .reference-card-header:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .reference-card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .reference-card-unit {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .reference-card-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .reference-card.expanded .reference-card-arrow {
+      transform: rotate(180deg);
+    }
+
+    .reference-card-body {
+      display: none;
+      padding: 0 20px 20px;
+    }
+
+    .reference-card.expanded .reference-card-body {
+      display: block;
+    }
+
+    .clinical-significance-box {
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      min-height: 140px;
+    }
+
+    .clinical-significance-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .clinical-significance-title::before {
+      content: 'i';
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 6px;
+    }
+
+    .clinical-significance-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .grade-table-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .grade-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+
+    .grade-table th {
+      background: #f3f4f6;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+
+    .grade-table td {
+      padding: 12px 16px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .grade-table td:first-child {
+      white-space: nowrap;
+    }
+
+    .grade-table th:nth-child(2),
+    .grade-table td:nth-child(2) {
+      width: 90px;
+      min-width: 90px;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    .grade-table th:last-child,
+    .grade-table td:last-child {
+      width: auto;
+      flex: 1;
+      min-width: 150px;
+      word-wrap: break-word;
+    }
+
+    .grade-table tr {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .grade-table tr:hover {
+      background: #f9fafb;
+    }
+
+    .grade-table-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .grade-table-badge.normal { background: #d1fae5; color: #059669; }
+    .grade-table-badge.warning { background: #fef3c7; color: #d97706; }
+    .grade-table-badge.danger { background: #fed7aa; color: #c2410c; }
+    .grade-table-badge.critical { background: #fee2e2; color: #b91c1c; }
+
+    .grade-table-range {
+      font-family: 'SF Mono', monospace;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .grade-table-principle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grade-table-principle-text {
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .grade-table-info-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #6b7280;
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .grade-table-hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 16px;
+    }
+
+    .grade-table-hint span:first-child {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #6b7280;
+      font-size: 9px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .care-tips-box {
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .care-tips-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .care-tip-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .care-tip-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .care-tip-bullet {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .reference-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      z-index: 40;
+    }
+
+    .reference-footer p {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .reference-about-card {
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .reference-about-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .reference-about-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* 分级详情弹窗样式 */
+    .grade-detail-modal {
+      max-width: 340px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .grade-detail-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .grade-detail-badge.normal { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .grade-detail-badge.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .grade-detail-badge.danger { background: rgba(249, 115, 22, 0.1); color: #ea580c; }
+    .grade-detail-badge.critical { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+
+    .grade-detail-title {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .grade-detail-section {
+      margin-bottom: 16px;
+    }
+
+    .grade-detail-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .grade-detail-value {
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'SF Mono', monospace;
+    }
+
+    .grade-detail-text {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .grade-detail-advice-box {
+      background: rgba(249, 115, 22, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .grade-detail-advice-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #c2410c;
+      margin-bottom: 8px;
+    }
+
+    .grade-detail-advice-text {
+      font-size: 14px;
+      color: #ea580c;
+      line-height: 1.6;
+    }
+
+    .grade-detail-no-advice-box {
+      background: rgba(16, 185, 129, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      color: #047857;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grade-detail-no-advice-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    .modal-close-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .modal-close-btn:active {
+      background: var(--border);
+    }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .indicator-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .tab-pill {
+      padding: 8px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .reminder-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .reminder-date {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .reminder-time {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+    }
+
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-mask.show {
+      display: flex;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 80%;
+      max-width: 320px;
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+
+    .modal-btn {
+      flex: 1;
+      height: 48px;
+      border: none;
+      background: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .modal-btn-cancel {
+      color: var(--text-secondary);
+      border-right: 1px solid var(--border);
+    }
+
+    .modal-btn-confirm {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .cycle-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cycle-btn {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cycle-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .cycle-btn:active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .cycle-input {
+      width: 80px;
+      height: 44px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    .cycle-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    select.input-field {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    select.input-field option {
+      color: var(--text);
+    }
+
+    .upload-area {
+      width: 100%;
+      min-height: 300px;
+      background: #fafdfc;
+      border: 2px dashed #d1d5db;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: rgba(20, 184, 166, 0.05);
+    }
+
+    .upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .upload-icon-wrapper {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(20, 184, 166, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .upload-icon {
+      font-size: 32px;
+      color: var(--primary);
+    }
+
+    .upload-text {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .upload-hint {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .upload-hint-small {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .preview-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 登录页 -->
+    <div id="loginPage" class="page active">
+      <div class="logo-section">
+        <div class="logo-icon">愈</div>
+        <div class="app-title">愈见</div>
+        <div class="app-subtitle">血常规监测助手</div>
+      </div>
+
+      <div class="form-section">
+        <div class="input-group">
+          <label class="input-label">手机号</label>
+          <input type="tel" id="phoneInput" class="input-field" placeholder="请输入11位手机号" maxlength="11">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">密码</label>
+          <input type="password" id="passwordInput" class="input-field" placeholder="请输入密码（至少6位）">
+        </div>
+
+        <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">登录 / 注册</button>
+      </div>
+
+      <div class="disclaimer">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议</div>
+    </div>
+
+    <!-- 首页 -->
+    <div id="homePage" class="page">
+      <!-- 页面标题栏 -->
+      <section class="home-header-section">
+        <h1 class="home-title">我的病历夹</h1>
+        <button class="home-add-btn" onclick="currentReportId = null; showPage('reportUploadPage')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="home-add-icon">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </section>
+
+      <!-- 快捷入口栏 -->
+      <section class="quick-access-section">
+        <div class="quick-access-grid">
+          <button class="quick-access-btn" onclick="showPage('referencePage')">
+            <div class="quick-access-icon quick-access-icon-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </div>
+            <div class="quick-access-text">
+              <p class="quick-access-title">分级速查</p>
+              <p class="quick-access-desc">WHO分级标准</p>
+            </div>
+          </button>
+          <button class="quick-access-btn" onclick="showPage('reminderPage')">
+            <div class="quick-access-icon quick-access-icon-warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
+            <div class="quick-access-text">
+              <p class="quick-access-title">提醒设置</p>
+              <p class="quick-access-desc">复查提醒管理</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- 患者信息卡片 -->
+      <section class="patient-card-section">
+        <div class="patient-info-card" id="patientCard" onclick="handlePatientCardClick()">
+          <div class="patient-info-row">
+            <div>
+              <p class="patient-info-label">患者姓名</p>
+              <h2 class="patient-info-name" id="patientName">点击创建档案</h2>
+            </div>
+            <div class="patient-info-right">
+              <p class="patient-info-label">报告总数</p>
+              <p class="patient-info-count" id="reportCount">0</p>
+            </div>
+          </div>
+          <div class="patient-info-footer">
+            <div class="patient-info-recent">
+              <span>最近检测：<span id="recentTestTime">暂无记录</span></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="patient-info-arrow">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+            <div class="patient-info-reminder" id="nextReminderInfo" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="patient-info-bell">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <span>下次提醒：<span id="nextReminderTime"></span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 历史报告列表 -->
+      <section class="reports-section">
+        <h3 class="reports-title">历史报告</h3>
+        <div class="reports-card" id="reportsList"></div>
+      </section>
+    </div>
+
+    <!-- 患者档案创建页 -->
+    <div id="patientCreatePage" class="page">
+      <div class="header">
+        <div class="back-btn" onclick="showPage('homePage')">‹ 返回</div>
+        <div class="header-title">创建患者档案</div>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label class="input-label">患者姓名 *</label>
+          <input type="text" id="patientNameInput" class="input-field" placeholder="请输入患者姓名">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">性别 *</label>
+          <div class="gender-selector">
+            <div class="gender-option" data-gender="男" onclick="selectGender('男')">男</div>
+            <div class="gender-option" data-gender="女" onclick="selectGender('女')">女</div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">出生日期</label>
+          <input type="date" id="birthdayInput" class="input-field">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">肿瘤类型</label>
+          <select id="tumorTypeInput" class="input-field">
+            <option value="">请选择肿瘤类型（可选）</option>
+            <option value="肺癌">肺癌</option>
+            <option value="乳腺癌">乳腺癌</option>
+            <option value="结直肠癌">结直肠癌</option>
+            <option value="胃癌">胃癌</option>
+            <option value="肝癌">肝癌</option>
+            <option value="食管癌">食管癌</option>
+            <option value="胰腺癌">胰腺癌</option>
+            <option value="卵巢癌">卵巢癌</option>
+            <option value="宫颈癌">宫颈癌</option>
+            <option value="前列腺癌">前列腺癌</option>
+            <option value="膀胱癌">膀胱癌</option>
+            <option value="肾癌">肾癌</option>
+            <option value="甲状腺癌">甲状腺癌</option>
+            <option value="淋巴瘤">淋巴瘤</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="savePatient()">保存档案</button>
+      </div>
+    </div>
+
+    <!-- 报告上传页 -->
+    <div id="reportUploadPage" class="page">
+      <div class="header">
+        <div class="back-btn" onclick="showPage('homePage')">‹ 返回</div>
+        <div class="header-title" id="reportUploadTitle">上传报告</div>
+        <div class="header-action" id="deleteReportBtn" style="display: none;" onclick="confirmDeleteReport()">删除</div>
+      </div>
+
+      <div class="card" id="uploadCard">
+        <div class="upload-area" onclick="document.getElementById('reportFile').click()">
+          <div class="upload-placeholder">
+            <div class="upload-icon-wrapper">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+            <div class="upload-text">点击或拖拽上传图片</div>
+            <div class="upload-hint">支持 JPG、PNG 格式</div>
+            <div class="upload-hint-small">请对齐血常规报告边框拍摄</div>
+          </div>
+        </div>
+        <input type="file" id="reportFile" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+      </div>
+
+      <div class="card" id="indicatorCard" style="display: none;">
+        <div class="section-title">血常规指标</div>
+        
+        <div class="input-group">
+          <label class="input-label">白细胞计数 (WBC)</label>
+          <input type="number" step="0.01" id="wbcInput" class="input-field" placeholder="×10⁹/L">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">中性粒细胞绝对值 (NEUT#)</label>
+          <input type="number" step="0.01" id="neutAbsInput" class="input-field" placeholder="×10⁹/L">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">血红蛋白 (HGB)</label>
+          <input type="number" id="hgbInput" class="input-field" placeholder="g/L">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">血小板计数 (PLT)</label>
+          <input type="number" id="pltInput" class="input-field" placeholder="×10⁹/L">
+        </div>
+      </div>
+
+      <div class="card" id="reportInfoCard" style="display: none;">
+        <div class="input-group">
+          <label class="input-label">检测时间</label>
+          <input type="datetime-local" id="testTimeInput" class="input-field">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">检测医院</label>
+          <input type="text" id="hospitalInput" class="input-field" placeholder="请输入检测医院（可选）">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="saveReportBtn" onclick="saveReport()">保存报告</button>
+      <button class="btn btn-secondary" id="ocrBtn" style="display: none; margin-top: 12px;" onclick="handleOCR()">智能识别</button>
+    </div>
+
+    <!-- 报告详情页 -->
+    <div id="reportDetailPage" class="page">
+      <div class="report-detail-content">
+        <!-- 报告基本信息 -->
+        <div class="report-info-card-new" id="reportInfoCard"></div>
+        
+        <!-- 核心指标详情 -->
+        <div id="indicatorDetailCards"></div>
+        
+        <!-- 免责声明 -->
+        <div class="disclaimer-card-new">
+          本报告仅供参考，不构成诊疗建议。如有疑问，请咨询专业医生。
+        </div>
+      </div>
+      
+      <!-- 悬浮趋势按钮 -->
+      <div class="floating-trend-btn-new" onclick="showPage('trendPage')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="trend-icon-svg">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      </div>
+      <div class="floating-trend-label-new">趋势</div>
+    </div>
+
+    <!-- 分级速查页 -->
+    <div id="referencePage" class="page">
+      <div class="header header-blur">
+        <div class="back-btn" onclick="showPage('homePage')">‹ 返回</div>
+        <div class="header-title">骨髓抑制分级速查</div>
+        <div class="header-placeholder"></div>
+      </div>
+
+      <!-- 快速导航栏 -->
+      <div class="reference-nav-bar">
+        <div class="reference-nav-scroll" id="referenceTabs"></div>
+      </div>
+
+      <!-- 分级内容 -->
+      <div id="referenceContent" class="reference-content"></div>
+
+      <!-- 底部免责声明 -->
+      <div class="reference-footer">
+        <p>本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</p>
+      </div>
+    </div>
+
+    <!-- 分级详情弹窗 -->
+    <div id="gradeDetailModal" class="modal-overlay" onclick="closeGradeDetailModal(event)">
+      <div class="modal-content grade-detail-modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <span class="grade-detail-badge" id="gradeDetailBadge"></span>
+          <span class="grade-detail-title" id="gradeDetailTitle"></span>
+        </div>
+        <div class="modal-body">
+          <div class="grade-detail-section">
+            <div class="grade-detail-label">指标范围</div>
+            <div class="grade-detail-value" id="gradeDetailRange"></div>
+          </div>
+          <div class="grade-detail-section">
+            <div class="grade-detail-label">处理原则</div>
+            <div class="grade-detail-text" id="gradeDetailPrinciple"></div>
+          </div>
+          <div class="grade-detail-section" id="gradeDetailAdviceSection" style="display: none;">
+            <div class="grade-detail-advice-box">
+              <div class="grade-detail-advice-label">💡 出院医嘱</div>
+              <div class="grade-detail-advice-text" id="gradeDetailAdvice"></div>
+            </div>
+          </div>
+          <div class="grade-detail-section" id="gradeDetailNoAdviceSection" style="display: none;">
+            <div class="grade-detail-no-advice-box">
+              <span class="grade-detail-no-advice-dot"></span>
+              该级别无需特殊医嘱，按常规观察即可
+            </div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeGradeDetailModal()">关闭</button>
+      </div>
+    </div>
+
+    <!-- 提醒设置页 -->
+    <div id="reminderPage" class="page">
+      <div class="header">
+        <div class="back-btn" onclick="showPage('homePage')">‹ 返回</div>
+        <div class="header-title">提醒设置</div>
+      </div>
+
+      <div class="card patient-info-card">
+        <div class="patient-info-row">
+          <div>
+            <p class="patient-info-label">患者姓名</p>
+            <h2 class="patient-info-name" id="reminderPatientName">-</h2>
+          </div>
+          <div class="patient-info-right">
+            <p class="patient-info-label">报告总数</p>
+            <p class="patient-info-count" id="reportCount">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div class="section-title" style="margin-bottom: 0;">复查提醒</div>
+        <button class="btn btn-primary" style="width: auto; padding: 8px 16px; height: auto; font-size: 14px;" onclick="showAddReminder()">+ 添加</button>
+      </div>
+
+      <div id="remindersList"></div>
+
+      <div class="tips-section">
+        <div class="section-title">温馨提示</div>
+        <div class="tip-item">
+          <span class="tip-bullet">•</span>
+          <span class="tip-text">提醒将在设定日期当天通过微信服务通知推送</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-bullet">•</span>
+          <span class="tip-text">建议在化疗后 7-14 天进行血常规复查</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 趋势分析页 -->
+    <div id="trendPage" class="page">
+      <div class="header">
+        <div class="back-btn" onclick="showPage('homePage')">‹ 返回</div>
+        <div class="header-title">趋势分析</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">选择指标</div>
+        <div class="indicator-tabs" id="trendTabs"></div>
+      </div>
+
+      <div class="card">
+        <canvas id="trendChart" style="width: 100%; height: 300px;"></canvas>
+      </div>
+
+      <div class="card" id="trendStats"></div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tab-bar" id="tabBar" style="display: none;">
+      <div class="tab-item active" data-page="homePage" onclick="switchTab('homePage')">
+        <div class="tab-icon">📁</div>
+        <div class="tab-text">病历夹</div>
+      </div>
+      <div class="tab-item" data-page="trendPage" onclick="switchTab('trendPage')">
+        <div class="tab-icon">📈</div>
+        <div class="tab-text">趋势</div>
+      </div>
+      <div class="tab-item" data-page="referencePage" onclick="switchTab('referencePage')">
+        <div class="tab-icon">📚</div>
+        <div class="tab-text">速查</div>
+      </div>
+      <div class="tab-item" data-page="reminderPage" onclick="switchTab('reminderPage')">
+        <div class="tab-icon">🔔</div>
+        <div class="tab-text">提醒</div>
+      </div>
+    </div>
+
+    <!-- 添加提醒弹窗 -->
+    <div class="modal-mask" id="reminderModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">添加提醒</div>
+          <div class="modal-close" onclick="hideAddReminder()">×</div>
+        </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <label class="input-label">提醒日期</label>
+            <input type="date" id="reminderDateInput" class="input-field">
+          </div>
+          <div class="input-group">
+            <label class="input-label">提醒时间</label>
+            <input type="time" id="reminderTimeInput" class="input-field" value="09:00">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn modal-btn-cancel" onclick="hideAddReminder()">取消</button>
+          <button class="modal-btn modal-btn-confirm" onclick="addReminder()">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000/api'
+    let token = localStorage.getItem('token')
+    let userId = localStorage.getItem('userId')
+    let patient = JSON.parse(localStorage.getItem('patient') || 'null')
+    let currentReportId = null
+    let selectedGender = ''
+    let uploadedFile = null
+    let savedCredentials = JSON.parse(localStorage.getItem('savedCredentials') || 'null')
+    let currentReferenceIndex = 0
+    let expandedReferenceCard = ''
+
+    async function checkAuth() {
+      if (!token) {
+        showPage('loginPage')
+        return false
+      }
+      
+      try {
+        const res = await fetch(`${API_BASE}/patients/${JSON.parse(atob(token.split('.')[1])).userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        
+        if (res.status === 401) {
+          if (savedCredentials) {
+            return await autoLogin()
+          } else {
+            localStorage.removeItem('token')
+            localStorage.removeItem('patient')
+            showPage('loginPage')
+            return false
+          }
+        }
+        return true
+      } catch (e) {
+        console.error('认证检查失败:', e)
+        return false
+      }
+    }
+
+    async function autoLogin() {
+      if (!savedCredentials) return false
+      
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(savedCredentials)
+        })
+        const data = await res.json()
+        
+        if (data.code === 0) {
+          token = data.data.token
+          
+          if (data.data.patient) {
+            patient = data.data.patient
+            localStorage.setItem('patient', JSON.stringify(patient))
+          } else {
+            const savedPatient = JSON.parse(localStorage.getItem('patient') || 'null')
+            if (savedPatient && savedPatient.name) {
+              try {
+                const saveRes = await fetch(`${API_BASE}/patients`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify(savedPatient)
+                })
+                const saveData = await saveRes.json()
+                if (saveData.code === 0) {
+                  patient = saveData.data
+                  localStorage.setItem('patient', JSON.stringify(patient))
+                  console.log('[自动登录] 已恢复患者档案')
+                }
+              } catch (e) {
+                console.error('[自动登录] 恢复患者档案失败:', e)
+              }
+            }
+          }
+          
+          localStorage.setItem('token', token)
+          return true
+        }
+      } catch (e) {
+        console.error('自动登录失败:', e)
+      }
+      
+      return false
+    }
+
+    const REFERENCE_DATA = [
+      {
+        code: 'ANC',
+        name: '中性粒细胞绝对值（ANC/NEUT#）',
+        shortName: '中性粒细胞',
+        unit: '×10⁹/L',
+        clinicalSignificance: '中性粒细胞是白细胞中最重要的抗感染成分，占白细胞总数的50%-70%，是抵抗细菌感染的主力军。数量下降直接关系到感染风险，尤其是<0.5×10⁹/L时，感染风险急剧增加。',
+        careTips: [
+          '自我监测：每日早晚测体温，≥37.5℃警惕，≥38.0℃立即就医',
+          '生活护理：使用软毛牙刷，避免挖鼻，保持皮肤清洁',
+          '避免去人群密集场所，外出佩戴口罩',
+          '避免接触感冒、发热患者，保持室内通风',
+        ],
+        grades: [
+          { level: 'normal', levelName: '0 级', range: '≥1.5', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I 级', range: '1.0-1.4', principle: '轻度减少，观察即可，注意感染预防', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II 级', range: '0.5-0.9', principle: '中度减少，需对症处理，考虑使用升白药物', dischargeAdvice: '若中性粒细胞<1.0×10⁹/L，立即皮下注射人粒细胞刺激因子 100μg，每日一次。连续注射 3 天后复查血常规，持续用药直至白细胞回升至 10.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III 级', range: '0.1-0.4', principle: '重度减少，必须使用升白针，密切监测', dischargeAdvice: '若中性粒细胞<0.5×10⁹/L，或合并发热 (体温>38.0℃)，须在升白同时及时使用抗生素，并根据医嘱行血培养检查', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV 级', range: '<0.1', principle: '极重度减少，立即使用升白针，预防感染，可能需暂停化疗', color: 'bg-critical/10 text-critical' },
+        ],
+      },
+      {
+        code: 'WBC',
+        name: '白细胞计数（WBC）',
+        shortName: '白细胞',
+        unit: '×10⁹/L',
+        clinicalSignificance: '白细胞是免疫系统的重要组成部分，主要负责抵御病原体入侵。化疗期间白细胞减少（骨髓抑制）会增加感染风险。',
+        careTips: [
+          '保持个人卫生，勤洗手，使用肥皂或免洗洗手液',
+          '避免前往人群密集场所，外出佩戴口罩',
+          '保持室内通风，室温适宜',
+          '避免接触感冒、发热患者',
+          '注意饮食卫生，避免生冷、未煮熟的食物',
+        ],
+        grades: [
+          { level: 'normal', levelName: '0 级', range: '≥4.0', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I 级', range: '3.0-3.9', principle: '轻度减少，观察即可，注意预防感染', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II 级', range: '2.0-2.9', principle: '中度减少，需对症处理，考虑使用升白药物', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III 级', range: '1.0-1.9', principle: '重度减少，必须使用升白针，密切监测', dischargeAdvice: '若白细胞<2.0×10⁹/L 或 中性粒细胞<1.0×10⁹/L，立即皮下注射人粒细胞刺激因子 100μg，每日一次。连续注射 3 天后复查血常规，持续用药直至白细胞回升至 10.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV 级', range: '<1.0', principle: '极重度减少，立即使用升白针，预防感染，可能需暂停化疗', dischargeAdvice: '若白细胞<1.0×10⁹/L (或中性粒细胞<0.5×10⁹/L)，或合并发热 (体温>38.0℃)，须在升白同时及时使用抗生素，并根据医嘱行血培养检查', color: 'bg-critical/10 text-critical' },
+        ],
+      },
+      {
+        code: 'HGB',
+        name: '血红蛋白（HGB）',
+        shortName: '血红蛋白',
+        unit: 'g/L',
+        clinicalSignificance: '血红蛋白负责运输氧气到全身各组织。血红蛋白降低会导致贫血，表现为乏力、头晕、气短等症状。',
+        careTips: [
+          '休息充足，避免剧烈运动和过度劳累',
+          '起身时动作缓慢，防止体位性低血压',
+          '饮食可适当增加富含铁质的食物（如红肉、菠菜等）',
+          '注意保暖，避免受凉',
+          '如出现心悸、气短加重，及时就医',
+        ],
+        grades: [
+          { level: 'normal', levelName: '0 级', range: '男≥120/女≥110', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I 级', range: '男90-119/女90-109', principle: '轻度贫血，注意营养补充，定期复查', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II 级', range: '60-89', principle: '中度贫血，考虑输血或药物治疗', dischargeAdvice: '若血红蛋白<90g/L，需评估是否需要输血治疗。建议加强营养，必要时使用促红细胞生成素', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III 级', range: '30-59', principle: '重度贫血，需要输血治疗', dischargeAdvice: '若血红蛋白<60g/L，建议输注红细胞悬液。同时补充铁剂、叶酸等造血原料', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV 级', range: '<30', principle: '极重度贫血，立即输血，可能需暂停化疗', dischargeAdvice: '若血红蛋白<30g/L，立即输血治疗，严密监测生命体征，必要时暂停化疗', color: 'bg-critical/10 text-critical' },
+        ],
+      },
+      {
+        code: 'PLT',
+        name: '血小板计数（PLT）',
+        shortName: '血小板',
+        unit: '×10⁹/L',
+        clinicalSignificance: '血小板参与止血和凝血过程。血小板减少会增加出血风险，表现为皮肤瘀斑、牙龈出血等症状。',
+        careTips: [
+          '避免剧烈运动和可能造成外伤的活动',
+          '使用软毛牙刷，避免牙龈出血',
+          '避免用力擤鼻、挖鼻',
+          '注意观察皮肤有无瘀斑、出血点',
+          '如出现严重出血，立即就医',
+        ],
+        grades: [
+          { level: 'normal', levelName: '0 级', range: '≥100', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I 级', range: '75-99', principle: '轻度减少，观察即可，注意出血预防', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II 级', range: '50-74', principle: '中度减少，需对症处理，避免出血', dischargeAdvice: '若血小板<75×10⁹/L，避免剧烈活动，注意观察有无出血倾向', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III 级', range: '25-49', principle: '重度减少，考虑输注血小板', dischargeAdvice: '若血小板<50×10⁹/L，建议输注血小板。避免外伤，禁止肌内注射', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV 级', range: '<25', principle: '极重度减少，立即输注血小板，可能需暂停化疗', dischargeAdvice: '若血小板<25×10⁹/L，立即输注血小板，绝对卧床休息，严密监测出血情况', color: 'bg-critical/10 text-critical' },
+        ],
+      },
+    ]
+
+    async function handleLogin() {
+      const phone = document.getElementById('phoneInput').value
+      const password = document.getElementById('passwordInput').value
+
+      if (!phone || phone.length !== 11) {
+        showToast('请输入正确的11位手机号')
+        return
+      }
+
+      if (!password || password.length < 6) {
+        showToast('密码至少6位')
+        return
+      }
+
+      const btn = document.getElementById('loginBtn')
+      btn.disabled = true
+      btn.innerHTML = '<span class="loading"></span>登录中...'
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          token = data.data.token
+          userId = data.data.userId
+          localStorage.setItem('token', token)
+          localStorage.setItem('userId', userId)
+          
+          savedCredentials = { phone, password }
+          localStorage.setItem('savedCredentials', JSON.stringify(savedCredentials))
+
+          if (data.data.patient) {
+            patient = data.data.patient
+            localStorage.setItem('patient', JSON.stringify(patient))
+            showPage('homePage')
+          } else {
+            showPage('patientCreatePage')
+          }
+        } else {
+          showToast(data.message || '登录失败')
+        }
+      } catch (e) {
+        console.error('登录错误:', e)
+        showToast('网络错误，请重试')
+      } finally {
+        btn.disabled = false
+        btn.textContent = '登录 / 注册'
+      }
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+      document.getElementById(pageId).classList.add('active')
+
+      const tabBar = document.getElementById('tabBar')
+      if (['homePage', 'trendPage', 'referencePage', 'reminderPage'].includes(pageId)) {
+        tabBar.style.display = 'flex'
+      } else {
+        tabBar.style.display = 'none'
+      }
+
+      if (pageId === 'homePage') loadHomeData()
+      if (pageId === 'referencePage') loadReferenceData()
+      if (pageId === 'reminderPage') loadReminders()
+      if (pageId === 'trendPage') loadTrendData()
+      
+      // 初始化上传页面状态
+      if (pageId === 'reportUploadPage') {
+        if (!currentReportId) {
+          // 新建报告，重置所有状态
+          document.getElementById('uploadCard').style.display = 'block'
+          document.getElementById('indicatorCard').style.display = 'none'
+          document.getElementById('reportInfoCard').style.display = 'none'
+          document.getElementById('ocrBtn').style.display = 'none'
+          document.getElementById('reportUploadTitle').textContent = '上传报告'
+          document.getElementById('deleteReportBtn').style.display = 'none'
+          
+          // 清空上传区域
+          const uploadArea = document.querySelector('.upload-area')
+          uploadArea.innerHTML = `
+            <div class="upload-placeholder">
+              <div class="upload-icon-wrapper">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="upload-text">点击或拖拽上传图片</div>
+              <div class="upload-hint">支持 JPG、PNG 格式</div>
+              <div class="upload-hint-small">请对齐血常规报告边框拍摄</div>
+            </div>
+          `
+          uploadedFile = null
+          document.getElementById('reportFile').value = ''
+          
+          // 清空输入框
+          document.getElementById('wbcInput').value = ''
+          document.getElementById('neutAbsInput').value = ''
+          document.getElementById('hgbInput').value = ''
+          document.getElementById('pltInput').value = ''
+          document.getElementById('testTimeInput').value = ''
+          document.getElementById('hospitalInput').value = ''
+        }
+      }
+    }
+
+    function switchTab(pageId) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'))
+      document.querySelector(`.tab-item[data-page="${pageId}"]`).classList.add('active')
+      showPage(pageId)
+    }
+
+    function selectGender(gender) {
+      selectedGender = gender
+      document.querySelectorAll('.gender-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.gender === gender)
+      })
+    }
+
+    async function savePatient() {
+      const name = document.getElementById('patientNameInput').value
+      const gender = selectedGender
+      const birthday = document.getElementById('birthdayInput').value
+      const tumorType = document.getElementById('tumorTypeInput').value
+
+      if (!name) {
+        showToast('请输入患者姓名')
+        return
+      }
+
+      if (!gender) {
+        showToast('请选择性别')
+        return
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/patients`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, gender, birthday, tumor_type: tumorType })
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          patient = data.data
+          localStorage.setItem('patient', JSON.stringify(patient))
+          showToast('档案创建成功')
+          showPage('homePage')
+        } else {
+          showToast(data.message || '保存失败')
+        }
+      } catch (e) {
+        console.error('保存患者错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    async function loadHomeData() {
+      if (!patient) {
+        document.getElementById('patientName').textContent = '点击创建档案'
+        document.getElementById('reportCount').textContent = '0'
+        document.getElementById('recentTestTime').textContent = '暂无记录'
+        document.getElementById('reportsList').innerHTML = `
+          <div class="empty-reports">
+            <svg class="empty-reports-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <p class="empty-reports-text">请先创建患者档案</p>
+          </div>
+        `
+        return
+      }
+
+      document.getElementById('patientName').textContent = patient.name
+      document.getElementById('reminderPatientName').textContent = patient.name
+
+      try {
+        const res = await fetch(`${API_BASE}/reports`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          const reports = data.data || []
+          document.getElementById('reportCount').textContent = reports.length
+
+          if (reports.length > 0) {
+            const latest = reports[0]
+            document.getElementById('recentTestTime').textContent = formatDate(latest.test_time)
+          }
+
+          const reportsList = document.getElementById('reportsList')
+          if (reports.length === 0) {
+            reportsList.innerHTML = `
+              <div class="empty-reports">
+                <svg class="empty-reports-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <p class="empty-reports-text">暂无报告，点击右上角+添加</p>
+              </div>
+            `
+          } else {
+            reportsList.innerHTML = reports.map(r => `
+              <div class="report-item-new" onclick="viewReport('${r.id}')">
+                <div class="report-info-left">
+                  <div class="report-date">${formatDate(r.test_time)}</div>
+                  <div class="report-hospital">${r.test_hospital || '未知医院'}</div>
+                </div>
+                <span class="report-status-tag ${r.overall_level || 'normal'}">${getLevelText(r.overall_level)}</span>
+              </div>
+            `).join('')
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    async function init() {
+      const isValid = await checkAuth()
+      if (isValid && token) {
+        if (patient) {
+          showPage('homePage')
+        } else {
+          showPage('patientCreatePage')
+        }
+      }
+    }
+
+    async function confirmDeleteReport() {
+      if (!currentReportId) return
+      
+      const confirmed = confirm('确定要删除这份报告吗？删除后无法恢复。')
+      if (!confirmed) return
+
+      try {
+        const res = await fetch(`${API_BASE}/reports/${currentReportId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          showToast('删除成功')
+          showPage('homePage')
+          loadHomeData()
+        } else {
+          showToast(data.message || '删除失败')
+        }
+      } catch (e) {
+        console.error('删除报告错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    async function editReport() {
+      if (!currentReportId) return
+
+      try {
+        const res = await fetch(`${API_BASE}/reports/detail/${currentReportId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          console.log('[编辑报告] 加载数据:', data.data)
+          
+          document.getElementById('testTimeInput').value = data.data.report.test_time
+          document.getElementById('hospitalInput').value = data.data.report.test_hospital || ''
+
+          const indicators = data.data.indicators
+          for (const ind of indicators) {
+            if (ind.indicator_code === 'WBC') {
+              document.getElementById('wbcInput').value = ind.test_value
+              console.log('[编辑报告] WBC:', ind.test_value)
+            } else if (ind.indicator_code === 'NEUT#') {
+              document.getElementById('neutAbsInput').value = ind.test_value
+              console.log('[编辑报告] NEUT#:', ind.test_value)
+            } else if (ind.indicator_code === 'HGB') {
+              document.getElementById('hgbInput').value = ind.test_value
+              console.log('[编辑报告] HGB:', ind.test_value)
+            } else if (ind.indicator_code === 'PLT') {
+              document.getElementById('pltInput').value = ind.test_value
+              console.log('[编辑报告] PLT:', ind.test_value)
+            }
+          }
+
+          document.getElementById('uploadCard').style.display = 'none'
+          document.getElementById('indicatorCard').style.display = 'block'
+          document.getElementById('ocrBtn').style.display = 'none'
+          
+          const existingReuploadBtn = document.getElementById('reuploadBtn')
+          if (!existingReuploadBtn) {
+            const reuploadBtn = document.createElement('button')
+            reuploadBtn.id = 'reuploadBtn'
+            reuploadBtn.className = 'btn btn-secondary'
+            reuploadBtn.style.marginTop = '12px'
+            reuploadBtn.textContent = '📷 重新上传报告'
+            reuploadBtn.onclick = handleReupload
+            const indicatorCard = document.getElementById('indicatorCard')
+            indicatorCard.parentNode.insertBefore(reuploadBtn, indicatorCard.nextSibling)
+          }
+          
+          document.getElementById('reportUploadTitle').textContent = '编辑报告'
+          document.getElementById('deleteReportBtn').style.display = 'block'
+          showPage('reportUploadPage')
+        }
+      } catch (e) {
+        console.error('编辑报告错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    function handleReupload() {
+      document.getElementById('uploadCard').style.display = 'block'
+      document.getElementById('indicatorCard').style.display = 'none'
+      document.getElementById('reportInfoCard').style.display = 'none'
+      const reuploadBtn = document.getElementById('reuploadBtn')
+      if (reuploadBtn) reuploadBtn.remove()
+      document.getElementById('ocrBtn').style.display = 'none'
+    }
+
+    function handlePatientCardClick() {
+      if (patient) {
+        editPatient()
+      } else {
+        showPage('patientCreatePage')
+      }
+    }
+
+    async function editPatient() {
+      if (!patient) return
+
+      document.getElementById('patientNameInput').value = patient.name
+      selectGender(patient.gender)
+      document.getElementById('birthdayInput').value = patient.birthday || ''
+      document.getElementById('tumorTypeInput').value = patient.tumor_type || ''
+
+      document.querySelector('#patientCreatePage .header-title').textContent = '编辑患者档案'
+      showPage('patientCreatePage')
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0]
+      if (!file) return
+
+      uploadedFile = file
+      const reader = new FileReader()
+      reader.onload = function(e) {
+        const uploadArea = document.querySelector('.upload-area')
+        uploadArea.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="预览">`
+      }
+      reader.readAsDataURL(file)
+
+      // 显示检测时间、医院输入框和识别按钮
+      document.getElementById('reportInfoCard').style.display = 'block'
+      document.getElementById('ocrBtn').style.display = 'block'
+    }
+
+    async function handleOCR() {
+      if (!uploadedFile) {
+        showToast('请先上传报告图片')
+        return
+      }
+
+      const btn = document.getElementById('ocrBtn')
+      btn.disabled = true
+      btn.textContent = '识别中...'
+
+      const formData = new FormData()
+      formData.append('report', uploadedFile)
+
+      try {
+        const res = await fetch(`${API_BASE}/ocr/parse`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          const result = data.data
+          console.log('[OCR] 识别结果:', result)
+
+          if (result.test_time) {
+            document.getElementById('testTimeInput').value = result.test_time
+          }
+          if (result.hospital) {
+            document.getElementById('hospitalInput').value = result.hospital
+          }
+
+          if (result.indicators) {
+            if (result.indicators.WBC) {
+              document.getElementById('wbcInput').value = result.indicators.WBC
+            }
+            if (result.indicators['NEUT#']) {
+              document.getElementById('neutAbsInput').value = result.indicators['NEUT#']
+            }
+            if (result.indicators.HGB) {
+              document.getElementById('hgbInput').value = result.indicators.HGB
+            }
+            if (result.indicators.PLT) {
+              document.getElementById('pltInput').value = result.indicators.PLT
+            }
+          }
+
+          showToast('识别成功')
+        } else {
+          showToast(data.message || '识别失败')
+        }
+      } catch (e) {
+        console.error('OCR错误:', e)
+        showToast('网络错误，请重试')
+      } finally {
+        btn.disabled = false
+        btn.textContent = '智能识别'
+      }
+    }
+
+    async function saveReport() {
+      const wbc = document.getElementById('wbcInput').value
+      const neutAbs = document.getElementById('neutAbsInput').value
+      const hgb = document.getElementById('hgbInput').value
+      const plt = document.getElementById('pltInput').value
+      const testTime = document.getElementById('testTimeInput').value
+      const hospital = document.getElementById('hospitalInput').value
+
+      if (!testTime) {
+        showToast('请选择检测时间')
+        return
+      }
+
+      if (!wbc && !neutAbs && !hgb && !plt) {
+        showToast('请至少填写一个指标')
+        return
+      }
+
+      const indicators = []
+      if (wbc) indicators.push({ indicator_code: 'WBC', test_value: parseFloat(wbc) })
+      if (neutAbs) indicators.push({ indicator_code: 'NEUT#', test_value: parseFloat(neutAbs) })
+      if (hgb) indicators.push({ indicator_code: 'HGB', test_value: parseFloat(hgb) })
+      if (plt) indicators.push({ indicator_code: 'PLT', test_value: parseFloat(plt) })
+
+      try {
+        const url = currentReportId ? `${API_BASE}/reports/${currentReportId}` : `${API_BASE}/reports`
+        const method = currentReportId ? 'PUT' : 'POST'
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            test_time: testTime,
+            test_hospital: hospital,
+            indicators
+          })
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          showToast('保存成功')
+          showPage('homePage')
+          loadHomeData()
+        } else {
+          showToast(data.message || '保存失败')
+        }
+      } catch (e) {
+        console.error('保存报告错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    async function viewReport(reportId) {
+      currentReportId = reportId
+      
+      try {
+        const res = await fetch(`${API_BASE}/reports/detail/${reportId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          renderReportDetail(data.data)
+          showPage('reportDetailPage')
+        }
+      } catch (e) {
+        console.error('查看报告错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    function renderReportDetail(reportData) {
+      const { report, indicators } = reportData
+
+      const reportInfoCard = document.getElementById('reportInfoCard')
+      reportInfoCard.innerHTML = `
+        <div class="info-row-new">
+          <span class="info-label-new">检测时间</span>
+          <span class="info-value-new">${formatDate(report.test_time)}</span>
+        </div>
+        <div class="info-divider-new"></div>
+        <div class="info-row-new">
+          <span class="info-label-new">检测医院</span>
+          <span class="info-value-new">${report.test_hospital || '未知'}</span>
+        </div>
+      `
+
+      const indicatorCards = document.getElementById('indicatorDetailCards')
+      indicatorCards.innerHTML = indicators.map(ind => {
+        const level = calculateLevel(ind.indicator_code, ind.test_value, patient?.gender)
+        const advice = getGradeAdvice(ind.indicator_code, level, patient?.gender)
+        const refRange = getReferenceRange(ind.indicator_code, patient?.gender)
+
+        return `
+          <div class="indicator-detail-card-new ${level}-bg">
+            <div class="card-header-new">
+              <div class="card-title-new">
+                ${getIndicatorName(ind.indicator_code)}
+              </div>
+              <span class="level-badge-new ${level}">${getLevelText(level)}</span>
+            </div>
+            
+            <div class="core-indicator-item-new abnormal-item">
+              <div class="indicator-main-row-new">
+                <div class="indicator-info-new">
+                  <div class="indicator-name-new">${ind.indicator_name}</div>
+                  <div class="indicator-ref-new">参考范围: ${refRange}</div>
+                </div>
+                <div class="indicator-value-section-new">
+                  <span class="indicator-value-new ${level}">${ind.test_value}</span>
+                  <span class="indicator-unit-new">${getIndicatorUnit(ind.indicator_code)}</span>
+                </div>
+              </div>
+              
+              <div class="advice-section-new">
+                <div class="advice-label-new">处理原则</div>
+                <div class="advice-content-new">${advice.principle}</div>
+                ${advice.dischargeAdvice ? `
+                  <div class="discharge-advice-new">
+                    <div class="advice-label-new">💡 出院医嘱</div>
+                    <div class="advice-content-new">${advice.dischargeAdvice}</div>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div class="view-reference-link-new">
+                <span onclick="showPage('referencePage')">
+                  查看完整分级速查 →
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        `
+      }).join('')
+    }
+
+    function calculateLevel(code, value, gender) {
+      const numValue = parseFloat(value)
+      
+      if (code === 'WBC') {
+        if (numValue >= 4.0) return 'normal'
+        if (numValue >= 3.0) return 'warning'
+        if (numValue >= 2.0) return 'danger'
+        if (numValue >= 1.0) return 'danger'
+        return 'critical'
+      } else if (code === 'NEUT#' || code === 'ANC') {
+        if (numValue >= 1.5) return 'normal'
+        if (numValue >= 1.0) return 'warning'
+        if (numValue >= 0.5) return 'danger'
+        if (numValue >= 0.1) return 'danger'
+        return 'critical'
+      } else if (code === 'HGB') {
+        const lowerBound = gender === '女' ? 110 : 120
+        if (numValue >= lowerBound) return 'normal'
+        if (numValue >= 90) return 'warning'
+        if (numValue >= 60) return 'danger'
+        if (numValue >= 30) return 'danger'
+        return 'critical'
+      } else if (code === 'PLT') {
+        if (numValue >= 100) return 'normal'
+        if (numValue >= 75) return 'warning'
+        if (numValue >= 50) return 'danger'
+        if (numValue >= 25) return 'danger'
+        return 'critical'
+      }
+      
+      return 'normal'
+    }
+
+    function getGradeAdvice(code, level, gender) {
+      const refData = REFERENCE_DATA.find(r => r.code === code || (code === 'NEUT#' && r.code === 'ANC'))
+      if (!refData) return { principle: '未知' }
+
+      const grade = refData.grades.find(g => g.level === level)
+      if (!grade) return { principle: '未知' }
+
+      return {
+        principle: grade.principle,
+        dischargeAdvice: grade.dischargeAdvice
+      }
+    }
+
+    function getReferenceRange(code, gender) {
+      if (code === 'WBC') return '4.0-10.0 ×10⁹/L'
+      if (code === 'NEUT#' || code === 'ANC') return '1.5-7.0 ×10⁹/L'
+      if (code === 'HGB') {
+        return gender === '女' ? '110-150 g/L' : '120-160 g/L'
+      }
+      if (code === 'PLT') return '100-300 ×10⁹/L'
+      return '未知'
+    }
+
+    function getIndicatorName(code) {
+      const names = {
+        'WBC': '白细胞计数',
+        'NEUT#': '中性粒细胞绝对值',
+        'ANC': '中性粒细胞绝对值',
+        'HGB': '血红蛋白',
+        'PLT': '血小板计数'
+      }
+      return names[code] || code
+    }
+
+    function getIndicatorUnit(code) {
+      if (code === 'HGB') return 'g/L'
+      return '×10⁹/L'
+    }
+
+    function getLevelText(level) {
+      const texts = {
+        'normal': '正常',
+        'warning': 'I级',
+        'danger': 'II-III级',
+        'critical': 'IV级'
+      }
+      return texts[level] || '未知'
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '未知'
+      const date = new Date(dateStr)
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    }
+
+    function loadReferenceData() {
+      const tabs = document.getElementById('referenceTabs')
+      
+      tabs.innerHTML = REFERENCE_DATA.map((r, i) => `
+        <button class="reference-nav-item ${i === 0 ? 'active' : ''}" onclick="selectReferenceNav(${i})">${r.shortName}</button>
+      `).join('')
+
+      // 初始加载时展开第一个卡片
+      currentReferenceIndex = 0
+      expandedReferenceCard = REFERENCE_DATA[0].code
+      renderReferenceContent()
+      
+      // 初始加载时也滚动到第一个卡片位置
+      setTimeout(() => {
+        const ref = REFERENCE_DATA[0]
+        const card = document.getElementById(`ref-card-${ref.code}`)
+        if (card) {
+          // 确保卡片展开
+          card.classList.add('expanded')
+          // 滚动到卡片位置，但留出固定头部的空间
+          const headerHeight = 116; // header + nav 的总高度
+          const cardTop = card.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: cardTop - headerHeight - 15, // 15px 的额外间距
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+    }
+
+    function selectReferenceNav(index) {
+      currentReferenceIndex = index
+      const ref = REFERENCE_DATA[index]
+      expandedReferenceCard = ref.code
+      
+      document.querySelectorAll('.reference-nav-item').forEach((t, i) => {
+        t.classList.toggle('active', i === index)
+      })
+      
+      renderReferenceContent()
+      
+      setTimeout(() => {
+        const card = document.getElementById(`ref-card-${ref.code}`)
+        if (card) {
+          // 确保卡片展开
+          card.classList.add('expanded')
+          // 滚动到卡片位置，但留出固定头部的空间
+          const headerHeight = 116; // header + nav 的总高度
+          const cardTop = card.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: cardTop - headerHeight - 15, // 15px 的额外间距
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+    }
+
+    function toggleReferenceCard(code) {
+      if (expandedReferenceCard === code) {
+        expandedReferenceCard = ''
+      } else {
+        expandedReferenceCard = code
+      }
+      renderReferenceContent()
+    }
+
+    function renderReferenceContent() {
+      const content = document.getElementById('referenceContent')
+      
+      // 确保至少有一个卡片展开
+      if (!expandedReferenceCard && REFERENCE_DATA.length > 0) {
+        expandedReferenceCard = REFERENCE_DATA[0].code
+      }
+      
+      content.innerHTML = REFERENCE_DATA.map((ref, index) => {
+        const isExpanded = expandedReferenceCard === ref.code
+        
+        return `
+          <div id="ref-card-${ref.code}" class="reference-card ${isExpanded ? 'expanded' : ''}">
+            <div class="reference-card-header" onclick="toggleReferenceCard('${ref.code}')">
+              <div>
+                <div class="reference-card-title">${ref.name}</div>
+                <div class="reference-card-unit">单位: ${ref.unit}</div>
+              </div>
+              <span class="reference-card-arrow">${isExpanded ? '▼' : '▶'}</span>
+            </div>
+            <div class="reference-card-body">
+              <!-- 临床意义 -->
+              <div class="clinical-significance-box">
+                <div class="clinical-significance-title">临床意义</div>
+                <div class="clinical-significance-text">${ref.clinicalSignificance}</div>
+              </div>
+              
+              <!-- 分级标准表格 -->
+              <div>
+                <div class="grade-table-title">分级标准与处理原则</div>
+                <table class="grade-table">
+                  <thead>
+                    <tr>
+                      <th>分级</th>
+                      <th>指标范围</th>
+                      <th>处理原则</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${ref.grades.map((g, gi) => `
+                      <tr onclick="openGradeDetailModal(${index}, ${gi})">
+                        <td><span class="grade-table-badge ${g.level}">${g.levelName}</span></td>
+                        <td class="grade-table-range">${g.range}</td>
+                        <td>
+                          <div class="grade-table-principle">
+                            <span class="grade-table-principle-text">${g.principle}</span>
+                            ${g.dischargeAdvice ? '<span class="grade-table-info-icon">ℹ️</span>' : ''}
+                          </div>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+                <div class="grade-table-hint">
+                  <span>ℹ️</span>
+                  <span>点击行查看详细出院医嘱</span>
+                </div>
+              </div>
+              
+              <!-- 居家照护建议 -->
+              <div class="care-tips-box">
+                <div class="care-tips-title">居家照护建议</div>
+                ${ref.careTips.map(tip => `
+                  <div class="care-tip-item">
+                    <span class="care-tip-bullet">•</span>
+                    <span>${tip}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `
+      }).join('') + `
+        <!-- 关于骨髓抑制分级 -->
+        <div class="reference-about-card">
+          <div class="reference-about-title">关于骨髓抑制分级</div>
+          <div class="reference-about-text">
+            以上分级标准参考WHO（世界卫生组织）骨髓抑制分级标准。实际处理请遵医嘱，
+            本速查表仅供健康科普参考，不能替代执业医师的专业判断。
+          </div>
+        </div>
+      `
+    }
+
+    function openGradeDetailModal(indicatorIndex, gradeIndex) {
+      const ref = REFERENCE_DATA[indicatorIndex]
+      const grade = ref.grades[gradeIndex]
+      
+      const badge = document.getElementById('gradeDetailBadge')
+      badge.textContent = grade.levelName
+      badge.className = `grade-detail-badge ${grade.level}`
+      
+      document.getElementById('gradeDetailTitle').textContent = ref.name
+      document.getElementById('gradeDetailRange').textContent = `${grade.range} ${ref.unit}`
+      document.getElementById('gradeDetailPrinciple').textContent = grade.principle
+      
+      const adviceSection = document.getElementById('gradeDetailAdviceSection')
+      const noAdviceSection = document.getElementById('gradeDetailNoAdviceSection')
+      
+      if (grade.dischargeAdvice) {
+        document.getElementById('gradeDetailAdvice').textContent = grade.dischargeAdvice
+        adviceSection.style.display = 'block'
+        noAdviceSection.style.display = 'none'
+      } else {
+        adviceSection.style.display = 'none'
+        noAdviceSection.style.display = 'block'
+      }
+      
+      document.getElementById('gradeDetailModal').classList.add('show')
+    }
+
+    function closeGradeDetailModal(event) {
+      if (event && event.target !== event.currentTarget) return
+      document.getElementById('gradeDetailModal').classList.remove('show')
+    }
+
+    async function loadReminders() {
+      try {
+        const res = await fetch(`${API_BASE}/reminders`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          const reminders = data.data || []
+          const remindersList = document.getElementById('remindersList')
+          
+          if (reminders.length === 0) {
+            remindersList.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-icon">📅</div>
+                <div class="empty-title">暂无提醒</div>
+                <div class="empty-desc">点击上方"添加"按钮创建提醒</div>
+              </div>
+            `
+          } else {
+            remindersList.innerHTML = reminders.map(r => `
+              <div class="reminder-item">
+                <div>
+                  <div class="reminder-date">${formatDate(r.reminder_date)}</div>
+                  <div class="reminder-time">${r.reminder_time}</div>
+                </div>
+                <div class="toggle-switch ${r.is_active ? 'active' : ''}" onclick="toggleReminder('${r.id}', ${!r.is_active})"></div>
+              </div>
+            `).join('')
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    function showAddReminder() {
+      document.getElementById('reminderModal').classList.add('show')
+    }
+
+    function hideAddReminder() {
+      document.getElementById('reminderModal').classList.remove('show')
+    }
+
+    async function addReminder() {
+      const date = document.getElementById('reminderDateInput').value
+      const time = document.getElementById('reminderTimeInput').value
+
+      if (!date) {
+        showToast('请选择提醒日期')
+        return
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/reminders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            reminder_date: date,
+            reminder_time: time
+          })
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          showToast('添加成功')
+          hideAddReminder()
+          loadReminders()
+        } else {
+          showToast(data.message || '添加失败')
+        }
+      } catch (e) {
+        console.error('添加提醒错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    async function toggleReminder(reminderId, isActive) {
+      try {
+        const res = await fetch(`${API_BASE}/reminders/${reminderId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ is_active: isActive })
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          loadReminders()
+        } else {
+          showToast(data.message || '操作失败')
+        }
+      } catch (e) {
+        console.error('切换提醒错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    async function loadTrendData() {
+      const tabs = document.getElementById('trendTabs')
+      const indicators = ['WBC', 'NEUT#', 'HGB', 'PLT']
+      
+      tabs.innerHTML = indicators.map((ind, i) => `
+        <button class="tab-pill ${i === 0 ? 'active' : ''}" onclick="selectTrendIndicator('${ind}')">${getIndicatorName(ind)}</button>
+      `).join('')
+
+      selectTrendIndicator('WBC')
+    }
+
+    async function selectTrendIndicator(indicator) {
+      document.querySelectorAll('.tab-pill').forEach(t => {
+        t.classList.toggle('active', t.textContent === getIndicatorName(indicator))
+      })
+
+      try {
+        const res = await fetch(`${API_BASE}/trends/${indicator}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          renderTrendChart(data.data, indicator)
+          renderTrendStats(data.data, indicator)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    function renderTrendChart(data, indicator) {
+      const ctx = document.getElementById('trendChart').getContext('2d')
+      
+      if (window.trendChartInstance) {
+        window.trendChartInstance.destroy()
+      }
+
+      const labels = data.map(d => formatDate(d.test_time))
+      const values = data.map(d => d.test_value)
+
+      window.trendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: getIndicatorName(indicator),
+            data: values,
+            borderColor: '#14b8a6',
+            backgroundColor: 'rgba(20, 184, 166, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      })
+    }
+
+    function renderTrendStats(data, indicator) {
+      if (data.length === 0) {
+        document.getElementById('trendStats').innerHTML = '<p style="text-align: center; color: var(--text-muted);">暂无数据</p>'
+        return
+      }
+
+      const values = data.map(d => d.test_value)
+      const latest = values[values.length - 1]
+      const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
+      const max = Math.max(...values)
+      const min = Math.min(...values)
+
+      document.getElementById('trendStats').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <div style="font-size: 12px; color: var(--text-muted);">最新值</div>
+            <div style="font-size: 20px; font-weight: 600;">${latest} ${getIndicatorUnit(indicator)}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--text-muted);">平均值</div>
+            <div style="font-size: 20px; font-weight: 600;">${avg} ${getIndicatorUnit(indicator)}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--text-muted);">最高值</div>
+            <div style="font-size: 20px; font-weight: 600;">${max} ${getIndicatorUnit(indicator)}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--text-muted);">最低值</div>
+            <div style="font-size: 20px; font-weight: 600;">${min} ${getIndicatorUnit(indicator)}</div>
+          </div>
+        </div>
+      `
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast')
+      toast.textContent = message
+      toast.classList.add('show')
+      setTimeout(() => {
+        toast.classList.remove('show')
+      }, 2000)
+    }
+
+    init()
+  </script>
+</body>
+</html>
