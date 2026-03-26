@@ -3,7 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const path = require('path')
-const { initDatabase } = require('./config/database')
+const { initDatabase } = require('./config/database-sqlite')
 
 const authRoutes = require('./routes/auth')
 const patientRoutes = require('./routes/patients')

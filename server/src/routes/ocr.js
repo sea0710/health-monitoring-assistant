@@ -170,7 +170,7 @@ const callExternalOCR = async (imagePath) => {
 }
 
 const parseOCRText = (text) => {
-  console.log('[OCR 解析] 输入文本:', text.substring(0, 500))
+  console.log('[OCR 解析] 输入文本:', text.substring(0, 800))
   
   const result = {
     hospital: '',
@@ -204,9 +204,10 @@ const parseOCRText = (text) => {
   }
   
   const extractValueAndUnit = (text, patterns) => {
-    for (const pattern of patterns) {
+    for (let i = 0; i < patterns.length; i++) {
+      const pattern = patterns[i]
       const match = text.match(pattern)
-      console.log(`[OCR 解析] 尝试匹配:`, pattern.toString().substring(0, 100), '结果:', match ? '成功' : '失败')
+      console.log(`[OCR 解析] 尝试匹配模式 ${i+1}:`, pattern.toString().substring(0, 120), '结果:', match ? '成功' : '失败')
       if (match) {
         const value = match[1]
         let unit = match[2] || ''
@@ -214,10 +215,22 @@ const parseOCRText = (text) => {
         return { value, unit: unit.trim() }
       }
     }
+    console.log('[OCR 解析] 所有模式都匹配失败')
     return { value: '', unit: '' }
   }
   
   const wbcData = extractValueAndUnit(text, [
+    // Markdown表格格式：| 1 | 白细胞(WBC) | 10.10 | 10^9/L |
+    /\|\s*\d+\s*\|\s*白细胞\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    // Markdown表格格式：| 白细胞(WBC) | 10.10 | 10^9/L |
+    /\|\s*白细胞\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    // 简单格式：白细胞(WBC) | 10.10 | 10^9/L
+    /白细胞\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    // 新增：简单的数值提取，只要找到WBC或白细胞附近的数字
+    /(?:WBC|白细胞)[\s\S]*?(\d+\.?\d*)/i,
+    /白细胞计数\s*[（(]\s*WBC\s*[）)][\s\S]*?(\d+\.?\d*)/i,
+    /WBC[\s\S]*?(\d+\.?\d*)/i,
+    // 原有的模式
     /\*?\s*白细胞计数\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /白细胞计数\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /白细胞\s*\([^(]*\)\s*(\d+\.?\d*)\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
@@ -240,16 +253,38 @@ const parseOCRText = (text) => {
     result.wbc_value = wbcData.value
     result.wbc_unit = wbcData.unit || '×10⁹/L'
     
-    const { convertToStandard } = require('../services/unitConversionService')
-    const converted = convertToStandard('WBC', wbcData.value, result.wbc_unit)
-    if (converted.success) {
-      result.wbc_standard_value = converted.standardizedValue
-      result.wbc_standard_unit = converted.standardUnit
-      console.log(`[OCR 解析] WBC 换算：${wbcData.value} ${result.wbc_unit} → ${result.wbc_standard_value} ${result.wbc_standard_unit}`)
+    try {
+      const { convertToStandard } = require('../services/unitConversionService')
+      const converted = convertToStandard('WBC', wbcData.value, result.wbc_unit)
+      if (converted.success) {
+        result.wbc_standard_value = converted.standardizedValue
+        result.wbc_standard_unit = converted.standardUnit
+        console.log(`[OCR 解析] WBC 换算：${wbcData.value} ${result.wbc_unit} → ${result.wbc_standard_value} ${result.wbc_standard_unit}`)
+      } else {
+        // 换算失败，直接用原始值作为标准值
+        result.wbc_standard_value = wbcData.value
+        console.log(`[OCR 解析] WBC 换算失败，使用原始值: ${wbcData.value}`)
+      }
+    } catch (e) {
+      console.error('[OCR 解析] WBC 换算异常:', e)
+      result.wbc_standard_value = wbcData.value
     }
+  } else {
+    console.log('[OCR 解析] 未找到 WBC 数值')
   }
   
   const neutData = extractValueAndUnit(text, [
+    // Markdown表格格式：| 7 | 中性粒细胞# (NE#) | 5.71 | 10^9/L |
+    /\|\s*\d+\s*\|\s*中性粒细胞#\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    // Markdown表格格式：| 中性粒细胞# (NE#) | 5.71 | 10^9/L |
+    /\|\s*中性粒细胞#\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    // 简单格式：中性粒细胞# (NE#) | 5.71 | 10^9/L
+    /中性粒细胞#\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    // 新增：简单的数值提取
+    /(?:NEUT#|中性粒细胞#)[\s\S]*?(\d+\.?\d*)/i,
+    /中性粒细胞绝对值\s*[（(]\s*NEUT#\s*[）)][\s\S]*?(\d+\.?\d*)/i,
+    /NE#[\s\S]*?(\d+\.?\d*)/i,
+    // 原有的模式
     /\*?\s*中性粒细胞绝对值\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /中性粒细胞绝对值\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /中性粒细胞#\s*\([^(]*\)\s*(\d+\.?\d*)\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
@@ -274,16 +309,37 @@ const parseOCRText = (text) => {
     result.neut_abs_value = neutData.value
     result.neut_abs_unit = neutData.unit || '×10⁹/L'
     
-    const { convertToStandard } = require('../services/unitConversionService')
-    const converted = convertToStandard('NEUT#', neutData.value, result.neut_abs_unit)
-    if (converted.success) {
-      result.neut_abs_standard_value = converted.standardizedValue
-      result.neut_abs_standard_unit = converted.standardUnit
-      console.log(`[OCR 解析] NEUT# 换算：${neutData.value} ${result.neut_abs_unit} → ${result.neut_abs_standard_value} ${result.neut_abs_standard_unit}`)
+    try {
+      const { convertToStandard } = require('../services/unitConversionService')
+      const converted = convertToStandard('NEUT#', neutData.value, result.neut_abs_unit)
+      if (converted.success) {
+        result.neut_abs_standard_value = converted.standardizedValue
+        result.neut_abs_standard_unit = converted.standardUnit
+        console.log(`[OCR 解析] NEUT# 换算：${neutData.value} ${result.neut_abs_unit} → ${result.neut_abs_standard_value} ${result.neut_abs_standard_unit}`)
+      } else {
+        result.neut_abs_standard_value = neutData.value
+        console.log(`[OCR 解析] NEUT# 换算失败，使用原始值: ${neutData.value}`)
+      }
+    } catch (e) {
+      console.error('[OCR 解析] NEUT# 换算异常:', e)
+      result.neut_abs_standard_value = neutData.value
     }
+  } else {
+    console.log('[OCR 解析] 未找到 NEUT# 数值')
   }
   
   const hgbData = extractValueAndUnit(text, [
+    // Markdown表格格式：| X | 血红蛋白(HGB) | 142 | g/L |
+    /\|\s*\d+\s*\|\s*血红蛋白\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(g\/L|g\/dL)?/i,
+    // Markdown表格格式：| 血红蛋白(HGB) | 142 | g/L |
+    /\|\s*血红蛋白\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(g\/L|g\/dL)?/i,
+    // 简单格式：血红蛋白(HGB) | 142 | g/L
+    /血红蛋白\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(g\/L|g\/dL)?/i,
+    // 新增：简单的数值提取
+    /(?:HGB|Hb|血红蛋白|血色素)[\s\S]*?(\d+\.?\d*)/i,
+    /血红蛋白\s*[（(]\s*HGB\s*[）)][\s\S]*?(\d+\.?\d*)/i,
+    /HGB[\s\S]*?(\d+\.?\d*)/i,
+    // 原有的模式
     /\*?\s*血红蛋白\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(g\/L|g\/dL)?/i,
     /血红蛋白\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(g\/L|g\/dL)?/i,
     /血红蛋白\s*\([^(]*\)\s*(\d+\.?\d*)\s*(g\/L|g\/dL)?/i,
@@ -300,16 +356,37 @@ const parseOCRText = (text) => {
     result.hgb_value = hgbData.value
     result.hgb_unit = hgbData.unit || 'g/L'
     
-    const { convertToStandard } = require('../services/unitConversionService')
-    const converted = convertToStandard('HGB', hgbData.value, result.hgb_unit)
-    if (converted.success) {
-      result.hgb_standard_value = converted.standardizedValue
-      result.hgb_standard_unit = converted.standardUnit
-      console.log(`[OCR 解析] HGB 换算：${hgbData.value} ${result.hgb_unit} → ${result.hgb_standard_value} ${result.hgb_standard_unit}`)
+    try {
+      const { convertToStandard } = require('../services/unitConversionService')
+      const converted = convertToStandard('HGB', hgbData.value, result.hgb_unit)
+      if (converted.success) {
+        result.hgb_standard_value = converted.standardizedValue
+        result.hgb_standard_unit = converted.standardUnit
+        console.log(`[OCR 解析] HGB 换算：${hgbData.value} ${result.hgb_unit} → ${result.hgb_standard_value} ${result.hgb_standard_unit}`)
+      } else {
+        result.hgb_standard_value = hgbData.value
+        console.log(`[OCR 解析] HGB 换算失败，使用原始值: ${hgbData.value}`)
+      }
+    } catch (e) {
+      console.error('[OCR 解析] HGB 换算异常:', e)
+      result.hgb_standard_value = hgbData.value
     }
+  } else {
+    console.log('[OCR 解析] 未找到 HGB 数值')
   }
   
   const pltData = extractValueAndUnit(text, [
+    // Markdown表格格式：| X | 血小板(PLT) | 349 | 10^9/L |
+    /\|\s*\d+\s*\|\s*血小板\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL|\/μL)?/i,
+    // Markdown表格格式：| 血小板(PLT) | 349 | 10^9/L |
+    /\|\s*血小板\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL|\/μL)?/i,
+    // 简单格式：血小板(PLT) | 349 | 10^9/L
+    /血小板\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL|\/μL)?/i,
+    // 新增：简单的数值提取
+    /(?:PLT|血小板)[\s\S]*?(\d+\.?\d*)/i,
+    /血小板计数\s*[（(]\s*PLT\s*[）)][\s\S]*?(\d+\.?\d*)/i,
+    /PLT[\s\S]*?(\d+\.?\d*)/i,
+    // 原有的模式
     /\*?\s*血小板计数\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL|\/μL)?/i,
     /血小板计数\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL|\/μL)?/i,
     /血小板\s*\([^(]*\)\s*(\d+\.?\d*)\s*(10\^9\/L|10\^3\/μL|K\/uL|\/μL)?/i,
@@ -332,19 +409,37 @@ const parseOCRText = (text) => {
     result.plt_value = pltData.value
     result.plt_unit = pltData.unit || '×10⁹/L'
     
-    const { convertToStandard } = require('../services/unitConversionService')
-    const converted = convertToStandard('PLT', pltData.value, result.plt_unit)
-    if (converted.success) {
-      result.plt_standard_value = converted.standardizedValue
-      result.plt_standard_unit = converted.standardUnit
-      console.log(`[OCR 解析] PLT 换算：${pltData.value} ${result.plt_unit} → ${result.plt_standard_value} ${result.plt_standard_unit}`)
+    try {
+      const { convertToStandard } = require('../services/unitConversionService')
+      const converted = convertToStandard('PLT', pltData.value, result.plt_unit)
+      if (converted.success) {
+        result.plt_standard_value = converted.standardizedValue
+        result.plt_standard_unit = converted.standardUnit
+        console.log(`[OCR 解析] PLT 换算：${pltData.value} ${result.plt_unit} → ${result.plt_standard_value} ${result.plt_standard_unit}`)
+      } else {
+        result.plt_standard_value = pltData.value
+        console.log(`[OCR 解析] PLT 换算失败，使用原始值: ${pltData.value}`)
+      }
+    } catch (e) {
+      console.error('[OCR 解析] PLT 换算异常:', e)
+      result.plt_standard_value = pltData.value
     }
+  } else {
+    console.log('[OCR 解析] 未找到 PLT 数值')
   }
   
-  const dateMatch = text.match(/(\d{4}[-年]\d{1,2}[-月]\d{1,2}日？)/)
+  const dateMatch = text.match(/(\d{4}[-年]\s*\d{1,2}[-月]\s*\d{1,2}日?)/i)
   if (dateMatch) {
-    result.test_time = dateMatch[1].replace(/年/g, '-').replace(/月/g, '-').replace(/日/g, '')
+    let dateStr = dateMatch[1].replace(/年/g, '-').replace(/月/g, '-').replace(/日/g, '').replace(/\s+/g, '')
+    result.test_time = dateStr
     console.log(`[OCR 解析] 日期：${result.test_time}`)
+  } else {
+    // 尝试其他日期格式
+    const altDateMatch1 = text.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/)
+    if (altDateMatch1) {
+      result.test_time = `${altDateMatch1[1]}-${altDateMatch1[2].padStart(2, '0')}-${altDateMatch1[3].padStart(2, '0')}`
+      console.log(`[OCR 解析] 日期(备用格式1)：${result.test_time}`)
+    }
   }
   
   const nameMatch = text.match(/姓名 [:：]\s*([^\s\n]+)/)

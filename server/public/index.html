@@ -2432,7 +2432,7 @@
       <div class="card" id="reportInfoCard" style="display: none;">
         <div class="input-group">
           <label class="input-label">检测时间</label>
-          <input type="datetime-local" id="testTimeInput" class="input-field">
+          <input type="date" id="testTimeInput" class="input-field">
         </div>
 
         <div class="input-group">
@@ -2441,7 +2441,6 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" id="saveReportBtn" onclick="saveReport()">保存报告</button>
       <button class="btn btn-secondary" id="ocrBtn" style="display: none; margin-top: 12px;" onclick="handleOCR()">智能识别</button>
     </div>
 
@@ -3027,7 +3026,7 @@
             `
           } else {
             reportsList.innerHTML = reports.map(r => `
-              <div class="report-item-new" onclick="viewReport('${r.id}')">
+              <div class="report-item-new" onclick="viewReport('${r.report_id}')">
                 <div class="report-info-left">
                   <div class="report-date">${formatDate(r.test_time)}</div>
                   <div class="report-hospital">${r.test_hospital || '未知医院'}</div>
@@ -3141,9 +3140,43 @@
       document.getElementById('uploadCard').style.display = 'block'
       document.getElementById('indicatorCard').style.display = 'none'
       document.getElementById('reportInfoCard').style.display = 'none'
+      
+      // 清空上传区域
+      const uploadArea = document.querySelector('.upload-area')
+      uploadArea.innerHTML = `
+        <div class="upload-placeholder">
+          <div class="upload-icon-wrapper">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <div class="upload-text">点击或拖拽上传图片</div>
+          <div class="upload-hint">支持 JPG、PNG 格式</div>
+          <div class="upload-hint-small">请对齐血常规报告边框拍摄</div>
+        </div>
+      `
+      
+      uploadedFile = null
+      document.getElementById('reportFile').value = ''
+      
+      // 清空输入框
+      document.getElementById('wbcInput').value = ''
+      document.getElementById('neutAbsInput').value = ''
+      document.getElementById('hgbInput').value = ''
+      document.getElementById('pltInput').value = ''
+      document.getElementById('testTimeInput').value = ''
+      document.getElementById('hospitalInput').value = ''
+      
+      // 重置按钮
+      const ocrBtn = document.getElementById('ocrBtn')
+      ocrBtn.textContent = '开始识别'
+      ocrBtn.onclick = handleOCR
+      ocrBtn.className = 'btn btn-secondary'
+      
       const reuploadBtn = document.getElementById('reuploadBtn')
       if (reuploadBtn) reuploadBtn.remove()
-      document.getElementById('ocrBtn').style.display = 'none'
     }
 
     function handlePatientCardClick() {
@@ -3175,12 +3208,33 @@
       reader.onload = function(e) {
         const uploadArea = document.querySelector('.upload-area')
         uploadArea.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="预览">`
+        
+        // 图片加载完成后自动触发识别
+        setTimeout(() => {
+          handleOCR()
+        }, 500)
       }
       reader.readAsDataURL(file)
 
-      // 显示检测时间、医院输入框和识别按钮
-      document.getElementById('reportInfoCard').style.display = 'block'
-      document.getElementById('ocrBtn').style.display = 'block'
+      // 显示开始识别按钮（识别过程中会隐藏）
+      const ocrBtn = document.getElementById('ocrBtn')
+      ocrBtn.style.display = 'block'
+      ocrBtn.textContent = '识别中...'
+      ocrBtn.className = 'btn btn-primary'
+      ocrBtn.disabled = true
+      
+      // 添加重新上传按钮
+      const existingReuploadBtn = document.getElementById('reuploadBtn')
+      if (!existingReuploadBtn) {
+        const reuploadBtn = document.createElement('button')
+        reuploadBtn.id = 'reuploadBtn'
+        reuploadBtn.className = 'btn btn-secondary'
+        reuploadBtn.style.marginTop = '12px'
+        reuploadBtn.textContent = '重新上传'
+        reuploadBtn.onclick = handleReupload
+        const ocrBtn = document.getElementById('ocrBtn')
+        ocrBtn.parentNode.insertBefore(reuploadBtn, ocrBtn.nextSibling)
+      }
     }
 
     async function handleOCR() {
@@ -3190,6 +3244,7 @@
       }
 
       const btn = document.getElementById('ocrBtn')
+      const originalText = btn.textContent
       btn.disabled = true
       btn.textContent = '识别中...'
 
@@ -3208,6 +3263,10 @@
           const result = data.data
           console.log('[OCR] 识别结果:', result)
 
+          // 显示检测时间、医院输入框
+          document.getElementById('reportInfoCard').style.display = 'block'
+          
+          // 回填识别结果 - 直接回填标准值
           if (result.test_time) {
             document.getElementById('testTimeInput').value = result.test_time
           }
@@ -3215,31 +3274,58 @@
             document.getElementById('hospitalInput').value = result.hospital
           }
 
-          if (result.indicators) {
-            if (result.indicators.WBC) {
-              document.getElementById('wbcInput').value = result.indicators.WBC
-            }
-            if (result.indicators['NEUT#']) {
-              document.getElementById('neutAbsInput').value = result.indicators['NEUT#']
-            }
-            if (result.indicators.HGB) {
-              document.getElementById('hgbInput').value = result.indicators.HGB
-            }
-            if (result.indicators.PLT) {
-              document.getElementById('pltInput').value = result.indicators.PLT
-            }
+          // 回填指标值 - 优先使用 standard_value
+          if (result.wbc_standard_value) {
+            document.getElementById('wbcInput').value = result.wbc_standard_value
+          } else if (result.wbc_value) {
+            document.getElementById('wbcInput').value = result.wbc_value
+          }
+          
+          if (result.neut_abs_standard_value) {
+            document.getElementById('neutAbsInput').value = result.neut_abs_standard_value
+          } else if (result.neut_abs_value) {
+            document.getElementById('neutAbsInput').value = result.neut_abs_value
+          }
+          
+          if (result.hgb_standard_value) {
+            document.getElementById('hgbInput').value = result.hgb_standard_value
+          } else if (result.hgb_value) {
+            document.getElementById('hgbInput').value = result.hgb_value
+          }
+          
+          if (result.plt_standard_value) {
+            document.getElementById('pltInput').value = result.plt_standard_value
+          } else if (result.plt_value) {
+            document.getElementById('pltInput').value = result.plt_value
+          }
+
+          // 显示指标输入框
+          document.getElementById('indicatorCard').style.display = 'block'
+          
+          // 修改按钮为保存报告
+          btn.textContent = '保存报告'
+          btn.onclick = saveReport
+          btn.disabled = false
+          btn.className = 'btn btn-primary'
+          
+          // 显示重新上传按钮
+          const reuploadBtn = document.getElementById('reuploadBtn')
+          if (reuploadBtn) {
+            reuploadBtn.style.display = 'block'
+            reuploadBtn.textContent = '重新上传'
           }
 
           showToast('识别成功')
         } else {
           showToast(data.message || '识别失败')
+          btn.disabled = false
+          btn.textContent = originalText
         }
       } catch (e) {
-        console.error('OCR错误:', e)
+        console.error('OCR 错误:', e)
         showToast('网络错误，请重试')
-      } finally {
         btn.disabled = false
-        btn.textContent = '智能识别'
+        btn.textContent = originalText
       }
     }
 
@@ -3271,6 +3357,19 @@
         const url = currentReportId ? `${API_BASE}/reports/${currentReportId}` : `${API_BASE}/reports`
         const method = currentReportId ? 'PUT' : 'POST'
 
+        // 获取当前患者 ID
+        let patientId = patient ? patient.patient_id : null
+        
+        console.log('[保存报告] patient 对象:', patient)
+        console.log('[保存报告] patient_id:', patientId)
+        
+        // 如果没有患者档案，先创建
+        if (!patientId && !currentReportId) {
+          showToast('请先创建患者档案')
+          showPage('patientCreatePage')
+          return
+        }
+
         const res = await fetch(url, {
           method,
           headers: {
@@ -3278,12 +3377,25 @@
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
+            patient_id: patientId,
             test_time: testTime,
             test_hospital: hospital,
             indicators
           })
         })
         const data = await res.json()
+
+        console.log('[保存报告] 响应:', data)
+
+        // 如果是 403 错误，说明患者档案不存在，需要重新创建
+        if (data.code === 403) {
+          console.log('[保存报告] 患者档案不存在，请重新创建')
+          localStorage.removeItem('patient')
+          patient = null
+          showToast('请先重新创建患者档案')
+          showPage('patientCreatePage')
+          return
+        }
 
         if (data.code === 0) {
           showToast('保存成功')
@@ -3348,7 +3460,7 @@
               <span class="level-badge-new ${level}">${getLevelText(level)}</span>
             </div>
             
-            <div class="core-indicator-item-new abnormal-item">
+            <div class="core-indicator-item-new ${level !== 'normal' ? 'abnormal-item' : ''}">
               <div class="indicator-main-row-new">
                 <div class="indicator-info-new">
                   <div class="indicator-name-new">${ind.indicator_name}</div>
@@ -3360,16 +3472,18 @@
                 </div>
               </div>
               
-              <div class="advice-section-new">
-                <div class="advice-label-new">处理原则</div>
-                <div class="advice-content-new">${advice.principle}</div>
-                ${advice.dischargeAdvice ? `
-                  <div class="discharge-advice-new">
-                    <div class="advice-label-new">💡 出院医嘱</div>
-                    <div class="advice-content-new">${advice.dischargeAdvice}</div>
-                  </div>
-                ` : ''}
-              </div>
+              ${level !== 'normal' ? `
+                <div class="advice-section-new">
+                  <div class="advice-label-new">处理原则</div>
+                  <div class="advice-content-new">${advice.principle}</div>
+                  ${advice.dischargeAdvice ? `
+                    <div class="discharge-advice-new">
+                      <div class="advice-label-new">💡 出院医嘱</div>
+                      <div class="advice-content-new">${advice.dischargeAdvice}</div>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
               
               <div class="view-reference-link-new">
                 <span onclick="showPage('referencePage')">

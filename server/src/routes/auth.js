@@ -1,9 +1,5 @@
 const { Router } = require('express')
-
-// 根据全局标志选择控制器
-const { register, login } = global.USE_DATABASE
-  ? require('../controllers/authController-db')
-  : require('../controllers/authController-memory')
+const { register, login } = require('../controllers/authController-sqlite')
 
 const router = Router()
 
