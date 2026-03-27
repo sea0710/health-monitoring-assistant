@@ -203,7 +203,7 @@ const parseOCRText = (text) => {
     return result
   }
   
-  const extractValueAndUnit = (text, patterns) => {
+  const extractValueAndUnit = (text, patterns, indicatorType = '') => {
     for (let i = 0; i < patterns.length; i++) {
       const pattern = patterns[i]
       const match = text.match(pattern)
@@ -212,6 +212,11 @@ const parseOCRText = (text) => {
         const value = match[1]
         let unit = match[2] || ''
         console.log(`[OCR 解析] 匹配成功：值=${value}, 单位=${unit}`)
+        // 只过滤掉单个数字"3"，这可能是血小板计数的误识别
+        if (indicatorType === 'PLT' && value === '3' && !unit) {
+          console.log('[OCR 解析] 过滤掉单个数字"3"，可能是血小板计数的误识别')
+          continue
+        }
         return { value, unit: unit.trim() }
       }
     }
@@ -220,16 +225,23 @@ const parseOCRText = (text) => {
   }
   
   const wbcData = extractValueAndUnit(text, [
+    // Markdown列表格式：1. **白细胞计数（WBC）**\n   - **结果**: 3.67
+    /白细胞计数\s*[（(]\s*WBC\s*[）)][\s\S]*?\*\*结果\*\*\s*[:：]\s*(\d+\.?\d*)/i,
+    /白细胞计数\s*[（(]\s*WBC\s*[）)][\s\S]*?结果\s*[:：]\s*(\d+\.?\d*)/i,
     // Markdown表格格式：| 1 | 白细胞(WBC) | 10.10 | 10^9/L |
     /\|\s*\d+\s*\|\s*白细胞\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     // Markdown表格格式：| 白细胞(WBC) | 10.10 | 10^9/L |
     /\|\s*白细胞\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     // 简单格式：白细胞(WBC) | 10.10 | 10^9/L
     /白细胞\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
-    // 新增：简单的数值提取，只要找到WBC或白细胞附近的数字
-    /(?:WBC|白细胞)[\s\S]*?(\d+\.?\d*)/i,
-    /白细胞计数\s*[（(]\s*WBC\s*[）)][\s\S]*?(\d+\.?\d*)/i,
-    /WBC[\s\S]*?(\d+\.?\d*)/i,
+    // 支持 AI 识别的多行格式（Markdown 格式，支持中英文括号）
+    /白细胞计数\s*[（(]\s*WBC\s*[）)][\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
+    /WBC[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
+    /白细胞[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
+    // 支持表格格式：| X | 白细胞计数 (WBC) | 6.09 | x10^9/L |
+    /\|\s*\d+\s*\|\s*白细胞 [^(]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    /\|\s*\d+\s*\|\s*WBC\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    /\|\s*白细胞 [^(]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
     // 原有的模式
     /\*?\s*白细胞计数\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /白细胞计数\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
@@ -239,16 +251,8 @@ const parseOCRText = (text) => {
     /WBC\s*(?:[:：]|\s+)?(\d+\.?\d*)\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /白细胞.*?(\d+\.?\d*)\s*(10\^9\/L|×10⁹\/L)?/i,
     /白细胞.*?[\s:：](\d+\.?\d*)/i,
-    /(\d+\.?\d*)\s*(?:10\^9\/L|×10⁹\/L)\s*白细胞/i,
-    // 支持 AI 识别的多行格式（Markdown 格式，支持中英文括号）
-    /白细胞计数\s*[（(]\s*WBC\s*[）)][\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
-    /WBC[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
-    /白细胞[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
-    // 支持表格格式：| X | 白细胞计数 (WBC) | 6.09 | x10^9/L |
-    /\|\s*\d+\s*\|\s*白细胞 [^(]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
-    /\|\s*\d+\s*\|\s*WBC\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
-    /\|\s*白细胞 [^(]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i
-  ])
+    /(\d+\.?\d*)\s*(?:10\^9\/L|×10⁹\/L)\s*白细胞/i
+  ], 'WBC')
   if (wbcData.value) {
     result.wbc_value = wbcData.value
     result.wbc_unit = wbcData.unit || '×10⁹/L'
@@ -274,16 +278,23 @@ const parseOCRText = (text) => {
   }
   
   const neutData = extractValueAndUnit(text, [
+    // Markdown列表格式：2. **中性粒细胞绝对值（NEUT#）**\n   - **结果**: 2.03
+    /中性粒细胞绝对值\s*[（(]\s*NEUT#\s*[）)][\s\S]*?\*\*结果\*\*\s*[:：]\s*(\d+\.?\d*)/i,
+    /中性粒细胞绝对值\s*[（(]\s*NEUT#\s*[）)][\s\S]*?结果\s*[:：]\s*(\d+\.?\d*)/i,
     // Markdown表格格式：| 7 | 中性粒细胞# (NE#) | 5.71 | 10^9/L |
     /\|\s*\d+\s*\|\s*中性粒细胞#\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     // Markdown表格格式：| 中性粒细胞# (NE#) | 5.71 | 10^9/L |
     /\|\s*中性粒细胞#\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     // 简单格式：中性粒细胞# (NE#) | 5.71 | 10^9/L
     /中性粒细胞#\s*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
-    // 新增：简单的数值提取
-    /(?:NEUT#|中性粒细胞#)[\s\S]*?(\d+\.?\d*)/i,
-    /中性粒细胞绝对值\s*[（(]\s*NEUT#\s*[）)][\s\S]*?(\d+\.?\d*)/i,
-    /NE#[\s\S]*?(\d+\.?\d*)/i,
+    // 支持 AI 识别的多行格式（Markdown 格式，支持中英文括号）
+    /中性粒细胞绝对值\s*[（(]\s*NEUT#\s*[）)][\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
+    /中性粒细胞[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
+    /NEUT#[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
+    // 支持表格格式
+    /\|\s*\d+\s*\|\s*中性粒细胞 [#\s]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    /\|\s*\d+\s*\|\s*NE#\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
+    /\|\s*中性粒细胞 [#\s]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
     // 原有的模式
     /\*?\s*中性粒细胞绝对值\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /中性粒细胞绝对值\s*\([^(]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
@@ -295,16 +306,8 @@ const parseOCRText = (text) => {
     /Neu#\s*(?:[:：]|\s+)?(\d+\.?\d*)\s*(10\^9\/L|10\^3\/μL|K\/uL)?/i,
     /中性粒细胞.*?(\d+\.?\d*)\s*(10\^9\/L|×10⁹\/L)?/i,
     /中性粒细胞.*?[\s:：](\d+\.?\d*)/i,
-    /(\d+\.?\d*)\s*(?:10\^9\/L|×10⁹\/L)\s*中性粒细胞/i,
-    // 支持 AI 识别的多行格式（Markdown 格式，支持中英文括号）
-    /中性粒细胞绝对值\s*[（(]\s*NEUT#\s*[）)][\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
-    /中性粒细胞[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
-    /NEUT#[\s\S]*?\*?\s*结果\*?\s*[:：]\s*(\d+\.?\d*)/i,
-    // 支持表格格式
-    /\|\s*\d+\s*\|\s*中性粒细胞 [#\s]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
-    /\|\s*\d+\s*\|\s*NE#\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i,
-    /\|\s*中性粒细胞 [#\s]*\([^)]*\)\s*\|\s*(\d+\.?\d*)\s*\|\s*(10\^9\/L|x10\^9\/L|10\^3\/μL|K\/uL)?/i
-  ])
+    /(\d+\.?\d*)\s*(?:10\^9\/L|×10⁹\/L)\s*中性粒细胞/i
+  ], 'NEUT#')
   if (neutData.value) {
     result.neut_abs_value = neutData.value
     result.neut_abs_unit = neutData.unit || '×10⁹/L'
@@ -428,17 +431,25 @@ const parseOCRText = (text) => {
     console.log('[OCR 解析] 未找到 PLT 数值')
   }
   
-  const dateMatch = text.match(/(\d{4}[-年]\s*\d{1,2}[-月]\s*\d{1,2}日?)/i)
-  if (dateMatch) {
-    let dateStr = dateMatch[1].replace(/年/g, '-').replace(/月/g, '-').replace(/日/g, '').replace(/\s+/g, '')
+  // 优先匹配带标签的检测时间
+  const testTimeMatch = text.match(/(?:检测时间|采样时间)\s*[:：]\s*(\d{4}[-年]\s*\d{1,2}[-月]\s*\d{1,2}日?)/i)
+  if (testTimeMatch) {
+    let dateStr = testTimeMatch[1].replace(/年/g, '-').replace(/月/g, '-').replace(/日/g, '').replace(/\s+/g, '')
     result.test_time = dateStr
-    console.log(`[OCR 解析] 日期：${result.test_time}`)
+    console.log(`[OCR 解析] 检测时间：${result.test_time}`)
   } else {
     // 尝试其他日期格式
-    const altDateMatch1 = text.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/)
-    if (altDateMatch1) {
-      result.test_time = `${altDateMatch1[1]}-${altDateMatch1[2].padStart(2, '0')}-${altDateMatch1[3].padStart(2, '0')}`
-      console.log(`[OCR 解析] 日期(备用格式1)：${result.test_time}`)
+    const dateMatch = text.match(/(\d{4}[-年]\s*\d{1,2}[-月]\s*\d{1,2}日?)/i)
+    if (dateMatch) {
+      let dateStr = dateMatch[1].replace(/年/g, '-').replace(/月/g, '-').replace(/日/g, '').replace(/\s+/g, '')
+      result.test_time = dateStr
+      console.log(`[OCR 解析] 日期：${result.test_time}`)
+    } else {
+      const altDateMatch1 = text.match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/)
+      if (altDateMatch1) {
+        result.test_time = `${altDateMatch1[1]}-${altDateMatch1[2].padStart(2, '0')}-${altDateMatch1[3].padStart(2, '0')}`
+        console.log(`[OCR 解析] 日期(备用格式1)：${result.test_time}`)
+      }
     }
   }
   

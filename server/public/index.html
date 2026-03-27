@@ -626,68 +626,130 @@
 
     .reports-card {
       background: white;
-      border-radius: 16px;
+      border-radius: 24px;
       overflow: hidden;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
     }
 
     .report-item-new {
-      padding: 16px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background-color 0.2s;
     }
 
     .report-item-new:last-child {
       border-bottom: none;
     }
 
-    .report-item-new:active {
-      background: var(--bg-secondary);
+    .report-item-new:hover {
+      background: rgba(0, 0, 0, 0.02);
     }
 
     .report-info-left {
       flex: 1;
+      min-width: 0;
+    }
+
+    .report-top-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .report-type-tag {
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text);
+      font-weight: 500;
+      white-space: nowrap;
     }
 
     .report-date {
-      font-size: 15px;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-
-    .report-hospital {
       font-size: 13px;
       color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .report-bottom-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .report-status-tag {
       padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      border-radius: 16px;
+      font-size: 13px;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     .report-status-tag.normal {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
     }
 
-    .report-status-tag.abnormal {
-      background: rgba(245, 158, 11, 0.1);
-      color: #f59e0b;
+    .report-status-tag.warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #ca8a04;
     }
 
     .report-status-tag.danger {
-      background: rgba(249, 115, 22, 0.1);
-      color: #ea580c;
+      background: rgba(249, 115, 22, 0.15);
+      color: #c2410c;
     }
 
     .report-status-tag.critical {
-      background: rgba(220, 38, 38, 0.1);
+      background: rgba(220, 38, 38, 0.15);
       color: #dc2626;
+    }
+
+    .report-abnormal-summary {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .report-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 12px;
+      flex-shrink: 0;
+    }
+
+    .report-delete-btn {
+      padding: 8px;
+      border-radius: 9999px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .report-delete-btn:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .report-arrow {
+      color: var(--text-muted);
+      opacity: 0.5;
     }
 
     .empty-reports {
@@ -814,9 +876,48 @@
       color: var(--text-muted);
     }
 
+    /* 报告详情页导航栏 */
+    .detail-header-blur {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 16px;
+    }
+
+    .detail-back-btn, .detail-edit-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      margin: 0 -8px;
+      border-radius: 9999px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .detail-back-btn:hover, .detail-edit-btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    .detail-header-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
     /* 报告详情页新样式 */
     .report-detail-content {
-      padding: 15px;
+      padding: 24px 16px;
       padding-bottom: 100px;
     }
 
@@ -872,6 +973,40 @@
 
     .indicator-detail-card-new.critical-bg {
       background: rgba(220, 38, 38, 0.05);
+    }
+
+    .indicator-list-new {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .indicator-item-new {
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .indicator-item-new.abnormal-item {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .legend-section-new {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .legend-label-new {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .legend-badges-new {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .card-header-new {
@@ -1909,8 +2044,21 @@
     }
 
     .toast.show {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       animation: fadeIn 0.2s ease;
+    }
+
+    .toast-loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
     }
 
     .loading {
@@ -2384,7 +2532,7 @@
       <div class="header">
         <div class="back-btn" onclick="showPage('homePage')">‹ 返回</div>
         <div class="header-title" id="reportUploadTitle">上传报告</div>
-        <div class="header-action" id="deleteReportBtn" style="display: none;" onclick="confirmDeleteReport()">删除</div>
+        <div class="header-action" id="deleteReportBtn" style="display: none;" onclick="confirmDeleteReportFromUpload()">删除</div>
       </div>
 
       <div class="card" id="uploadCard">
@@ -2442,29 +2590,49 @@
       </div>
 
       <button class="btn btn-secondary" id="ocrBtn" style="display: none; margin-top: 12px;" onclick="handleOCR()">智能识别</button>
+      <button class="btn btn-secondary" id="cancelReportBtn" style="display: none; margin-top: 12px;" onclick="cancelReport()">取消报告</button>
     </div>
 
     <!-- 报告详情页 -->
     <div id="reportDetailPage" class="page">
+      <!-- 导航栏 -->
+      <header class="detail-header-blur">
+        <button class="detail-back-btn" onclick="showPage('homePage')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>返回</span>
+        </button>
+        <h1 class="detail-header-title">报告详情</h1>
+        <button class="detail-edit-btn" onclick="editCurrentReport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>编辑</span>
+        </button>
+      </header>
+
       <div class="report-detail-content">
         <!-- 报告基本信息 -->
-        <div class="report-info-card-new" id="reportInfoCard"></div>
+        <div class="report-info-card-new" id="reportDetailInfoCard"></div>
         
         <!-- 核心指标详情 -->
         <div id="indicatorDetailCards"></div>
         
         <!-- 免责声明 -->
         <div class="disclaimer-card-new">
-          本报告仅供参考，不构成诊疗建议。如有疑问，请咨询专业医生。
+          本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断
         </div>
       </div>
       
       <!-- 悬浮趋势按钮 -->
-      <div class="floating-trend-btn-new" onclick="showPage('trendPage')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="trend-icon-svg">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      <button class="floating-trend-btn-new" onclick="showPage('trendPage')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
         </svg>
-      </div>
+      </button>
       <div class="floating-trend-label-new">趋势</div>
     </div>
 
@@ -2626,6 +2794,23 @@
       </div>
     </div>
 
+    <!-- 删除报告确认弹窗 -->
+    <div class="modal-mask" id="deleteReportModal">
+      <div class="modal-content" style="max-width: 320px;">
+        <div class="modal-header">
+          <div class="modal-title">确认删除</div>
+          <div class="modal-close" onclick="cancelDeleteReport()">×</div>
+        </div>
+        <div class="modal-body">
+          <p id="deleteReportText" style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;"></p>
+        </div>
+        <div class="modal-footer" style="display: flex; border-top: 1px solid var(--border);">
+          <button class="modal-btn modal-btn-cancel" onclick="cancelDeleteReport()" style="flex: 1; border-right: 1px solid var(--border);">取消</button>
+          <button class="modal-btn modal-btn-confirm" onclick="confirmDeleteReport()" style="flex: 1; background: #ef4444; color: white;">删除</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
   </div>
@@ -2636,11 +2821,13 @@
     let userId = localStorage.getItem('userId')
     let patient = JSON.parse(localStorage.getItem('patient') || 'null')
     let currentReportId = null
+    let currentReportData = null
     let selectedGender = ''
     let uploadedFile = null
     let savedCredentials = JSON.parse(localStorage.getItem('savedCredentials') || 'null')
     let currentReferenceIndex = 0
     let expandedReferenceCard = ''
+    let ocrAbortController = null
 
     async function checkAuth() {
       if (!token) {
@@ -2735,11 +2922,11 @@
           '避免接触感冒、发热患者，保持室内通风',
         ],
         grades: [
-          { level: 'normal', levelName: '0 级', range: '≥1.5', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
-          { level: 'warning', levelName: 'I 级', range: '1.0-1.4', principle: '轻度减少，观察即可，注意感染预防', color: 'bg-warning/10 text-warning' },
-          { level: 'danger', levelName: 'II 级', range: '0.5-0.9', principle: '中度减少，需对症处理，考虑使用升白药物', dischargeAdvice: '若中性粒细胞<1.0×10⁹/L，立即皮下注射人粒细胞刺激因子 100μg，每日一次。连续注射 3 天后复查血常规，持续用药直至白细胞回升至 10.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'danger', levelName: 'III 级', range: '0.1-0.4', principle: '重度减少，必须使用升白针，密切监测', dischargeAdvice: '若中性粒细胞<0.5×10⁹/L，或合并发热 (体温>38.0℃)，须在升白同时及时使用抗生素，并根据医嘱行血培养检查', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'critical', levelName: 'IV 级', range: '<0.1', principle: '极重度减少，立即使用升白针，预防感染，可能需暂停化疗', color: 'bg-critical/10 text-critical' },
+          { level: 'normal', levelName: '0级', range: '≥1.5', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I级', range: '1.0-1.4', principle: '轻度减少，观察即可，注意感染预防', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II级', range: '0.5-0.9', principle: '中度减少，需对症处理，考虑使用升白药物', dischargeAdvice: '若中性粒细胞<1.0×10⁹/L，立即皮下注射人粒细胞刺激因子 100μg，每日一次。连续注射3天后复查血常规，持续用药直至白细胞回升至 10.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III级', range: '0.1-0.4', principle: '重度减少，必须使用升白针，密切监测', dischargeAdvice: '若中性粒细胞<0.5×10⁹/L，或合并发热(体温>38.0℃)，须在升白同时及时使用抗生素，并根据医嘱行血培养检查', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV级', range: '<0.1', principle: '极重度减少，立即使用升白针，预防感染，可能需暂停化疗', color: 'bg-critical/10 text-critical' },
         ],
       },
       {
@@ -2756,11 +2943,11 @@
           '注意饮食卫生，避免生冷、未煮熟的食物',
         ],
         grades: [
-          { level: 'normal', levelName: '0 级', range: '≥4.0', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
-          { level: 'warning', levelName: 'I 级', range: '3.0-3.9', principle: '轻度减少，观察即可，注意预防感染', color: 'bg-warning/10 text-warning' },
-          { level: 'danger', levelName: 'II 级', range: '2.0-2.9', principle: '中度减少，需对症处理，考虑使用升白药物', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'danger', levelName: 'III 级', range: '1.0-1.9', principle: '重度减少，必须使用升白针，密切监测', dischargeAdvice: '若白细胞<2.0×10⁹/L 或 中性粒细胞<1.0×10⁹/L，立即皮下注射人粒细胞刺激因子 100μg，每日一次。连续注射 3 天后复查血常规，持续用药直至白细胞回升至 10.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'critical', levelName: 'IV 级', range: '<1.0', principle: '极重度减少，立即使用升白针，预防感染，可能需暂停化疗', dischargeAdvice: '若白细胞<1.0×10⁹/L (或中性粒细胞<0.5×10⁹/L)，或合并发热 (体温>38.0℃)，须在升白同时及时使用抗生素，并根据医嘱行血培养检查', color: 'bg-critical/10 text-critical' },
+          { level: 'normal', levelName: '0级', range: '≥4.0', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I级', range: '3.0-3.9', principle: '轻度减少，观察即可，注意预防感染', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II级', range: '2.0-2.9', principle: '中度减少，需对症处理，考虑使用升白药物', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III级', range: '1.0-1.9', principle: '重度减少，必须使用升白针，密切监测', dischargeAdvice: '若白细胞<2.0×10⁹/L 或 中性粒细胞<1.0×10⁹/L，立即皮下注射人粒细胞刺激因子 100μg，每日一次。连续注射3天后复查血常规，持续用药直至白细胞回升至 10.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV级', range: '<1.0', principle: '极重度减少，立即使用升白针，预防感染，可能需暂停化疗', dischargeAdvice: '若白细胞<1.0×10⁹/L (或中性粒细胞<0.5×10⁹/L)，或合并发热(体温>38.0℃)，须在升白同时及时使用抗生素，并根据医嘱行血培养检查', color: 'bg-critical/10 text-critical' },
         ],
       },
       {
@@ -2777,11 +2964,11 @@
           '如出现心悸、气短加重，及时就医',
         ],
         grades: [
-          { level: 'normal', levelName: '0 级', range: '男≥120/女≥110', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
-          { level: 'warning', levelName: 'I 级', range: '男90-119/女90-109', principle: '轻度贫血，注意营养补充，定期复查', color: 'bg-warning/10 text-warning' },
-          { level: 'danger', levelName: 'II 级', range: '60-89', principle: '中度贫血，考虑输血或药物治疗', dischargeAdvice: '若血红蛋白<90g/L，需评估是否需要输血治疗。建议加强营养，必要时使用促红细胞生成素', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'danger', levelName: 'III 级', range: '30-59', principle: '重度贫血，需要输血治疗', dischargeAdvice: '若血红蛋白<60g/L，建议输注红细胞悬液。同时补充铁剂、叶酸等造血原料', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'critical', levelName: 'IV 级', range: '<30', principle: '极重度贫血，立即输血，可能需暂停化疗', dischargeAdvice: '若血红蛋白<30g/L，立即输血治疗，严密监测生命体征，必要时暂停化疗', color: 'bg-critical/10 text-critical' },
+          { level: 'normal', levelName: '0级', range: '男≥120/女≥110', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I级', range: '男90-119/女90-109', principle: '轻度减少，观察即可，注意休息', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II级', range: '80-100', principle: '中度减少，需对症处理，考虑使用升红药物', dischargeAdvice: '若血红蛋白<100g/L，除外出血等原因后，可皮下注射促红细胞生成素', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III级', range: '65-79', principle: '重度减少，必须使用升红药物，密切监测', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV级', range: '<65', principle: '极重度减少，立即输血治疗，预防心衰', dischargeAdvice: '若贫血严重（如Hb<60g/L）或有明显心慌、气短等症状，必要时输血治疗', color: 'bg-critical/10 text-critical' },
         ],
       },
       {
@@ -2798,11 +2985,11 @@
           '如出现严重出血，立即就医',
         ],
         grades: [
-          { level: 'normal', levelName: '0 级', range: '≥100', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
-          { level: 'warning', levelName: 'I 级', range: '75-99', principle: '轻度减少，观察即可，注意出血预防', color: 'bg-warning/10 text-warning' },
-          { level: 'danger', levelName: 'II 级', range: '50-74', principle: '中度减少，需对症处理，避免出血', dischargeAdvice: '若血小板<75×10⁹/L，避免剧烈活动，注意观察有无出血倾向', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'danger', levelName: 'III 级', range: '25-49', principle: '重度减少，考虑输注血小板', dischargeAdvice: '若血小板<50×10⁹/L，建议输注血小板。避免外伤，禁止肌内注射', color: 'bg-orange-500/10 text-orange-600' },
-          { level: 'critical', levelName: 'IV 级', range: '<25', principle: '极重度减少，立即输注血小板，可能需暂停化疗', dischargeAdvice: '若血小板<25×10⁹/L，立即输注血小板，绝对卧床休息，严密监测出血情况', color: 'bg-critical/10 text-critical' },
+          { level: 'normal', levelName: '0级', range: '≥100', principle: '正常范围，无需处理', color: 'bg-success/10 text-success' },
+          { level: 'warning', levelName: 'I级', range: '75-99', principle: '轻度减少，观察即可', color: 'bg-warning/10 text-warning' },
+          { level: 'danger', levelName: 'II级', range: '50-74', principle: '中度减少，需对症处理，考虑使用升血小板药物', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'danger', levelName: 'III级', range: '25-49', principle: '重度减少，必须使用升血小板药物，密切监测', dischargeAdvice: '请皮下注射血小板生成素 1ml 或 白介素-11 1.5mg，每日一次，连续3天后再次复查血常规，直到血小板上升至 70.0×10⁹/L 以上', color: 'bg-orange-500/10 text-orange-600' },
+          { level: 'critical', levelName: 'IV级', range: '<25', principle: '极重度减少，立即给予血小板输注及止血药物，预防出血', dischargeAdvice: '若血小板<20.0×10⁹/L属于血小板减少出血危象，应尽快给予血小板输注及应用止血药物治疗', color: 'bg-critical/10 text-critical' },
         ],
       },
     ]
@@ -3002,16 +3189,16 @@
         const data = await res.json()
 
         if (data.code === 0) {
-          const reports = data.data || []
-          document.getElementById('reportCount').textContent = reports.length
+          reportsListData = data.data || []
+          document.getElementById('reportCount').textContent = reportsListData.length
 
-          if (reports.length > 0) {
-            const latest = reports[0]
+          if (reportsListData.length > 0) {
+            const latest = reportsListData[0]
             document.getElementById('recentTestTime').textContent = formatDate(latest.test_time)
           }
 
           const reportsList = document.getElementById('reportsList')
-          if (reports.length === 0) {
+          if (reportsListData.length === 0) {
             reportsList.innerHTML = `
               <div class="empty-reports">
                 <svg class="empty-reports-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -3025,20 +3212,99 @@
               </div>
             `
           } else {
-            reportsList.innerHTML = reports.map(r => `
-              <div class="report-item-new" onclick="viewReport('${r.report_id}')">
-                <div class="report-info-left">
-                  <div class="report-date">${formatDate(r.test_time)}</div>
-                  <div class="report-hospital">${r.test_hospital || '未知医院'}</div>
+            reportsList.innerHTML = reportsListData.map(r => {
+              const level = r.overall_level || 'normal'
+              const abnormalCount = r.abnormal_count || 0
+              let statusBadge = ''
+              let statusText = ''
+              
+              if (abnormalCount === 0) {
+                statusBadge = '<span class="report-status-tag normal">指标正常</span>'
+              } else if (abnormalCount <= 1) {
+                statusBadge = `<span class="report-status-tag warning">${abnormalCount}项异常</span>`
+              } else {
+                statusBadge = `<span class="report-status-tag danger">${abnormalCount}项异常</span>`
+              }
+              
+              const abnormalSummary = r.abnormal_summary || ''
+              
+              return `
+                <div class="report-item-new">
+                  <div class="report-info-left" onclick="viewReport('${r.report_id}')">
+                    <div class="report-top-row">
+                      <span class="report-type-tag">血常规</span>
+                      <span class="report-date">${formatDate(r.test_time)}</span>
+                    </div>
+                    <div class="report-bottom-row">
+                      ${statusBadge}
+                      ${abnormalSummary ? `<span class="report-abnormal-summary">${abnormalSummary}</span>` : ''}
+                    </div>
+                  </div>
+                  <div class="report-actions">
+                    <button class="report-delete-btn" onclick="event.stopPropagation(); deleteReport('${r.report_id}')">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                    <svg class="report-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="viewReport('${r.report_id}')">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </div>
                 </div>
-                <span class="report-status-tag ${r.overall_level || 'normal'}">${getLevelText(r.overall_level)}</span>
-              </div>
-            `).join('')
+              `
+            }).join('')
           }
         }
       } catch (e) {
         console.error(e)
       }
+    }
+
+    let reportToDelete = null
+    let reportsListData = []
+
+    function deleteReport(reportId) {
+      reportToDelete = reportId
+      const report = reportsListData.find(r => r.report_id === reportId)
+      document.getElementById('deleteReportText').textContent = `确定要删除 ${report ? formatDate(report.test_time) : ''} 的血常规报告吗？此操作无法撤销。`
+      document.getElementById('deleteReportModal').classList.add('show')
+    }
+
+    async function confirmDeleteReport() {
+      if (!reportToDelete) return
+
+      try {
+        const res = await fetch(`${API_BASE}/reports/${reportToDelete}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (data.code === 0) {
+          showToast('删除成功')
+          document.getElementById('deleteReportModal').classList.remove('show')
+          reportToDelete = null
+          
+          // 如果当前在上传页面，返回首页
+          const currentPage = document.querySelector('.page.active').id
+          if (currentPage === 'reportUploadPage') {
+            showPage('homePage')
+          } else {
+            loadHomeData()
+          }
+        } else {
+          showToast(data.message || '删除失败')
+        }
+      } catch (e) {
+        console.error('删除报告错误:', e)
+        showToast('网络错误，请重试')
+      }
+    }
+
+    function cancelDeleteReport() {
+      document.getElementById('deleteReportModal').classList.remove('show')
+      reportToDelete = null
     }
 
     async function init() {
@@ -3052,30 +3318,13 @@
       }
     }
 
-    async function confirmDeleteReport() {
+    async function confirmDeleteReportFromUpload() {
       if (!currentReportId) return
       
-      const confirmed = confirm('确定要删除这份报告吗？删除后无法恢复。')
-      if (!confirmed) return
-
-      try {
-        const res = await fetch(`${API_BASE}/reports/${currentReportId}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        const data = await res.json()
-
-        if (data.code === 0) {
-          showToast('删除成功')
-          showPage('homePage')
-          loadHomeData()
-        } else {
-          showToast(data.message || '删除失败')
-        }
-      } catch (e) {
-        console.error('删除报告错误:', e)
-        showToast('网络错误，请重试')
-      }
+      // 使用统一的删除确认弹窗
+      reportToDelete = currentReportId
+      document.getElementById('deleteReportText').textContent = '确定要删除这份报告吗？此操作无法撤销。'
+      document.getElementById('deleteReportModal').classList.add('show')
     }
 
     async function editReport() {
@@ -3137,6 +3386,15 @@
     }
 
     function handleReupload() {
+      // 取消正在进行的OCR请求
+      if (ocrAbortController) {
+        ocrAbortController.abort()
+        ocrAbortController = null
+      }
+      
+      // 隐藏loading toast
+      hideToast()
+      
       document.getElementById('uploadCard').style.display = 'block'
       document.getElementById('indicatorCard').style.display = 'none'
       document.getElementById('reportInfoCard').style.display = 'none'
@@ -3157,6 +3415,7 @@
           <div class="upload-hint-small">请对齐血常规报告边框拍摄</div>
         </div>
       `
+      uploadArea.style.border = '2px dashed #d1d5db'
       
       uploadedFile = null
       document.getElementById('reportFile').value = ''
@@ -3174,9 +3433,66 @@
       ocrBtn.textContent = '开始识别'
       ocrBtn.onclick = handleOCR
       ocrBtn.className = 'btn btn-secondary'
+      ocrBtn.style.display = 'none'
       
       const reuploadBtn = document.getElementById('reuploadBtn')
       if (reuploadBtn) reuploadBtn.remove()
+      
+      // 显示取消按钮
+      const cancelBtn = document.getElementById('cancelReportBtn')
+      if (cancelBtn) {
+        cancelBtn.style.display = 'none'
+      }
+    }
+
+    function cancelReport() {
+      // 重置上传页面状态
+      uploadedFile = null
+      
+      // 重置上传区域
+      const uploadArea = document.querySelector('.upload-area')
+      uploadArea.innerHTML = `
+        <div class="upload-placeholder">
+          <div class="upload-icon-wrapper">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <div class="upload-text">点击或拖拽上传图片</div>
+          <div class="upload-hint">支持 JPG、PNG 格式</div>
+          <div class="upload-hint-small">请对齐血常规报告边框拍摄</div>
+        </div>
+      `
+      uploadArea.style.border = '2px dashed #d1d5db'
+      
+      // 隐藏指标卡片和报告信息卡片
+      document.getElementById('indicatorCard').style.display = 'none'
+      document.getElementById('reportInfoCard').style.display = 'none'
+      
+      // 重置OCR按钮
+      const ocrBtn = document.getElementById('ocrBtn')
+      ocrBtn.style.display = 'none'
+      ocrBtn.textContent = '智能识别'
+      ocrBtn.onclick = handleOCR
+      ocrBtn.className = 'btn btn-secondary'
+      
+      // 隐藏取消按钮
+      const cancelBtn = document.getElementById('cancelReportBtn')
+      if (cancelBtn) {
+        cancelBtn.style.display = 'none'
+      }
+      
+      // 重置输入框
+      document.getElementById('wbcInput').value = ''
+      document.getElementById('neutAbsInput').value = ''
+      document.getElementById('hgbInput').value = ''
+      document.getElementById('pltInput').value = ''
+      document.getElementById('testTimeInput').value = ''
+      document.getElementById('hospitalInput').value = ''
+      
+      showToast('已取消报告')
     }
 
     function handlePatientCardClick() {
@@ -3216,12 +3532,12 @@
       }
       reader.readAsDataURL(file)
 
-      // 显示开始识别按钮（识别过程中会隐藏）
+      // 隐藏识别按钮，显示toast
       const ocrBtn = document.getElementById('ocrBtn')
-      ocrBtn.style.display = 'block'
-      ocrBtn.textContent = '识别中...'
-      ocrBtn.className = 'btn btn-primary'
-      ocrBtn.disabled = true
+      ocrBtn.style.display = 'none'
+      
+      // 显示识别中toast
+      showToast('正在识别中...', 'loading')
       
       // 添加重新上传按钮
       const existingReuploadBtn = document.getElementById('reuploadBtn')
@@ -3243,10 +3559,11 @@
         return
       }
 
-      const btn = document.getElementById('ocrBtn')
-      const originalText = btn.textContent
-      btn.disabled = true
-      btn.textContent = '识别中...'
+      // 创建AbortController来允许取消请求
+      ocrAbortController = new AbortController()
+
+      // 显示识别中toast
+      showToast('正在识别中...', 'loading')
 
       const formData = new FormData()
       formData.append('report', uploadedFile)
@@ -3255,7 +3572,8 @@
         const res = await fetch(`${API_BASE}/ocr/parse`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
+          body: formData,
+          signal: ocrAbortController.signal
         })
         const data = await res.json()
 
@@ -3302,11 +3620,13 @@
           // 显示指标输入框
           document.getElementById('indicatorCard').style.display = 'block'
           
-          // 修改按钮为保存报告
-          btn.textContent = '保存报告'
-          btn.onclick = saveReport
-          btn.disabled = false
-          btn.className = 'btn btn-primary'
+          // 显示保存报告按钮
+          const ocrBtn = document.getElementById('ocrBtn')
+          ocrBtn.style.display = 'block'
+          ocrBtn.textContent = '保存报告'
+          ocrBtn.onclick = saveReport
+          ocrBtn.disabled = false
+          ocrBtn.className = 'btn btn-primary'
           
           // 显示重新上传按钮
           const reuploadBtn = document.getElementById('reuploadBtn')
@@ -3315,17 +3635,29 @@
             reuploadBtn.textContent = '重新上传'
           }
 
-          showToast('识别成功')
+          // 关闭loading toast，显示成功toast
+          hideToast()
+          setTimeout(() => {
+            showToast('识别成功')
+          }, 100)
         } else {
-          showToast(data.message || '识别失败')
-          btn.disabled = false
-          btn.textContent = originalText
+          hideToast()
+          setTimeout(() => {
+            showToast(data.message || '识别失败')
+          }, 100)
         }
       } catch (e) {
-        console.error('OCR 错误:', e)
-        showToast('网络错误，请重试')
-        btn.disabled = false
-        btn.textContent = originalText
+        if (e.name === 'AbortError') {
+          console.log('OCR 请求已取消')
+        } else {
+          console.error('OCR 错误:', e)
+        }
+        hideToast()
+        setTimeout(() => {
+          showToast('识别已取消')
+        }, 100)
+      } finally {
+        ocrAbortController = null
       }
     }
 
@@ -3348,10 +3680,30 @@
       }
 
       const indicators = []
-      if (wbc) indicators.push({ indicator_code: 'WBC', test_value: parseFloat(wbc) })
-      if (neutAbs) indicators.push({ indicator_code: 'NEUT#', test_value: parseFloat(neutAbs) })
-      if (hgb) indicators.push({ indicator_code: 'HGB', test_value: parseFloat(hgb) })
-      if (plt) indicators.push({ indicator_code: 'PLT', test_value: parseFloat(plt) })
+      if (wbc) indicators.push({ 
+        indicator_code: 'WBC', 
+        indicator_name: '白细胞计数',
+        test_value: parseFloat(wbc),
+        level: calculateLevel('WBC', parseFloat(wbc), patient?.gender)
+      })
+      if (neutAbs) indicators.push({ 
+        indicator_code: 'NEUT#', 
+        indicator_name: '中性粒细胞绝对值',
+        test_value: parseFloat(neutAbs),
+        level: calculateLevel('NEUT#', parseFloat(neutAbs), patient?.gender)
+      })
+      if (hgb) indicators.push({ 
+        indicator_code: 'HGB', 
+        indicator_name: '血红蛋白',
+        test_value: parseFloat(hgb),
+        level: calculateLevel('HGB', parseFloat(hgb), patient?.gender)
+      })
+      if (plt) indicators.push({ 
+        indicator_code: 'PLT', 
+        indicator_name: '血小板计数',
+        test_value: parseFloat(plt),
+        level: calculateLevel('PLT', parseFloat(plt), patient?.gender)
+      })
 
       try {
         const url = currentReportId ? `${API_BASE}/reports/${currentReportId}` : `${API_BASE}/reports`
@@ -3420,6 +3772,7 @@
         const data = await res.json()
 
         if (data.code === 0) {
+          currentReportData = data.data
           renderReportDetail(data.data)
           showPage('reportDetailPage')
         }
@@ -3429,104 +3782,305 @@
       }
     }
 
+    function editCurrentReport() {
+      if (!currentReportData) {
+        showToast('没有可编辑的报告')
+        return
+      }
+      
+      const { report, indicators } = currentReportData
+      
+      // 安全地设置元素值的value
+      function setInputValue(id, value) {
+        const el = document.getElementById(id)
+        if (el) {
+          el.value = value || ''
+        }
+      }
+      
+      // 先清空所有输入框
+      setInputValue('wbcInput', '')
+      setInputValue('neutAbsInput', '')
+      setInputValue('hgbInput', '')
+      setInputValue('pltInput', '')
+      setInputValue('testTimeInput', '')
+      setInputValue('hospitalInput', '')
+      
+      // 填充编辑表单
+      if (report) {
+        if (report.test_time) {
+          setInputValue('testTimeInput', report.test_time)
+        }
+        if (report.test_hospital) {
+          setInputValue('hospitalInput', report.test_hospital)
+        }
+      }
+      
+      // 填充指标值
+      if (indicators && indicators.length > 0) {
+        indicators.forEach(ind => {
+          if (ind.indicator_code === 'WBC') {
+            setInputValue('wbcInput', ind.test_value)
+          } else if (ind.indicator_code === 'NEUT#') {
+            setInputValue('neutAbsInput', ind.test_value)
+          } else if (ind.indicator_code === 'HGB') {
+            setInputValue('hgbInput', ind.test_value)
+          } else if (ind.indicator_code === 'PLT') {
+            setInputValue('pltInput', ind.test_value)
+          }
+        })
+      }
+      
+      // 显示报告信息和指标卡片（上传页面的）
+      const uploadReportInfoCard = document.getElementById('reportInfoCard')
+      if (uploadReportInfoCard) {
+        uploadReportInfoCard.style.display = 'block'
+      }
+      
+      const uploadIndicatorCard = document.getElementById('indicatorCard')
+      if (uploadIndicatorCard) {
+        uploadIndicatorCard.style.display = 'block'
+      }
+      
+      // 修改按钮为更新报告
+      const ocrBtn = document.getElementById('ocrBtn')
+      if (ocrBtn) {
+        ocrBtn.style.display = 'block'
+        ocrBtn.textContent = '更新报告'
+        ocrBtn.onclick = saveReport
+        ocrBtn.disabled = false
+        ocrBtn.className = 'btn btn-primary'
+      }
+      
+      showPage('reportUploadPage')
+    }
+
     function renderReportDetail(reportData) {
       const { report, indicators } = reportData
 
-      const reportInfoCard = document.getElementById('reportInfoCard')
+      // 计算最高异常等级
+      const indicatorsWithLevel = indicators.map(ind => {
+        const level = calculateLevel(ind.indicator_code, ind.test_value, patient?.gender)
+        return { ...ind, level }
+      })
+      
+      // 排序：critical > danger > warning > normal
+      const levelOrder = { 'critical': 0, 'danger': 1, 'warning': 2, 'normal': 3 }
+      indicatorsWithLevel.sort((a, b) => levelOrder[a.level] - levelOrder[b.level])
+
+      const hasAbnormal = indicatorsWithLevel.some(ind => ind.level !== 'normal')
+      const maxLevel = indicatorsWithLevel.reduce((max, ind) => {
+        return levelOrder[ind.level] < levelOrder[max] ? ind.level : max
+      }, 'normal')
+
+      const levelConfig = {
+        normal: { title: '指标正常', bgColor: 'normal-bg', icon: '✓' },
+        warning: { title: '轻度异常（Ⅰ度）', bgColor: 'warning-bg', icon: '!' },
+        danger: { title: '中度异常（Ⅱ-Ⅲ度）', bgColor: 'danger-bg', icon: '!' },
+        critical: { title: '重度异常（Ⅳ度）', bgColor: 'critical-bg', icon: '!' }
+      }
+
+      const levelBadgeConfig = {
+        normal: { label: '正常', className: 'bg-success/10 text-success border-success/20' },
+        warning: { label: 'Ⅰ度', className: 'bg-warning/10 text-warning border-warning/20' },
+        danger: { label: 'Ⅱ-Ⅲ度', className: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+        critical: { label: 'Ⅳ度', className: 'bg-critical/10 text-critical border-critical/20' }
+      }
+
+      // 报告信息卡片
+      const reportInfoCard = document.getElementById('reportDetailInfoCard')
       reportInfoCard.innerHTML = `
+        <div class="info-row-new">
+          <span class="info-label-new">检测医院</span>
+          <span class="info-value-new">${report.test_hospital || '未知'}</span>
+        </div>
+        <div class="info-divider-new"></div>
         <div class="info-row-new">
           <span class="info-label-new">检测时间</span>
           <span class="info-value-new">${formatDate(report.test_time)}</span>
         </div>
         <div class="info-divider-new"></div>
         <div class="info-row-new">
-          <span class="info-label-new">检测医院</span>
-          <span class="info-value-new">${report.test_hospital || '未知'}</span>
+          <span class="info-label-new">患者姓名</span>
+          <span class="info-value-new">${patient?.name || '未知'}</span>
         </div>
       `
 
+      // 指标详情卡片
       const indicatorCards = document.getElementById('indicatorDetailCards')
-      indicatorCards.innerHTML = indicators.map(ind => {
-        const level = calculateLevel(ind.indicator_code, ind.test_value, patient?.gender)
-        const advice = getGradeAdvice(ind.indicator_code, level, patient?.gender)
-        const refRange = getReferenceRange(ind.indicator_code, patient?.gender)
-
-        return `
-          <div class="indicator-detail-card-new ${level}-bg">
-            <div class="card-header-new">
-              <div class="card-title-new">
-                ${getIndicatorName(ind.indicator_code)}
-              </div>
-              <span class="level-badge-new ${level}">${getLevelText(level)}</span>
+      indicatorCards.innerHTML = `
+        <div class="indicator-detail-card-new ${hasAbnormal ? levelConfig[maxLevel].bgColor : 'normal-bg'}">
+          <div class="card-header-new">
+            <div class="card-title-new">
+              指标详情
             </div>
-            
-            <div class="core-indicator-item-new ${level !== 'normal' ? 'abnormal-item' : ''}">
-              <div class="indicator-main-row-new">
-                <div class="indicator-info-new">
-                  <div class="indicator-name-new">${ind.indicator_name}</div>
-                  <div class="indicator-ref-new">参考范围: ${refRange}</div>
-                </div>
-                <div class="indicator-value-section-new">
-                  <span class="indicator-value-new ${level}">${ind.test_value}</span>
-                  <span class="indicator-unit-new">${getIndicatorUnit(ind.indicator_code)}</span>
-                </div>
-              </div>
+          </div>
+          
+          <div class="indicator-list-new">
+            ${indicatorsWithLevel.map(ind => {
+              const level = ind.level
+              const gradeInfo = getGradeInfo(ind.indicator_code, level, ind.test_value)
+              const refRange = getReferenceRangeFromData(ind.indicator_code, patient?.gender)
+
+              const levelBadgeText = level === 'normal' ? '正常' : 
+                                       level === 'warning' ? 'Ⅰ度' : 
+                                       level === 'danger' ? (gradeInfo && gradeInfo.levelName ? gradeInfo.levelName : 'Ⅱ-Ⅲ度') : 'Ⅳ度';
               
-              ${level !== 'normal' ? `
-                <div class="advice-section-new">
-                  <div class="advice-label-new">处理原则</div>
-                  <div class="advice-content-new">${advice.principle}</div>
-                  ${advice.dischargeAdvice ? `
-                    <div class="discharge-advice-new">
-                      <div class="advice-label-new">💡 出院医嘱</div>
-                      <div class="advice-content-new">${advice.dischargeAdvice}</div>
+              return `
+                <div class="indicator-item-new ${level !== 'normal' ? 'abnormal-item' : ''}">
+                  <div class="indicator-main-row-new">
+                    <div class="indicator-info-new">
+                      <div class="indicator-name-new">${ind.indicator_name || getIndicatorName(ind.indicator_code)}</div>
+                      <div class="indicator-ref-new">参考：${refRange}</div>
+                    </div>
+                    <div class="indicator-value-section-new">
+                      <div style="display: flex; align-items: baseline; justify-content: flex-end;">
+                        <span class="indicator-value-new ${level}">${ind.test_value}</span>
+                        <span class="indicator-unit-new">${getIndicatorUnit(ind.indicator_code)}</span>
+                      </div>
+                      <div style="margin-top: 4px; text-align: right;">
+                        <span class="level-badge-new ${level}">${levelBadgeText}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  ${level !== 'normal' && gradeInfo ? `
+                    <div class="advice-section-new">
+                      <div class="advice-label-new">处理原则</div>
+                      <div class="advice-content-new">${gradeInfo.principle}</div>
+                      ${gradeInfo.dischargeAdvice ? `
+                        <div class="discharge-advice-new">
+                          <div class="advice-label-new">出院医嘱</div>
+                          <div class="advice-content-new">${gradeInfo.dischargeAdvice}</div>
+                        </div>
+                      ` : ''}
                     </div>
                   ` : ''}
                 </div>
-              ` : ''}
-              
-              <div class="view-reference-link-new">
-                <span onclick="showPage('referencePage')">
-                  查看完整分级速查 →
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </span>
-              </div>
+              `
+            }).join('')}
+          </div>
+
+          ${hasAbnormal ? `
+            <div class="view-reference-link-new">
+              <span onclick="showPage('referencePage')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                查看完整分级速查
+              </span>
+            </div>
+          ` : ''}
+
+          <div class="legend-section-new">
+            <div class="legend-label-new">异常等级说明：</div>
+            <div class="legend-badges-new">
+              <span class="legend-badge-new normal">正常</span>
+              <span class="legend-badge-new warning">Ⅰ度-轻度</span>
+              <span class="legend-badge-new danger">Ⅱ-Ⅲ度-中度</span>
+              <span class="legend-badge-new critical">Ⅳ度-重度</span>
             </div>
           </div>
-        `
-      }).join('')
+        </div>
+      `
     }
 
+    function getGradeInfo(code, level, value) {
+      const refData = REFERENCE_DATA.find(r => r.code === code || (code === 'NEUT#' && r.code === 'ANC'))
+      if (!refData) return { levelName: '未知', principle: '未知' }
+
+      // 对于danger级别，需要根据具体数值判断是II级还是III级
+      if (level === 'danger') {
+        const numValue = parseFloat(value)
+        let matchedGrade = null
+        
+        // 根据数值范围匹配具体的grade
+        for (const grade of refData.grades) {
+          if (grade.level === 'danger') {
+            // 解析range字符串判断是否匹配
+            const range = grade.range
+            if (range.includes('-')) {
+              const [min, max] = range.split('-').map(v => parseFloat(v.trim()))
+              if (numValue >= min && numValue <= max) {
+                matchedGrade = grade
+                break
+              }
+            } else if (range.startsWith('<')) {
+              const max = parseFloat(range.substring(1))
+              if (numValue < max) {
+                matchedGrade = grade
+                break
+              }
+            }
+          }
+        }
+        
+        if (matchedGrade) {
+          return {
+            levelName: matchedGrade.levelName,
+            principle: matchedGrade.principle,
+            dischargeAdvice: matchedGrade.dischargeAdvice
+          }
+        }
+      }
+
+      // 其他级别直接匹配
+      const grade = refData.grades.find(g => g.level === level)
+      if (!grade) return { levelName: '未知', principle: '未知' }
+
+      return {
+        levelName: grade.levelName,
+        principle: grade.principle,
+        dischargeAdvice: grade.dischargeAdvice
+      }
+    }
+
+    function getReferenceRangeFromData(code, gender) {
+      const refData = REFERENCE_DATA.find(r => r.code === code || (code === 'NEUT#' && r.code === 'ANC'))
+      if (!refData) return '未知'
+      
+      const normalGrade = refData.grades.find(g => g.level === 'normal')
+      if (!normalGrade) return '未知'
+      
+      // 返回正常范围
+      return `${normalGrade.range} ${refData.unit}`
+    }
+
+    // 计算指标分级（严格按照分级速查标准，只判断低于正常范围的情况）
     function calculateLevel(code, value, gender) {
       const numValue = parseFloat(value)
       
       if (code === 'WBC') {
-        if (numValue >= 4.0) return 'normal'
-        if (numValue >= 3.0) return 'warning'
-        if (numValue >= 2.0) return 'danger'
-        if (numValue >= 1.0) return 'danger'
-        return 'critical'
+        // 白细胞分级标准（只判断低于正常范围）
+        if (numValue >= 4.0) return 'normal'        // 0级：≥4.0
+        if (numValue >= 3.0) return 'warning'       // I级：3.0-3.9
+        if (numValue >= 2.0) return 'danger'        // II级：2.0-2.9
+        if (numValue >= 1.0) return 'danger'        // III级：1.0-1.9
+        return 'critical'                            // IV级：<1.0
       } else if (code === 'NEUT#' || code === 'ANC') {
-        if (numValue >= 1.5) return 'normal'
-        if (numValue >= 1.0) return 'warning'
-        if (numValue >= 0.5) return 'danger'
-        if (numValue >= 0.1) return 'danger'
-        return 'critical'
+        // 中性粒细胞分级标准（只判断低于正常范围）
+        if (numValue >= 1.5) return 'normal'        // 0级：≥1.5
+        if (numValue >= 1.0) return 'warning'       // I级：1.0-1.4
+        if (numValue >= 0.5) return 'danger'        // II级：0.5-0.9
+        if (numValue >= 0.1) return 'danger'        // III级：0.1-0.4
+        return 'critical'                            // IV级：<0.1
       } else if (code === 'HGB') {
+        // 血红蛋白分级标准（只判断低于正常范围）
         const lowerBound = gender === '女' ? 110 : 120
-        if (numValue >= lowerBound) return 'normal'
-        if (numValue >= 90) return 'warning'
-        if (numValue >= 60) return 'danger'
-        if (numValue >= 30) return 'danger'
-        return 'critical'
+        if (numValue >= lowerBound) return 'normal'  // 0级：男≥120/女≥110
+        if (numValue >= 90) return 'warning'         // I级：男90-119/女90-109
+        if (numValue >= 80) return 'danger'          // II级：80-100
+        if (numValue >= 65) return 'danger'          // III级：65-79
+        return 'critical'                             // IV级：<65
       } else if (code === 'PLT') {
-        if (numValue >= 100) return 'normal'
-        if (numValue >= 75) return 'warning'
-        if (numValue >= 50) return 'danger'
-        if (numValue >= 25) return 'danger'
-        return 'critical'
+        // 血小板分级标准（只判断低于正常范围）
+        if (numValue >= 100) return 'normal'         // 0级：≥100
+        if (numValue >= 75) return 'warning'         // I级：75-99
+        if (numValue >= 50) return 'danger'          // II级：50-74
+        if (numValue >= 25) return 'danger'          // III级：25-49
+        return 'critical'                             // IV级：<25
       }
       
       return 'normal'
@@ -3892,39 +4446,97 @@
         const res = await fetch(`${API_BASE}/trends/${indicator}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
-        const data = await res.json()
+        const result = await res.json()
 
-        if (data.code === 0) {
-          renderTrendChart(data.data, indicator)
-          renderTrendStats(data.data, indicator)
+        if (result.code === 0) {
+          renderTrendChart(result.data, indicator, result.reference)
+          renderTrendStats(result.data, indicator, result.reference)
         }
       } catch (e) {
         console.error(e)
       }
     }
 
-    function renderTrendChart(data, indicator) {
-      const ctx = document.getElementById('trendChart').getContext('2d')
+    function renderTrendChart(data, indicator, reference) {
+      let canvas = document.getElementById('trendChart')
+      const chartContainer = canvas ? canvas.parentElement : document.querySelector('#trendPage .card:nth-child(2)')
+      
+      if (!chartContainer) {
+        console.error('未找到图表容器')
+        return
+      }
       
       if (window.trendChartInstance) {
         window.trendChartInstance.destroy()
+        window.trendChartInstance = null
       }
+
+      if (data.length === 0) {
+        chartContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">暂无数据，请先上传报告</p>'
+        return
+      }
+      
+      if (!canvas) {
+        chartContainer.innerHTML = '<canvas id="trendChart" style="width: 100%; height: 300px;"></canvas>'
+        canvas = document.getElementById('trendChart')
+      }
+      
+      const ctx = canvas.getContext('2d')
 
       const labels = data.map(d => formatDate(d.test_time))
       const values = data.map(d => d.test_value)
+      
+      const pointColors = data.map(d => {
+        if (d.level === 'critical') return '#dc2626'
+        if (d.level === 'danger') return '#ea580c'
+        if (d.level === 'warning') return '#f59e0b'
+        return '#14b8a6'
+      })
+
+      const datasets = [{
+        label: getIndicatorName(indicator),
+        data: values,
+        borderColor: '#14b8a6',
+        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: pointColors,
+        pointBorderColor: pointColors,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }]
+
+      if (reference && reference.min !== undefined && reference.max !== undefined) {
+        const referenceData = new Array(data.length).fill(reference.min)
+        const referenceDataMax = new Array(data.length).fill(reference.max)
+        
+        datasets.push({
+          label: '参考下限',
+          data: referenceData,
+          borderColor: 'rgba(156, 163, 175, 0.5)',
+          borderDash: [5, 5],
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false
+        })
+        
+        datasets.push({
+          label: '参考上限',
+          data: referenceDataMax,
+          borderColor: 'rgba(156, 163, 175, 0.5)',
+          borderDash: [5, 5],
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: '-1',
+          backgroundColor: 'rgba(156, 163, 175, 0.1)'
+        })
+      }
 
       window.trendChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels,
-          datasets: [{
-            label: getIndicatorName(indicator),
-            data: values,
-            borderColor: '#14b8a6',
-            backgroundColor: 'rgba(20, 184, 166, 0.1)',
-            tension: 0.4,
-            fill: true
-          }]
+          datasets
         },
         options: {
           responsive: true,
@@ -3932,18 +4544,44 @@
           plugins: {
             legend: {
               display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.label === getIndicatorName(indicator)) {
+                    const dataIndex = context.dataIndex
+                    const level = data[dataIndex].level
+                    let levelText = ''
+                    if (level === 'critical') levelText = ' (Ⅳ度)'
+                    else if (level === 'danger') levelText = ' (Ⅱ-Ⅲ度)'
+                    else if (level === 'warning') levelText = ' (Ⅰ度)'
+                    return `${context.dataset.label}: ${context.parsed.y} ${getIndicatorUnit(indicator)}${levelText}`
+                  }
+                  return `${context.dataset.label}: ${context.parsed.y}`
+                }
+              }
             }
           },
           scales: {
             y: {
-              beginAtZero: false
+              beginAtZero: false,
+              title: {
+                display: true,
+                text: getIndicatorUnit(indicator)
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: '检测时间'
+              }
             }
           }
         }
       })
     }
 
-    function renderTrendStats(data, indicator) {
+    function renderTrendStats(data, indicator, reference) {
       if (data.length === 0) {
         document.getElementById('trendStats').innerHTML = '<p style="text-align: center; color: var(--text-muted);">暂无数据</p>'
         return
@@ -3954,12 +4592,23 @@
       const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
       const max = Math.max(...values)
       const min = Math.min(...values)
+      
+      const latestData = data[data.length - 1]
+      let latestColor = '#10b981'
+      if (latestData.level === 'critical') latestColor = '#dc2626'
+      else if (latestData.level === 'danger') latestColor = '#ea580c'
+      else if (latestData.level === 'warning') latestColor = '#f59e0b'
+
+      let referenceText = ''
+      if (reference && reference.min !== undefined && reference.max !== undefined) {
+        referenceText = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 12px;">参考范围: ${reference.min} - ${reference.max} ${getIndicatorUnit(indicator)}</div>`
+      }
 
       document.getElementById('trendStats').innerHTML = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
             <div style="font-size: 12px; color: var(--text-muted);">最新值</div>
-            <div style="font-size: 20px; font-weight: 600;">${latest} ${getIndicatorUnit(indicator)}</div>
+            <div style="font-size: 20px; font-weight: 600; color: ${latestColor};">${latest} ${getIndicatorUnit(indicator)}</div>
           </div>
           <div>
             <div style="font-size: 12px; color: var(--text-muted);">平均值</div>
@@ -3974,16 +4623,32 @@
             <div style="font-size: 20px; font-weight: 600;">${min} ${getIndicatorUnit(indicator)}</div>
           </div>
         </div>
+        ${referenceText}
       `
     }
 
-    function showToast(message) {
+    function showToast(message, type = 'default') {
       const toast = document.getElementById('toast')
-      toast.textContent = message
-      toast.classList.add('show')
-      setTimeout(() => {
-        toast.classList.remove('show')
-      }, 2000)
+      
+      // 移除之前的类型类
+      toast.classList.remove('toast-loading', 'toast-success', 'toast-error')
+      
+      if (type === 'loading') {
+        toast.innerHTML = `<span class="toast-loading-spinner"></span>${message}`
+        toast.classList.add('show', 'toast-loading')
+      } else {
+        toast.textContent = message
+        toast.classList.add('show')
+        setTimeout(() => {
+          toast.classList.remove('show')
+        }, 2000)
+      }
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast')
+      toast.classList.remove('show', 'toast-loading')
+      toast.textContent = ''
     }
 
     init()

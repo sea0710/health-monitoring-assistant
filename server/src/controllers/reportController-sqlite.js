@@ -1,5 +1,43 @@
 const { generateId, query, queryAll, queryOne } = require('../db/sqlite')
 
+// 计算指标分级（严格按照分级速查标准，只判断低于正常范围的情况）
+const calculateLevel = (code, value, gender) => {
+  const numValue = parseFloat(value)
+  
+  if (code === 'WBC') {
+    // 白细胞分级标准（只判断低于正常范围）
+    if (numValue >= 4.0) return 'normal'        // 0级：≥4.0
+    if (numValue >= 3.0) return 'warning'       // I级：3.0-3.9
+    if (numValue >= 2.0) return 'danger'        // II级：2.0-2.9
+    if (numValue >= 1.0) return 'danger'        // III级：1.0-1.9
+    return 'critical'                            // IV级：<1.0
+  } else if (code === 'NEUT#' || code === 'ANC') {
+    // 中性粒细胞分级标准（只判断低于正常范围）
+    if (numValue >= 1.5) return 'normal'        // 0级：≥1.5
+    if (numValue >= 1.0) return 'warning'       // I级：1.0-1.4
+    if (numValue >= 0.5) return 'danger'        // II级：0.5-0.9
+    if (numValue >= 0.1) return 'danger'        // III级：0.1-0.4
+    return 'critical'                            // IV级：<0.1
+  } else if (code === 'HGB') {
+    // 血红蛋白分级标准（只判断低于正常范围）
+    const lowerBound = gender === '女' ? 110 : 120
+    if (numValue >= lowerBound) return 'normal'  // 0级：男≥120/女≥110
+    if (numValue >= 90) return 'warning'         // I级：男90-119/女90-109
+    if (numValue >= 80) return 'danger'          // II级：80-100
+    if (numValue >= 65) return 'danger'          // III级：65-79
+    return 'critical'                             // IV级：<65
+  } else if (code === 'PLT') {
+    // 血小板分级标准（只判断低于正常范围）
+    if (numValue >= 100) return 'normal'         // 0级：≥100
+    if (numValue >= 75) return 'warning'         // I级：75-99
+    if (numValue >= 50) return 'danger'          // II级：50-74
+    if (numValue >= 25) return 'danger'          // III级：25-49
+    return 'critical'                             // IV级：<25
+  }
+  
+  return 'normal'
+}
+
 const getReportsForCurrentUser = (req, res) => {
   try {
     const userId = req.userId
@@ -21,9 +59,72 @@ const getReportsForCurrentUser = (req, res) => {
       [patient.patient_id]
     )
     
+    // 为每个报告添加异常指标信息
+    const reportsWithDetails = reports.map(report => {
+      // 获取报告的指标
+      const indicators = queryAll(
+        'SELECT * FROM indicators WHERE report_id = ?',
+        [report.report_id]
+      )
+      
+      // 获取患者性别用于计算HGB的分级
+      const patientInfo = queryOne('SELECT gender FROM patients WHERE patient_id = ?', [report.patient_id])
+      const gender = patientInfo ? patientInfo.gender : '男'
+      
+      // 重新计算每个指标的level
+      const updatedIndicators = indicators.map(ind => {
+        const calculatedLevel = calculateLevel(ind.indicator_code, ind.test_value, gender)
+        return {
+          ...ind,
+          level: calculatedLevel
+        }
+      })
+      
+      // 计算异常指标
+      const abnormalIndicators = updatedIndicators.filter(ind => ind.level && ind.level !== 'normal')
+      const abnormalCount = abnormalIndicators.length
+      
+      // 生成异常指标摘要
+      let abnormalSummary = ''
+      if (abnormalCount > 0) {
+        // 指标中文名称映射
+        const indicatorNames = {
+          'WBC': '白细胞',
+          'NEUT#': '中性粒细胞',
+          'HGB': '血红蛋白',
+          'PLT': '血小板'
+        }
+        
+        const abnormalTexts = abnormalIndicators.map(ind => {
+          const name = indicatorNames[ind.indicator_code] || ind.indicator_name || ind.indicator_code
+          // 判断趋势（只判断低于正常范围的情况）
+          let trend = ''
+          // 根据分级速查标准判断
+          const referenceMin = {
+            'WBC': 4.0,
+            'NEUT#': 1.5,
+            'HGB': gender === '女' ? 110 : 120,
+            'PLT': 100
+          }
+          const min = referenceMin[ind.indicator_code]
+          if (min && ind.test_value < min) {
+            trend = '↓'
+          }
+          return `${name}${trend}`
+        })
+        abnormalSummary = abnormalTexts.join(' ')
+      }
+      
+      return {
+        ...report,
+        abnormal_count: abnormalCount,
+        abnormal_summary: abnormalSummary
+      }
+    })
+    
     res.json({
       code: 0,
-      data: reports,
+      data: reportsWithDetails,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
@@ -45,9 +146,72 @@ const getReports = (req, res) => {
       [patientId]
     )
     
+    // 为每个报告添加异常指标信息
+    const reportsWithDetails = reports.map(report => {
+      // 获取报告的指标
+      const indicators = queryAll(
+        'SELECT * FROM indicators WHERE report_id = ?',
+        [report.report_id]
+      )
+      
+      // 获取患者性别用于计算HGB的分级
+      const patientInfo = queryOne('SELECT gender FROM patients WHERE patient_id = ?', [report.patient_id])
+      const gender = patientInfo ? patientInfo.gender : '男'
+      
+      // 重新计算每个指标的level
+      const updatedIndicators = indicators.map(ind => {
+        const calculatedLevel = calculateLevel(ind.indicator_code, ind.test_value, gender)
+        return {
+          ...ind,
+          level: calculatedLevel
+        }
+      })
+      
+      // 计算异常指标
+      const abnormalIndicators = updatedIndicators.filter(ind => ind.level && ind.level !== 'normal')
+      const abnormalCount = abnormalIndicators.length
+      
+      // 生成异常指标摘要
+      let abnormalSummary = ''
+      if (abnormalCount > 0) {
+        // 指标中文名称映射
+        const indicatorNames = {
+          'WBC': '白细胞',
+          'NEUT#': '中性粒细胞',
+          'HGB': '血红蛋白',
+          'PLT': '血小板'
+        }
+        
+        const abnormalTexts = abnormalIndicators.map(ind => {
+          const name = indicatorNames[ind.indicator_code] || ind.indicator_name || ind.indicator_code
+          // 判断趋势（只判断低于正常范围的情况）
+          let trend = ''
+          // 根据分级速查标准判断
+          const referenceMin = {
+            'WBC': 4.0,
+            'NEUT#': 1.5,
+            'HGB': gender === '女' ? 110 : 120,
+            'PLT': 100
+          }
+          const min = referenceMin[ind.indicator_code]
+          if (min && ind.test_value < min) {
+            trend = '↓'
+          }
+          return `${name}${trend}`
+        })
+        abnormalSummary = abnormalTexts.join(' ')
+      }
+      
+      return {
+        ...report,
+        abnormal_count: abnormalCount,
+        abnormal_summary: abnormalSummary
+      }
+    })
+    
     res.json({
       code: 0,
-      data: reports,
+      data: reportsWithDetails,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
@@ -79,11 +243,24 @@ const getReportDetail = (req, res) => {
       [reportId]
     )
     
+    // 获取患者性别用于计算HGB的分级
+    const patientInfo = queryOne('SELECT gender FROM patients WHERE patient_id = ?', [report.patient_id])
+    const gender = patientInfo ? patientInfo.gender : '男'
+    
+    // 重新计算每个指标的level
+    const updatedIndicators = indicators.map(ind => {
+      const calculatedLevel = calculateLevel(ind.indicator_code, ind.test_value, gender)
+      return {
+        ...ind,
+        level: calculatedLevel
+      }
+    })
+    
     res.json({
       code: 0,
       data: {
         report,
-        indicators
+        indicators: updatedIndicators
       },
       timestamp: new Date().toISOString()
     })
@@ -130,10 +307,33 @@ const createReport = (req, res) => {
     else if (levels.includes('danger')) overallLevel = 'danger'
     else if (levels.includes('warning')) overallLevel = 'warning'
     
+    // 计算异常指标
+    const abnormalIndicators = indicators.filter(ind => ind.level && ind.level !== 'normal')
+    const abnormalCount = abnormalIndicators.length
+    
+    // 生成异常指标摘要
+    let abnormalSummary = ''
+    if (abnormalCount > 0) {
+      const abnormalTexts = abnormalIndicators.map(ind => {
+        const name = ind.indicator_name || ind.indicator_code
+        // 判断是上升还是下降
+        let trend = ''
+        if (ind.standard_min && ind.standard_max) {
+          if (ind.test_value < ind.standard_min) {
+            trend = '↓'
+          } else if (ind.test_value > ind.standard_max) {
+            trend = '↑'
+          }
+        }
+        return `${name}${trend}`
+      })
+      abnormalSummary = abnormalTexts.join(' ')
+    }
+    
     // 创建报告
     query(
-      'INSERT INTO reports (report_id, patient_id, test_time, test_hospital, overall_level) VALUES (?, ?, ?, ?, ?)',
-      [reportId, patient_id, test_time, test_hospital || null, overallLevel]
+      'INSERT INTO reports (report_id, patient_id, test_time, test_hospital, overall_level, abnormal_count, abnormal_summary) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [reportId, patient_id, test_time, test_hospital || null, overallLevel, abnormalCount, abnormalSummary]
     )
     
     // 创建指标
@@ -211,10 +411,44 @@ const updateReport = (req, res) => {
       })
     }
     
+    // 计算总体级别和异常指标信息
+    let overallLevel = 'normal'
+    let abnormalCount = 0
+    let abnormalSummary = ''
+    
+    if (indicators && indicators.length > 0) {
+      const levels = indicators.map(i => i.level || 'normal')
+      if (levels.includes('critical')) overallLevel = 'critical'
+      else if (levels.includes('danger')) overallLevel = 'danger'
+      else if (levels.includes('warning')) overallLevel = 'warning'
+      
+      // 计算异常指标
+      const abnormalIndicators = indicators.filter(ind => ind.level && ind.level !== 'normal')
+      abnormalCount = abnormalIndicators.length
+      
+      // 生成异常指标摘要
+      if (abnormalCount > 0) {
+        const abnormalTexts = abnormalIndicators.map(ind => {
+          const name = ind.indicator_name || ind.indicator_code
+          // 判断是上升还是下降
+          let trend = ''
+          if (ind.standard_min && ind.standard_max) {
+            if (ind.test_value < ind.standard_min) {
+              trend = '↓'
+            } else if (ind.test_value > ind.standard_max) {
+              trend = '↑'
+            }
+          }
+          return `${name}${trend}`
+        })
+        abnormalSummary = abnormalTexts.join(' ')
+      }
+    }
+    
     // 更新报告
     query(
-      'UPDATE reports SET test_time = ?, test_hospital = ? WHERE report_id = ?',
-      [test_time, test_hospital || null, reportId]
+      'UPDATE reports SET test_time = ?, test_hospital = ?, overall_level = ?, abnormal_count = ?, abnormal_summary = ? WHERE report_id = ?',
+      [test_time, test_hospital || null, overallLevel, abnormalCount, abnormalSummary, reportId]
     )
     
     // 删除旧指标

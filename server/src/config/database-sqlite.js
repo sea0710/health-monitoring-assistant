@@ -68,6 +68,8 @@ const createTables = () => {
       test_time TEXT NOT NULL,
       test_hospital TEXT,
       overall_level TEXT,
+      abnormal_count INTEGER DEFAULT 0,
+      abnormal_summary TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
     );
@@ -110,6 +112,31 @@ const createTables = () => {
   `
   
   db.run(tables)
+  
+  // 数据库迁移：检查并添加缺失的列
+  migrateDatabase()
+}
+
+const migrateDatabase = () => {
+  try {
+    // 检查 reports 表是否有 abnormal_count 列
+    const reportsInfo = db.exec("PRAGMA table_info(reports)")
+    if (reportsInfo.length > 0) {
+      const columns = reportsInfo[0].values.map(col => col[1])
+      
+      if (!columns.includes('abnormal_count')) {
+        console.log('迁移数据库：添加 reports.abnormal_count 列')
+        db.run('ALTER TABLE reports ADD COLUMN abnormal_count INTEGER DEFAULT 0')
+      }
+      
+      if (!columns.includes('abnormal_summary')) {
+        console.log('迁移数据库：添加 reports.abnormal_summary 列')
+        db.run('ALTER TABLE reports ADD COLUMN abnormal_summary TEXT')
+      }
+    }
+  } catch (error) {
+    console.error('数据库迁移失败:', error)
+  }
 }
 
 const saveDatabase = () => {
