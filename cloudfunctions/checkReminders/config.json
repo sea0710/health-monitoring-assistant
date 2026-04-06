@@ -1,0 +1,1 @@
+{"permissions": {"openapi": ["subscribeMessage.send"], "cloudfunction": []}, "triggers": [{"name": "checkReminders", "type": "timer", "config": "0 * * * * * *"}]}

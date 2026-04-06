@@ -1,63 +1,110 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="handleBack">
-      <text class="back-icon">‹</text>
-      <text class="back-text">返回</text>
-    </view>
-    <text class="title">报告详情</text>
-    <view class="placeholder"></view>
-  </view>
+<view class="container page-enter">
 
-  <view class="report-info-card">
-    <view class="info-row">
-      <text class="info-label">检测日期</text>
-      <text class="info-value">{{report.test_time}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">检测医院</text>
-      <text class="info-value">{{report.test_hospital || '未填写'}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">报告类型</text>
-      <text class="info-value">{{report.report_type}}</text>
-    </view>
-  </view>
-
-  <view class="indicators-section">
-    <text class="section-title">血常规指标</text>
-    
-    <view class="indicator-card {{item.is_abnormal ? 'abnormal' : 'normal'}}" wx:for="{{indicators}}" wx:key="indicator_id">
-      <view class="indicator-main">
-        <view class="indicator-left">
-          <text class="indicator-name">{{item.indicator_name}}</text>
-          <text class="indicator-code">{{item.indicator_code}}</text>
-        </view>
-        <view class="indicator-right">
-          <text class="indicator-value">{{item.test_value}}</text>
-          <text class="indicator-unit">{{item.unit}}</text>
-        </view>
+  <view class="content-area">
+    <view class="info-card animate-fade-in">
+      <view class="info-row">
+        <text class="info-label">检测医院</text>
+        <text class="info-value">{{report.test_hospital || '未填写'}}</text>
       </view>
-      <view class="indicator-footer">
-        <view class="reference-range">
-          <text>参考范围: {{item.reference_min}} - {{item.reference_max}} {{item.unit}}</text>
-        </view>
-        <view class="indicator-status" wx:if="{{item.is_abnormal}}">
-          <text class="status-badge {{item.abnormal_level}}">{{item.abnormal_level}}度抑制</text>
-        </view>
-        <view class="indicator-status" wx:else>
-          <text class="status-badge normal">正常</text>
-        </view>
+      <view class="info-divider"></view>
+      <view class="info-row">
+        <text class="info-label">检测时间</text>
+        <text class="info-value">{{report.test_time}}</text>
+      </view>
+      <view class="info-divider"></view>
+      <view class="info-row">
+        <text class="info-label">患者姓名</text>
+        <text class="info-value">{{report.patient_name || '未知'}}</text>
       </view>
     </view>
+
+    <view class="indicators-card {{maxLevel}}-bg animate-scale-in">
+      <view class="card-header">
+        <view class="card-title-row">
+          <text class="card-icon {{maxLevel}} icon icon-lg">{{levelIcon}}</text>
+          <text class="card-title-text">关键指标</text>
+        </view>
+        <view class="level-badge {{maxLevel}} badge-pulse">{{levelText}}</view>
+      </view>
+      
+      <view class="indicators-list">
+        <view class="indicator-item {{item.is_abnormal ? 'abnormal-item' : ''}} list-item-enter" wx:for="{{coreIndicators}}" wx:key="indicator_id" style="animation-delay: {{(index) * 0.05}}s">
+          <view class="indicator-info">
+            <view class="indicator-left">
+              <text class="indicator-name">{{item.indicator_name}}</text>
+              <text class="indicator-reference">参考：{{item.reference_min}}-{{item.reference_max}} {{item.unit}}</text>
+            </view>
+            <view class="indicator-right">
+              <text class="indicator-value {{item.abnormal_level}}">{{item.test_value}}</text>
+              <view class="indicator-badge {{item.abnormal_level}}">{{item.levelText}}</view>
+            </view>
+          </view>
+          
+          <view class="advice-section" wx:if="{{item.is_abnormal && item.advice}}">
+            <view class="advice-box">
+              <view class="advice-label">处理原则</view>
+              <view class="advice-content">{{item.advice.principle}}</view>
+              <view class="advice-divider" wx:if="{{item.advice.dischargeAdvice}}"></view>
+              <view class="advice-label" wx:if="{{item.advice.dischargeAdvice}}">出院医嘱</view>
+              <view class="discharge-advice" wx:if="{{item.advice.dischargeAdvice}}">{{item.advice.dischargeAdvice}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="reference-link btn-press" wx:if="{{hasAbnormal}}" bindtap="handleViewReference">
+        <text class="reference-link-icon icon icon-sm">↗</text>
+        <text class="reference-link-text">查看完整分级速查</text>
+      </view>
+
+      <view class="legend-section">
+        <text class="legend-title">异常等级说明：</text>
+        <view class="legend-badges">
+          <view class="legend-badge normal">正常</view>
+          <view class="legend-badge warning">Ⅰ度-轻度</view>
+          <view class="legend-badge danger">Ⅱ-Ⅲ度-中度</view>
+          <view class="legend-badge critical">Ⅳ度-重度</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="other-indicators-card" wx:if="{{otherIndicators.length > 0}}">
+      <view class="card-title-row btn-press" bindtap="toggleOtherIndicators">
+        <text class="card-title">其他指标</text>
+        <text class="toggle-icon icon icon-sm">{{showOtherIndicators ? '收起' : '展开'}}</text>
+      </view>
+      
+      <view class="other-indicators-list expand-collapse" wx:if="{{showOtherIndicators}}">
+        <view class="other-indicator-item list-item-enter" wx:for="{{otherIndicators}}" wx:key="indicator_id" style="animation-delay: {{(index) * 0.05}}s">
+          <view class="other-indicator-info">
+            <text class="other-indicator-name">{{item.indicator_name}}</text>
+            <view class="other-indicator-right">
+              <text class="other-indicator-value">{{item.test_value}}</text>
+              <text class="other-indicator-status {{item.is_abnormal ? 'abnormal' : 'normal'}}">{{item.statusText}}</text>
+            </view>
+          </view>
+          <text class="other-indicator-reference">参考范围：{{item.reference_min}}-{{item.reference_max}} {{item.unit}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="disclaimer">
+      本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断
+    </view>
   </view>
 
-  <view class="trend-link" bindtap="handleViewTrend">
-    <text class="trend-text">查看指标趋势图</text>
-    <text class="trend-arrow">›</text>
-  </view>
-
-  <view class="disclaimer-card">
-    <text class="disclaimer-title">温馨提示</text>
-    <text class="disclaimer-content">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断。如有异常请及时就医。</text>
+  <view class="fab-container">
+    <view class="fab-item btn-press" bindtap="handleEdit">
+      <view class="fab-button">
+        <text class="fab-icon icon icon-md">✎</text>
+      </view>
+      <text class="fab-label">编辑</text>
+    </view>
+    <view class="fab-item btn-press" bindtap="handleViewTrend">
+      <view class="fab-button">
+        <text class="fab-icon icon icon-md">📈</text>
+      </view>
+      <text class="fab-label">趋势</text>
+    </view>
   </view>
 </view>

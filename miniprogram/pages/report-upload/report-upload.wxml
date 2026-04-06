@@ -1,29 +1,21 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="handleBack">
-      <text class="back-icon">‹</text>
-      <text class="back-text">返回</text>
-    </view>
-    <text class="title">上传报告</text>
-    <view class="placeholder"></view>
-  </view>
+<view class="container page-enter">
 
   <view class="upload-section" wx:if="{{!ocrResult}}">
-    <view class="upload-area" bindtap="handleChooseImage">
-      <image wx:if="{{previewImage}}" src="{{previewImage}}" class="preview-image" mode="aspectFit"></image>
+    <view class="upload-area card-interactive" bindtap="handleChooseImage">
+      <image wx:if="{{previewImage}}" src="{{previewImage}}" class="preview-image animate-scale-in" mode="aspectFit"></image>
       <view wx:else class="upload-placeholder">
-        <image src="/images/icon-camera.svg" class="upload-icon"></image>
+        <image src="/images/icon-camera.svg" class="upload-icon icon icon-xl breathing"></image>
         <text class="upload-text">点击上传血常规报告</text>
         <text class="upload-hint">支持拍照或从相册选择</text>
       </view>
     </view>
 
-    <button wx:if="{{previewImage}}" class="btn-primary mt-4" bindtap="handleOCR" loading="{{isRecognizing}}">
-      {{isRecognizing ? '识别中...' : '开始识别'}}
+    <button wx:if="{{previewImage && !isRecognizing}}" class="btn-primary mt-4 btn-press" bindtap="handleOCR">
+      开始识别
     </button>
   </view>
 
-  <view class="result-section" wx:if="{{ocrResult}}">
+  <view class="result-section animate-fade-in" wx:if="{{ocrResult}}">
     <view class="result-header">
       <text class="result-title">识别结果</text>
       <text class="edit-hint">可手动修改识别结果</text>
@@ -41,44 +33,42 @@
 
       <view class="input-row">
         <text class="input-label">检测医院</text>
-        <input class="input-field-inline" value="{{hospital}}" bindinput="onHospitalInput" placeholder="请输入医院名称" />
+        <input class="input-field-inline input-glow" value="{{hospital}}" bindinput="onHospitalInput" placeholder="{{hospital ? '' : '可手动输入'}}" />
       </view>
     </view>
 
     <view class="indicators-card">
-      <text class="card-title">血常规指标</text>
+      <text class="card-title">报告指标</text>
+      <text class="card-hint">带 * 为关键指标，必填</text>
       
-      <view class="indicator-item" wx:for="{{indicators}}" wx:key="code">
+      <view class="indicator-item list-item-enter" wx:for="{{indicators}}" wx:key="code" style="animation-delay: {{(index) * 0.02}}s">
         <view class="indicator-header">
-          <text class="indicator-name">{{item.name}}</text>
+          <text class="indicator-name">{{item.name}}<text wx:if="{{item.isKey}}" class="required-mark">*</text></text>
           <text class="indicator-unit">{{item.unit}}</text>
         </view>
         <view class="indicator-input-row">
           <input 
-            class="indicator-value {{item.isAbnormal ? 'abnormal' : ''}}" 
+            class="indicator-value input-glow" 
             type="digit" 
             value="{{item.value}}" 
             bindinput="onIndicatorValueInput"
             data-code="{{item.code}}"
+            placeholder="{{item.isKey ? '必填' : '选填'}}"
           />
-          <text class="reference-range">参考: {{item.referenceMin}}-{{item.referenceMax}}</text>
-        </view>
-        <view class="indicator-status" wx:if="{{item.isAbnormal}}">
-          <text class="status-badge {{item.abnormalLevel}}">{{item.abnormalLevelName}}</text>
         </view>
       </view>
     </view>
 
-    <button class="btn-primary" bindtap="handleSave" loading="{{isSaving}}">
+    <button class="btn-primary btn-press" bindtap="handleSave" loading="{{isSaving}}">
       {{isSaving ? '保存中...' : '保存报告'}}
     </button>
 
-    <button class="btn-secondary mt-3" bindtap="handleReset">
+    <button class="btn-secondary mt-3 btn-press" bindtap="handleReset">
       重新上传
     </button>
   </view>
 
   <view class="disclaimer">
-    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议</text>
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
   </view>
 </view>

@@ -1,38 +1,48 @@
+// app.js
 App({
   globalData: {
     userInfo: null,
     patientInfo: null,
-    token: null,
-    apiBaseUrl: 'https://your-api-domain.com/api'
+    token: null
   },
 
   onLaunch() {
-    this.checkLoginStatus()
+    wx.cloud.init({
+      env: 'cloud1-1gbuq7na412c0c74',
+      traceUser: true
+    })
   },
 
-  onShow() {
+  onError(error) {
+    console.error('[全局错误]', error)
+    const errorInfo = this.parseError(error)
+    this.reportError(errorInfo)
   },
 
-  onHide() {
+  onPageNotFound(res) {
+    console.error('[页面不存在]', res)
+    wx.redirectTo({
+      url: '/pages/home/home'
+    })
   },
 
-  checkLoginStatus() {
-    const token = wx.getStorageSync('token')
-    if (token) {
-      this.globalData.token = token
-      this.getUserInfo()
+  parseError(error) {
+    if (typeof error === 'string') {
+      return {
+        message: error,
+        stack: '',
+        time: new Date().toISOString()
+      }
+    }
+    return {
+      message: error.message || '未知错误',
+      stack: error.stack || '',
+      time: new Date().toISOString()
     }
   },
 
-  getUserInfo() {
-    const userInfo = wx.getStorageSync('userInfo')
-    if (userInfo) {
-      this.globalData.userInfo = userInfo
-    }
-    const patientInfo = wx.getStorageSync('patientInfo')
-    if (patientInfo) {
-      this.globalData.patientInfo = patientInfo
-    }
+  reportError(errorInfo) {
+    console.error('[错误上报]', errorInfo)
   },
 
   setToken(token) {
@@ -40,22 +50,34 @@ App({
     wx.setStorageSync('token', token)
   },
 
-  setUserInfo(userInfo) {
-    this.globalData.userInfo = userInfo
-    wx.setStorageSync('userInfo', userInfo)
+  setUserInfo(user) {
+    this.globalData.userInfo = user
+    wx.setStorageSync('userInfo', user)
   },
 
-  setPatientInfo(patientInfo) {
-    this.globalData.patientInfo = patientInfo
-    wx.setStorageSync('patientInfo', patientInfo)
+  setPatientInfo(patient) {
+    this.globalData.patientInfo = patient
+    wx.setStorageSync('patientInfo', patient)
   },
 
-  clearStorage() {
-    this.globalData.token = null
+  getToken() {
+    return this.globalData.token || wx.getStorageSync('token')
+  },
+
+  getUserInfo() {
+    return this.globalData.userInfo || wx.getStorageSync('userInfo')
+  },
+
+  getPatientInfo() {
+    return this.globalData.patientInfo || wx.getStorageSync('patientInfo')
+  },
+
+  clearUserInfo() {
     this.globalData.userInfo = null
     this.globalData.patientInfo = null
-    wx.removeStorageSync('token')
+    this.globalData.token = null
     wx.removeStorageSync('userInfo')
     wx.removeStorageSync('patientInfo')
+    wx.removeStorageSync('token')
   }
 })

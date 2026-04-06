@@ -1,181 +1,257 @@
+/* ============================================
+   速查页面 - 视觉优化样式
+   设计原则：温暖、可靠、简洁
+   特点：参考信息页面，需要清晰的信息层级
+   ============================================ */
+
+/* ============================================
+   1. 页面容器
+   ============================================ */
 .container {
   min-height: 100vh;
-  padding: 16px;
-  padding-bottom: 100px;
-  background: #f8faf9;
+  background: var(--background);
+  padding: var(--spacing-lg);
+  padding-bottom: 80px;
 }
 
-.header {
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-}
-
-.title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
+/* ============================================
+   2. 指标标签页
+   ============================================ */
 .indicator-tabs {
-  margin-bottom: 16px;
+  background: var(--surface);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tabs-scroll {
-  width: 100%;
   white-space: nowrap;
 }
 
 .tabs-list {
   display: inline-flex;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .tab-item {
-  display: inline-flex;
-  padding: 10px 20px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-full);
+  background: var(--hover);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-base);
+}
+
+.tab-item:active {
+  transform: scale(0.95);
 }
 
 .tab-item.active {
-  background: #14b8a6;
-  border-color: #14b8a6;
+  background: var(--primary-color);
   color: #ffffff;
+  font-weight: var(--font-weight-semibold);
 }
 
+/* ============================================
+   4. 内容区域
+   ============================================ */
 .content-section {
-  margin-bottom: 16px;
+  padding-top: var(--spacing-md);
 }
 
+/* ============================================
+   5. 描述卡片
+   ============================================ */
 .description-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .description-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.description-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: var(--spacing-xs);
 }
 
 .description-text {
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.8;
-}
-
-.grades-section {
-  margin-bottom: 16px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
   display: block;
 }
 
+/* ============================================
+   6. 分级区域
+   ============================================ */
+.grades-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
 .grade-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border-left: 4px solid #22c55e;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
 }
 
-.grade-card.normal {
-  border-left-color: #22c55e;
-}
-
-.grade-card.I {
-  border-left-color: #f59e0b;
-}
-
-.grade-card.II {
-  border-left-color: #f97316;
-}
-
-.grade-card.III {
-  border-left-color: #ea580c;
-}
-
-.grade-card.IV {
-  border-left-color: #dc2626;
+.grade-card:active {
+  transform: scale(0.98);
 }
 
 .grade-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
 }
 
-.grade-level {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
+.grade-level-badge {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.grade-badge-normal {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.grade-badge-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.grade-badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.grade-badge-critical {
+  background: var(--critical-bg);
+  color: var(--critical);
 }
 
 .grade-range {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
-.grade-suggestion {
-  font-size: 14px;
-  color: #374151;
+.grade-description {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  display: block;
 }
 
+.grade-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.grade-principle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.grade-advice {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--divider-color);
+}
+
+.grade-advice-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.grade-advice-text {
+  font-size: var(--font-size-sm);
+  color: #f97316;
+  line-height: var(--line-height-normal);
+}
+
+/* ============================================
+   7. 居家护理建议
+   ============================================ */
 .tips-section {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .tips-list {
-  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
 .tip-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.tip-item:last-child {
-  margin-bottom: 0;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  padding: var(--spacing-sm) 0;
 }
 
 .tip-bullet {
-  color: #14b8a6;
-  margin-right: 8px;
+  color: var(--primary-color);
   font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .tip-text {
-  font-size: 14px;
-  color: #374151;
-  line-height: 1.6;
   flex: 1;
+  line-height: 1.5;
 }
 
+/* ============================================
+   8. 免责声明
+   ============================================ */
 .disclaimer {
-  padding: 16px 0;
+  padding: var(--spacing-lg);
   text-align: center;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  margin: var(--spacing-lg);
 }
 
 .disclaimer-text {
-  font-size: 12px;
-  color: #9ca3af;
-  line-height: 1.6;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-relaxed);
 }

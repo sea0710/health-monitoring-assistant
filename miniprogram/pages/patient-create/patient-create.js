@@ -5,11 +5,6 @@ Page({
   data: {
     name: '',
     gender: '',
-    birthday: '',
-    tumorType: '',
-    treatmentPlan: '',
-    chemotherapyCycles: '',
-    lastChemoEndDate: '',
     isLoading: false
   },
 
@@ -26,18 +21,9 @@ Page({
     if (patient) {
       this.setData({
         name: patient.name || '',
-        gender: patient.gender || '',
-        birthday: patient.birthday || '',
-        tumorType: patient.tumor_type || '',
-        treatmentPlan: patient.treatment_plan || '',
-        chemotherapyCycles: patient.chemotherapy_cycles || '',
-        lastChemoEndDate: patient.last_chemo_end_date || ''
+        gender: patient.gender || ''
       })
     }
-  },
-
-  handleBack() {
-    wx.navigateBack()
   },
 
   onNameInput(e) {
@@ -49,31 +35,16 @@ Page({
     this.setData({ gender })
   },
 
-  onBirthdayChange(e) {
-    this.setData({ birthday: e.detail.value })
-  },
-
-  onTumorTypeInput(e) {
-    this.setData({ tumorType: e.detail.value })
-  },
-
-  onTreatmentPlanInput(e) {
-    this.setData({ treatmentPlan: e.detail.value })
-  },
-
-  onChemotherapyCyclesInput(e) {
-    this.setData({ chemotherapyCycles: e.detail.value })
-  },
-
-  onLastChemoEndDateChange(e) {
-    this.setData({ lastChemoEndDate: e.detail.value })
-  },
-
   async handleSave() {
-    const { name, gender, birthday, tumorType, treatmentPlan, chemotherapyCycles, lastChemoEndDate } = this.data
+    const { name, gender } = this.data
 
     if (!name.trim()) {
       showToast('请输入患者姓名')
+      return
+    }
+
+    if (!gender) {
+      showToast('请选择性别')
       return
     }
 
@@ -82,20 +53,31 @@ Page({
 
     try {
       const app = getApp()
-      const userId = app.globalData.userInfo?.user_id
+      const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
+      const userId = userInfo?.user_id
+
+      if (!userId) {
+        showToast('用户未登录，请重新登录')
+        setTimeout(() => {
+          wx.redirectTo({ url: '/pages/login/login' })
+        }, 1000)
+        return
+      }
 
       const res = await api.patients.create({
+        user_id: userId,
         name: name.trim(),
-        gender,
-        birthday,
-        tumor_type: tumorType,
-        treatment_plan: treatmentPlan,
-        chemotherapy_cycles: chemotherapyCycles ? parseInt(chemotherapyCycles) : null,
-        last_chemo_end_date: lastChemoEndDate
+        gender
       })
 
       if (res.code === 0) {
-        app.setPatientInfo(res.data)
+        // 保存完整的患者信息，包括 name 和 gender
+        const patientInfo = {
+          patient_id: res.data.patient_id,
+          name: name.trim(),
+          gender: gender
+        }
+        app.setPatientInfo(patientInfo)
         showToast('保存成功')
         
         setTimeout(() => {

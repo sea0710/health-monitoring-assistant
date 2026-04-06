@@ -1,232 +1,556 @@
+/* ============================================
+   报告详情页面 - 视觉优化样式
+   设计原则：温暖、可靠、简洁
+   特点：数据展示页面，需要清晰的信息层级
+   对齐设计稿：ReportDetailPage.tsx
+   ============================================ */
+
+/* ============================================
+   1. 页面容器
+   ============================================ */
 .container {
   min-height: 100vh;
-  padding: 16px;
-  padding-bottom: 100px;
-  background: #f8faf9;
+  background: var(--background);
+  padding: var(--spacing-lg);
+  padding-bottom: 120px;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 16px;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  margin-left: -8px;
-}
-
-.back-icon {
-  font-size: 20px;
-  color: #14b8a6;
-  margin-right: 4px;
-}
-
-.back-text {
-  font-size: 14px;
-  color: #14b8a6;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.placeholder {
-  width: 60px;
-}
-
-.report-info-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+/* ============================================
+   2. 报告基础信息卡片
+   ============================================ */
+.info-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: none;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
+  padding: var(--spacing-md) 0;
+}
+
+.info-row:first-child {
+  padding-top: 0;
 }
 
 .info-row:last-child {
-  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .info-label {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 .info-value {
-  font-size: 14px;
-  color: #1f2937;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
 }
 
-.indicators-section {
-  margin-bottom: 16px;
+.info-divider {
+  height: 1px;
+  background: var(--divider-color);
 }
 
-.section-title {
+/* ============================================
+   4. 指标详情卡片
+   ============================================ */
+.indicators-card {
+  border-radius: 20px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: none;
+}
+
+.normal-bg {
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.warning-bg {
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.danger-bg {
+  background: rgba(249, 115, 22, 0.05);
+}
+
+.critical-bg {
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+}
+
+.card-icon {
   font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
-  display: block;
+  margin-right: var(--spacing-sm);
+  font-weight: bold;
 }
 
-.indicator-card {
-  background: #ffffff;
+.card-icon.normal {
+  color: var(--success);
+}
+
+.card-icon.warning {
+  color: var(--warning);
+}
+
+.card-icon.danger {
+  color: #f97316;
+}
+
+.card-icon.critical {
+  color: var(--critical);
+}
+
+.card-title-text {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.level-badge {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid;
+}
+
+.level-badge.normal {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.level-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.level-badge.danger {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.level-badge.critical {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--critical);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+/* ============================================
+   5. 指标列表
+   ============================================ */
+.indicators-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ============================================
+   6. 指标项 - 独立卡片样式
+   ============================================ */
+.indicator-item {
+  padding: var(--spacing-md);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border-left: 4px solid #22c55e;
+  background: rgba(255, 255, 255, 0.4);
+  transition: all var(--transition-base);
 }
 
-.indicator-card.abnormal {
-  border-left-color: #f59e0b;
+.indicator-item.abnormal-item {
+  background: rgba(255, 255, 255, 0.6);
 }
 
-.indicator-main {
+.indicator-info {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
 }
 
 .indicator-left {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .indicator-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 4px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
 }
 
-.indicator-code {
-  font-size: 12px;
-  color: #9ca3af;
+.indicator-reference {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 
 .indicator-right {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 .indicator-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.indicator-card.abnormal .indicator-value {
-  color: #d97706;
-}
-
-.indicator-unit {
-  font-size: 12px;
-  color: #6b7280;
-  margin-left: 4px;
-}
-
-.indicator-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.reference-range {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-.indicator-status {
-  display: flex;
-  align-items: center;
-}
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-badge.normal {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
-}
-
-.status-badge.I {
-  background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
-}
-
-.status-badge.II {
-  background: rgba(249, 115, 22, 0.1);
-  color: #ea580c;
-}
-
-.status-badge.III {
-  background: rgba(234, 88, 12, 0.1);
-  color: #c2410c;
-}
-
-.status-badge.IV {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
-
-.trend-link {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.trend-text {
-  font-size: 14px;
-  color: #14b8a6;
-  font-weight: 500;
-}
-
-.trend-arrow {
   font-size: 18px;
-  color: #14b8a6;
+  font-weight: var(--font-weight-bold);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  line-height: 1.2;
 }
 
-.disclaimer-card {
-  background: rgba(245, 158, 11, 0.05);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  border-radius: 12px;
-  padding: 16px;
+.indicator-value.normal {
+  color: var(--success);
 }
 
-.disclaimer-title {
+.indicator-value.warning {
+  color: var(--warning);
+}
+
+.indicator-value.danger {
+  color: #f97316;
+}
+
+.indicator-value.critical {
+  color: var(--critical);
+}
+
+.indicator-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid;
+}
+
+.indicator-badge.normal {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.indicator-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.indicator-badge.danger {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.indicator-badge.critical {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--critical);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+/* ============================================
+   7. 处理建议区域
+   ============================================ */
+.advice-section {
+  margin-top: var(--spacing-sm);
+}
+
+.advice-box {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.advice-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.advice-content {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.advice-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.discharge-advice {
+  font-size: var(--font-size-sm);
+  color: #f97316;
+  line-height: 1.6;
+}
+
+/* ============================================
+   8. 参考链接
+   ============================================ */
+.reference-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+  transition: opacity var(--transition-base);
+}
+
+.reference-link:active {
+  opacity: 0.7;
+}
+
+.reference-link-icon {
   font-size: 14px;
-  font-weight: 600;
-  color: #d97706;
-  margin-bottom: 8px;
+  color: var(--primary-color);
+}
+
+.reference-link-text {
+  font-size: var(--font-size-xs);
+  color: var(--primary-color);
+}
+
+/* ============================================
+   9. 图例说明
+   ============================================ */
+.legend-section {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.legend-title {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
   display: block;
 }
 
-.disclaimer-content {
-  font-size: 12px;
-  color: #92400e;
-  line-height: 1.6;
+.legend-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.legend-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid;
+}
+
+.legend-badge.normal {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.legend-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.legend-badge.danger {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.legend-badge.critical {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--critical);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+/* ============================================
+   9.1 其他指标模块
+   ============================================ */
+.other-indicators-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+}
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.toggle-icon {
+  font-size: var(--font-size-xs);
+  color: var(--primary-color);
+  padding: 4px 12px;
+  background: var(--primary-50);
+  border-radius: var(--radius-full);
+}
+
+.other-indicators-list {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--divider-color);
+}
+
+.other-indicator-item {
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.other-indicator-item:last-child {
+  border-bottom: none;
+}
+
+.other-indicator-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.other-indicator-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.other-indicator-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.other-indicator-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.other-indicator-status {
+  font-size: var(--font-size-xs);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.other-indicator-status.normal {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.other-indicator-status.abnormal {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.other-indicator-reference {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* ============================================
+   10. 免责声明
+   ============================================ */
+.disclaimer {
+  padding: var(--spacing-lg);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-relaxed);
+}
+
+/* ============================================
+   11. 悬浮按钮
+   ============================================ */
+.fab-container {
+  position: fixed;
+  bottom: 24px;
+  right: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 20px;
+  z-index: 50;
+}
+
+.fab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fab-button {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-base);
+}
+
+.fab-button:active {
+  transform: scale(0.95);
+}
+
+.fab-icon {
+  font-size: 22px;
+}
+
+.fab-label {
+  margin-top: 4px;
+  padding: 2px 10px;
+  background: var(--primary-color);
+  color: white;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
 }

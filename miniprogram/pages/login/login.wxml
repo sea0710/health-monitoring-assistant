@@ -1,7 +1,7 @@
-<view class="container">
-  <view class="logo-section">
-    <view class="logo-icon">
-      <image src="/images/logo.svg" class="logo-image" mode="aspectFit"></image>
+<view class="container page-enter">
+  <view class="logo-section animate-fade-in">
+    <view class="logo-icon floating">
+      <image src="/images/logo.svg" class="logo-image icon icon-xl" mode="aspectFit"></image>
     </view>
     <text class="app-title">愈见</text>
     <text class="app-subtitle">血常规监测助手</text>
@@ -11,7 +11,7 @@
     <view class="input-group">
       <text class="input-label">手机号</text>
       <input 
-        class="input-field" 
+        class="input-field input-glow" 
         type="number" 
         placeholder="请输入11位手机号" 
         maxlength="11"
@@ -24,22 +24,22 @@
       <text class="input-label">密码</text>
       <view class="password-input-wrapper">
         <input 
-          class="input-field password-input" 
+          class="input-field password-input input-glow" 
           type="{{showPassword ? 'text' : 'password'}}" 
           placeholder="请输入密码（至少6位）"
           value="{{password}}"
           bindinput="onPasswordInput"
         />
-        <view class="password-toggle" bindtap="togglePassword">
+        <view class="password-toggle btn-press" bindtap="togglePassword">
           <image 
             src="{{showPassword ? '/images/eye-off.svg' : '/images/eye.svg'}}" 
-            class="toggle-icon"
+            class="toggle-icon icon icon-sm"
           ></image>
         </view>
       </view>
     </view>
 
-    <button class="btn-primary btn-login" bindtap="handleLogin" loading="{{isLoading}}">
+    <button class="btn-primary btn-login btn-press" bindtap="handleLogin" loading="{{isLoading}}">
       {{isLoading ? '请稍候...' : '登录 / 注册'}}
     </button>
 

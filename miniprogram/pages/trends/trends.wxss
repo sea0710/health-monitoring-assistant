@@ -1,49 +1,24 @@
+/* ============================================
+   趋势页面 - 视觉优化样式
+   设计原则：温暖、可靠、简洁
+   特点：数据可视化页面，需要清晰的图表展示
+   ============================================ */
+
+/* ============================================
+   1. 页面容器
+   ============================================ */
 .container {
   min-height: 100vh;
-  padding: 16px;
+  padding: var(--spacing-lg);
   padding-bottom: 100px;
-  background: #f8faf9;
+  background: var(--background);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 16px;
-}
-
-.back-btn {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  margin-left: -8px;
-}
-
-.back-icon {
-  font-size: 20px;
-  color: #14b8a6;
-  margin-right: 4px;
-}
-
-.back-text {
-  font-size: 14px;
-  color: #14b8a6;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.placeholder {
-  width: 60px;
-}
-
+/* ============================================
+   2. 指标选择器
+   ============================================ */
 .indicator-selector {
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .selector-scroll {
@@ -53,48 +28,59 @@
 
 .selector-list {
   display: inline-flex;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .selector-item {
   display: inline-flex;
-  padding: 8px 16px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  font-size: 14px;
-  color: #6b7280;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-base);
+}
+
+.selector-item:active {
+  transform: scale(0.95);
 }
 
 .selector-item.active {
-  background: #14b8a6;
-  border-color: #14b8a6;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
   color: #ffffff;
+  font-weight: var(--font-weight-semibold);
 }
 
+/* ============================================
+   4. 图表区域
+   ============================================ */
 .chart-section {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
 }
 
 .chart-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .chart-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
 }
 
 .chart-period {
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 
 .chart-container {
@@ -102,59 +88,68 @@
   height: 250px;
 }
 
+/* ============================================
+   5. 空状态
+   ============================================ */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 0;
-  background: #ffffff;
-  border-radius: 16px;
-  margin-bottom: 16px;
+  padding: 48px var(--spacing-lg);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-light);
 }
 
 .empty-icon {
   width: 48px;
   height: 48px;
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-lg);
   opacity: 0.4;
 }
 
 .empty-title {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
 }
 
 .empty-desc {
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 
+/* ============================================
+   6. 数据表格
+   ============================================ */
 .data-table {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
 }
 
 .table-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
   display: block;
 }
 
 .table-header {
   display: flex;
-  padding: 12px 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--divider-color);
 }
 
 .table-row {
   display: flex;
-  padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--divider-color);
 }
 
 .table-row:last-child {
@@ -163,13 +158,13 @@
 
 .table-cell {
   flex: 1;
-  font-size: 14px;
-  color: #374151;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
 }
 
 .table-header .table-cell {
-  font-weight: 500;
-  color: #6b7280;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
 }
 
 .status-dot {
@@ -177,23 +172,68 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 .status-dot.normal {
-  background: #22c55e;
+  background: #10b981;
 }
 
-.status-dot.abnormal {
-  background: #f59e0b;
+.status-dot.warning {
+  background: #fbbf24;
 }
 
+.status-dot.danger2 {
+  background: #f97316;
+}
+
+.status-dot.danger3 {
+  background: #ef4444;
+}
+
+.status-dot.critical {
+  background: #991b1b;
+}
+
+.status-text {
+  font-size: var(--font-size-xs);
+  vertical-align: middle;
+}
+
+.status-text.normal {
+  color: #10b981;
+}
+
+.status-text.warning {
+  color: #d97706;
+}
+
+.status-text.danger2 {
+  color: #ea580c;
+}
+
+.status-text.danger3 {
+  color: #dc2626;
+}
+
+.status-text.critical {
+  color: #991b1b;
+}
+
+/* ============================================
+   7. 免责声明
+   ============================================ */
 .disclaimer {
-  padding: 16px 0;
+  padding: var(--spacing-lg);
   text-align: center;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  margin: var(--spacing-lg);
 }
 
 .disclaimer-text {
-  font-size: 12px;
-  color: #9ca3af;
-  line-height: 1.6;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-relaxed);
 }

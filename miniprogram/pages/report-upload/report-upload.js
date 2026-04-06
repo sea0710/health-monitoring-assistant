@@ -2,9 +2,12 @@ const { api } = require('../../utils/api')
 const { showLoading, hideLoading, showToast } = require('../../utils/util')
 const { INDICATORS } = require('../../utils/constants')
 
+const KEY_INDICATORS = ['WBC', 'HGB', 'PLT', 'NEUT#']
+
 Page({
   data: {
     previewImage: '',
+    fileID: '',
     isRecognizing: false,
     isSaving: false,
     ocrResult: null,
@@ -24,11 +27,7 @@ Page({
       name: ind.name,
       unit: ind.unit,
       value: '',
-      referenceMin: ind.min,
-      referenceMax: ind.max,
-      isAbnormal: false,
-      abnormalLevel: '',
-      abnormalLevelName: ''
+      isKey: KEY_INDICATORS.includes(ind.code)
     }))
     this.setData({ indicators })
   },
@@ -40,20 +39,24 @@ Page({
     return `${year}-${month}-${day}`
   },
 
-  handleBack() {
-    wx.navigateBack()
-  },
-
-  handleChooseImage() {
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['album', 'camera'],
-      success: (res) => {
-        const tempFilePath = res.tempFiles[0].tempFilePath
-        this.setData({ previewImage: tempFilePath })
-      }
-    })
+  async handleChooseImage() {
+    try {
+      const res = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera']
+      })
+      
+      const tempFilePath = res.tempFiles[0].tempFilePath
+      this.setData({ 
+        previewImage: tempFilePath,
+        fileID: ''
+      })
+      
+      await this.handleOCR()
+    } catch (error) {
+      console.log('用户取消选择图片')
+    }
   },
 
   async handleOCR() {
@@ -65,66 +68,114 @@ Page({
     }
 
     this.setData({ isRecognizing: true })
-    showLoading('识别中...')
+    showLoading('识别中，请稍等')
 
     try {
-      const res = await api.ocr.recognize(previewImage)
+      const ext = previewImage.split('.').pop() || 'jpg'
+      const cloudPath = `reports/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${ext}`
+      
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: previewImage
+      })
+      
+      if (!uploadRes.fileID) {
+        throw new Error('上传失败')
+      }
+      
+      this.setData({ fileID: uploadRes.fileID })
+      
+      const res = await api.ocr.recognize(uploadRes.fileID)
       
       if (res.code === 0) {
+        hideLoading()
         this.parseOCRResult(res.data)
         showToast('识别成功')
       } else {
+        hideLoading()
         showToast(res.message || '识别失败')
       }
     } catch (error) {
       console.error('OCR识别失败:', error)
+      hideLoading()
       showToast('识别失败，请重试')
     } finally {
-      hideLoading()
       this.setData({ isRecognizing: false })
     }
   },
 
   parseOCRResult(data) {
-    const indicators = this.data.indicators.map(ind => {
-      let value = ''
-      switch (ind.code) {
-        case 'WBC':
-          value = data.wbc_value || ''
-          break
-        case 'NEUT#':
-          value = data.neut_abs_value || ''
-          break
-        case 'NEUT%':
-          value = data.neut_percent_value || ''
-          break
-        case 'RBC':
-          value = data.rbc_value || ''
-          break
-        case 'HGB':
-          value = data.hgb_value || ''
-          break
-        case 'PLT':
-          value = data.plt_value || ''
-          break
+    if (data.indicators && data.indicators.length > 0) {
+      const indicatorsMap = {}
+      data.indicators.forEach(ind => {
+        indicatorsMap[ind.indicator_code] = ind
+      })
+      
+      const indicators = this.data.indicators.map(ind => {
+        const ocrInd = indicatorsMap[ind.code]
+        if (ocrInd) {
+          const value = String(ocrInd.test_value)
+          return {
+            ...ind,
+            value
+          }
+        }
+        return ind
+      })
+      
+      this.setData({
+        ocrResult: data,
+        testTime: data.test_time || this.formatDate(new Date()),
+        hospital: data.test_hospital || '',
+        indicators
+      })
+    } else {
+      // OCR字段名映射
+      const fieldMapping = {
+        'WBC': 'wbc_value',
+        'NEUT#': 'neut_abs_value',
+        'NEUT%': 'neut_percent_value',
+        'LYMPH#': 'lymph_abs_value',
+        'LYMPH%': 'lymph_percent_value',
+        'MONO#': 'mono_abs_value',
+        'MONO%': 'mono_percent_value',
+        'EOS#': 'eos_abs_value',
+        'EOS%': 'eos_percent_value',
+        'BASO#': 'baso_abs_value',
+        'BASO%': 'baso_percent_value',
+        'RBC': 'rbc_value',
+        'HGB': 'hgb_value',
+        'HCT': 'hct_value',
+        'MCV': 'mcv_value',
+        'MCH': 'mch_value',
+        'MCHC': 'mchc_value',
+        'RDW-SD': 'rdw_sd_value',
+        'RDW-CV': 'rdw_cv_value',
+        'PLT': 'plt_value',
+        'PDW': 'pdw_value',
+        'MPV': 'mpv_value',
+        'P-LCR': 'p_lcr_value',
+        'TCT': 'tct_value',
+        'CRP': 'crp_value'
       }
       
-      const numValue = parseFloat(value)
-      const isAbnormal = !isNaN(numValue) && (numValue < ind.referenceMin || numValue > ind.referenceMax)
-      
-      return {
-        ...ind,
-        value,
-        isAbnormal
-      }
-    })
+      const indicators = this.data.indicators.map(ind => {
+        const fieldName = fieldMapping[ind.code]
+        const value = fieldName && data[fieldName] ? String(data[fieldName]) : ''
+        
+        return {
+          ...ind,
+          value
+        }
+      })
 
-    this.setData({
-      ocrResult: data,
-      testTime: data.test_time || this.formatDate(new Date()),
-      hospital: data.hospital || '',
-      indicators
-    })
+      this.setData({
+        ocrResult: data,
+        testTime: data.test_time || this.formatDate(new Date()),
+        hospital: data.test_hospital || '',
+        indicators
+      })
+    }
   },
 
   onTestTimeChange(e) {
@@ -141,9 +192,7 @@ Page({
     
     const indicators = this.data.indicators.map(ind => {
       if (ind.code === code) {
-        const numValue = parseFloat(value)
-        const isAbnormal = !isNaN(numValue) && (numValue < ind.referenceMin || numValue > ind.referenceMax)
-        return { ...ind, value, isAbnormal }
+        return { ...ind, value }
       }
       return ind
     })
@@ -152,44 +201,80 @@ Page({
   },
 
   async handleSave() {
-    const { testTime, hospital, indicators, previewImage } = this.data
+    const { testTime, hospital, indicators, previewImage, fileID } = this.data
     const app = getApp()
     const patient = app.globalData.patientInfo || wx.getStorageSync('patientInfo')
+    const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
 
     if (!patient) {
       showToast('请先创建患者档案')
       return
     }
 
-    const validIndicators = indicators.filter(ind => ind.value)
-    if (validIndicators.length === 0) {
-      showToast('请至少填写一项指标')
+    const patientId = patient.patient_id || patient._id
+    if (!patientId) {
+      showToast('患者信息不完整，请重新创建档案')
       return
     }
+
+    if (!userInfo || !userInfo.user_id) {
+      showToast('用户信息不完整，请重新登录')
+      return
+    }
+
+    // 检查4个关键指标是否都已填写
+    const KEY_INDICATORS = ['WBC', 'HGB', 'PLT', 'NEUT#']
+    const keyIndicatorsData = indicators.filter(ind => KEY_INDICATORS.includes(ind.code))
+    const missingKeyIndicators = keyIndicatorsData.filter(ind => !ind.value)
+    
+    if (missingKeyIndicators.length > 0) {
+      const missingNames = missingKeyIndicators.map(ind => {
+        const config = INDICATORS.find(i => i.code === ind.code)
+        return config?.name || ind.code
+      }).join('、')
+      showToast(`请填写关键指标：${missingNames}`)
+      return
+    }
+
+    // 过滤出有值的指标
+    const validIndicators = indicators.filter(ind => ind.value)
 
     this.setData({ isSaving: true })
     showLoading('保存中...')
 
     try {
-      const res = await api.reports.create({
-        patient_id: patient.patient_id,
+      const reportData = {
+        user_id: userInfo.user_id,
+        patient_id: patientId,
+        report_type: '血常规',
         test_time: testTime,
         test_hospital: hospital,
-        raw_image_url: previewImage,
+        raw_image_url: fileID || previewImage,
         indicators: validIndicators.map(ind => ({
           indicator_code: ind.code,
           indicator_name: ind.name,
           test_value: parseFloat(ind.value),
-          reference_min: ind.referenceMin,
-          reference_max: ind.referenceMax,
-          unit: ind.unit
+          reference_min: INDICATORS.find(i => i.code === ind.code)?.min || 0,
+          reference_max: INDICATORS.find(i => i.code === ind.code)?.max || 0,
+          unit: ind.unit,
+          is_abnormal: false,
+          abnormal_level: 'normal'
         }))
-      })
+      }
+      
+      console.log('保存报告 - 请求数据:', reportData)
+      
+      const res = await api.reports.create(reportData)
+      
+      console.log('保存报告 - 响应:', res)
 
       if (res.code === 0) {
         showToast('保存成功')
+        const reportId = res.data.report_id
         setTimeout(() => {
-          wx.navigateBack()
+          wx.redirectTo({
+            url: `/pages/report-detail/report-detail?id=${reportId}`
+          })
         }, 1000)
       } else {
         showToast(res.message || '保存失败')
@@ -206,6 +291,7 @@ Page({
   handleReset() {
     this.setData({
       previewImage: '',
+      fileID: '',
       ocrResult: null,
       hospital: ''
     })

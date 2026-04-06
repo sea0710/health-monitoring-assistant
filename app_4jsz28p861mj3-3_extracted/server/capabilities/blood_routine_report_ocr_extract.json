@@ -1,0 +1,143 @@
+{
+  "id": "blood_routine_report_ocr_extract",
+  "pluginKey": "@official-plugins/ai-image-to-json",
+  "pluginVersion": "1.0.6",
+  "name": "血常规报告OCR识别提取",
+  "description": "从血常规报告图片中提取结构化的血常规指标数据，包含检测信息和核心检验指标",
+  "icon": "",
+  "paramsSchema": {
+    "type": "object",
+    "properties": {
+      "report_image": {
+        "description": "血常规报告图片",
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "format": "plugin-image-url"
+      }
+    },
+    "required": [
+      "report_image"
+    ]
+  },
+  "formValue": {
+    "jsonStructure": [
+      {
+        "name": "hospital",
+        "paramDescription": "检测医院名称",
+        "paramType": "String"
+      },
+      {
+        "paramDescription": "检测时间",
+        "paramType": "String",
+        "name": "test_time"
+      },
+      {
+        "paramDescription": "患者姓名",
+        "paramType": "String",
+        "name": "patient_name"
+      },
+      {
+        "name": "wbc_value",
+        "paramDescription": "白细胞计数(WBC)检测值",
+        "paramType": "String"
+      },
+      {
+        "name": "wbc_reference",
+        "paramDescription": "白细胞计数(WBC)参考值范围",
+        "paramType": "String"
+      },
+      {
+        "name": "wbc_unit",
+        "paramDescription": "白细胞计数(WBC)单位",
+        "paramType": "String"
+      },
+      {
+        "name": "neut_abs_value",
+        "paramDescription": "中性粒细胞绝对值(NEUT#)检测值",
+        "paramType": "String"
+      },
+      {
+        "name": "neut_abs_reference",
+        "paramDescription": "中性粒细胞绝对值(NEUT#)参考值范围",
+        "paramType": "String"
+      },
+      {
+        "paramDescription": "中性粒细胞绝对值(NEUT#)单位",
+        "paramType": "String",
+        "name": "neut_abs_unit"
+      },
+      {
+        "name": "neut_percent_value",
+        "paramDescription": "中性粒细胞百分比(NEUT%)检测值",
+        "paramType": "String"
+      },
+      {
+        "name": "neut_percent_reference",
+        "paramDescription": "中性粒细胞百分比(NEUT%)参考值范围",
+        "paramType": "String"
+      },
+      {
+        "paramType": "String",
+        "name": "neut_percent_unit",
+        "paramDescription": "中性粒细胞百分比(NEUT%)单位"
+      },
+      {
+        "name": "rbc_value",
+        "paramDescription": "红细胞计数(RBC)检测值",
+        "paramType": "String"
+      },
+      {
+        "paramDescription": "红细胞计数(RBC)参考值范围",
+        "paramType": "String",
+        "name": "rbc_reference"
+      },
+      {
+        "name": "rbc_unit",
+        "paramDescription": "红细胞计数(RBC)单位",
+        "paramType": "String"
+      },
+      {
+        "name": "hgb_value",
+        "paramDescription": "血红蛋白(HGB)检测值",
+        "paramType": "String"
+      },
+      {
+        "name": "hgb_reference",
+        "paramDescription": "血红蛋白(HGB)参考值范围",
+        "paramType": "String"
+      },
+      {
+        "name": "hgb_unit",
+        "paramDescription": "血红蛋白(HGB)单位",
+        "paramType": "String"
+      },
+      {
+        "name": "plt_value",
+        "paramDescription": "血小板计数(PLT)检测值",
+        "paramType": "String"
+      },
+      {
+        "name": "plt_reference",
+        "paramDescription": "血小板计数(PLT)参考值范围",
+        "paramType": "String"
+      },
+      {
+        "name": "plt_unit",
+        "paramDescription": "血小板计数(PLT)单位",
+        "paramType": "String"
+      }
+    ],
+    "modelID": "88",
+    "modelParams": {
+      "temperature": 0.5,
+      "maxTokens": 8192
+    },
+    "images": "{{input.report_image}}",
+    "prompt": "你是专业的医疗检验报告OCR识别专家，擅长从血常规检验报告图片中准确提取结构化数据。\n\n请仔细识别图片中的血常规报告内容，按照要求提取以下信息，确保提取准确，未找到的信息填空字符串。\n\n提取要求：\n1. 所有数值请保留原始精度\n2. 参考值范围如实提取原文内容\n3. 单位如实提取，无单位则留空\n4. 日期时间按原始格式提取"
+  },
+  "createdAt": 1774424691151,
+  "updatedAt": 1774424691151,
+  "createdBy": 6874762265522913284
+}

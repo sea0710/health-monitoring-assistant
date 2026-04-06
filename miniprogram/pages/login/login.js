@@ -16,8 +16,8 @@ Page({
   },
 
   checkExistingLogin() {
-    const token = wx.getStorageSync('token')
-    if (token) {
+    const userInfo = wx.getStorageSync('userInfo')
+    if (userInfo) {
       this.navigateToHome()
     }
   },
@@ -80,13 +80,34 @@ Page({
 
   handleLoginSuccess(data) {
     const app = getApp()
-    app.setToken(data.token)
-    app.setUserInfo(data.user)
+    // 由于使用云函数，不需要 token，直接存储用户信息
+    app.setUserInfo({
+      user_id: data.user_id,
+      phone: data.phone
+    })
 
-    if (data.patient) {
-      app.setPatientInfo(data.patient)
-      this.navigateToHome()
+    // 检查是否是新用户
+    if (data.is_new_user) {
+      this.navigateToPatientCreate()
     } else {
+      // 老用户，尝试获取患者信息
+      this.checkPatientInfo(data.user_id)
+    }
+  },
+
+  async checkPatientInfo(userId) {
+    try {
+      const { api } = require('../../utils/api')
+      const res = await api.patients.get(userId)
+      if (res.data) {
+        const app = getApp()
+        app.setPatientInfo(res.data)
+        this.navigateToHome()
+      } else {
+        this.navigateToPatientCreate()
+      }
+    } catch (error) {
+      console.error('获取患者信息失败:', error)
       this.navigateToPatientCreate()
     }
   },

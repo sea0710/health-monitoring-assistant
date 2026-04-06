@@ -1,12 +1,4 @@
-<view class="container">
-  <view class="header">
-    <view class="back-btn" bindtap="handleBack">
-      <text class="back-icon">‹</text>
-      <text class="back-text">返回</text>
-    </view>
-    <text class="title">指标趋势</text>
-    <view class="placeholder"></view>
-  </view>
+<view class="container page-enter">
 
   <view class="indicator-selector">
     <scroll-view scroll-x class="selector-scroll">
@@ -24,10 +16,10 @@
     </scroll-view>
   </view>
 
-  <view class="chart-section" wx:if="{{trendData.length > 0}}">
+  <view class="chart-section" wx:if="{{chartData.length > 0}}">
     <view class="chart-info">
       <text class="chart-title">{{currentIndicatorName}}趋势</text>
-      <text class="chart-period">近{{trendData.length}}次检测</text>
+      <text class="chart-period">近{{chartData.length}}次检测</text>
     </view>
     
     <view class="chart-container">
@@ -36,12 +28,11 @@
   </view>
 
   <view class="empty-state" wx:else>
-    <image src="/images/icon-chart-empty.svg" class="empty-icon"></image>
     <text class="empty-title">暂无趋势数据</text>
     <text class="empty-desc">上传更多报告后可查看趋势图</text>
   </view>
 
-  <view class="data-table" wx:if="{{trendData.length > 0}}">
+  <view class="data-table" wx:if="{{chartData.length > 0}}">
     <text class="table-title">历史数据</text>
     
     <view class="table-header">
@@ -50,16 +41,16 @@
       <text class="table-cell">状态</text>
     </view>
     
-    <view class="table-row" wx:for="{{trendData}}" wx:key="date">
+    <view class="table-row" wx:for="{{chartData}}" wx:key="date">
       <text class="table-cell">{{item.date}}</text>
-      <text class="table-cell">{{item[currentIndicator] || '-'}}</text>
+      <text class="table-cell">{{item.value}}</text>
       <text class="table-cell">
-        <text class="status-dot {{item.isAbnormal ? 'abnormal' : 'normal'}}"></text>
+        <text class="status-text {{item.level}}">{{item.levelText}}</text>
       </text>
     </view>
   </view>
 
   <view class="disclaimer">
-    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议</text>
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
   </view>
 </view>

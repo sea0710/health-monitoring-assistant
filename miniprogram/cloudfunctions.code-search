@@ -1,0 +1,14 @@
+# Query: cloudfunctions
+# ContextLines: 1
+
+2 results - 2 files
+
+云开发部署指南.md:
+  53  
+  54: 1. 在开发者工具中，找到左侧目录树中的`cloudfunctions`文件夹
+  55  2. 右键点击每个云函数文件夹（login、ocr、report）
+
+miniprogram/project.config.json:
+  2    "miniprogramRoot": "miniprogram/",
+  3:   "cloudfunctionRoot": "cloudfunctions/",
+  4    "setting": {

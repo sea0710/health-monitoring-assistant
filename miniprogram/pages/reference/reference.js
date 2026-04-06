@@ -1,38 +1,26 @@
-const { api } = require('../../utils/api')
-const { showLoading, hideLoading } = require('../../utils/util')
+const { REFERENCE_DATA, DISCLAIMER_TEXT } = require('../../utils/constants')
 
 Page({
   data: {
     references: [],
-    currentCode: 'WBC',
-    currentReference: null
+    currentCode: 'ANC',
+    currentReference: null,
+    disclaimer: DISCLAIMER_TEXT
   },
 
   onLoad() {
     this.loadReferences()
   },
 
-  async loadReferences() {
-    showLoading('加载中...')
+  loadReferences() {
+    const references = REFERENCE_DATA
+    this.setData({ references })
     
-    try {
-      const res = await api.references.get()
-      
-      if (res.code === 0) {
-        const references = res.data || []
-        this.setData({ references })
-        
-        if (references.length > 0) {
-          this.setData({
-            currentCode: references[0].code,
-            currentReference: references[0]
-          })
-        }
-      }
-    } catch (error) {
-      console.error('加载分级速查数据失败:', error)
-    } finally {
-      hideLoading()
+    if (references.length > 0) {
+      this.setData({
+        currentCode: references[0].code,
+        currentReference: references[0]
+      })
     }
   },
 
@@ -43,6 +31,22 @@ Page({
     this.setData({
       currentCode: code,
       currentReference: reference
+    })
+  },
+
+  handleGradeClick(e) {
+    const grade = e.currentTarget.dataset.grade
+    // 显示分级详情弹窗
+    this.setData({
+      showGradeDetail: true,
+      selectedGrade: grade
+    })
+  },
+
+  closeGradeDetail() {
+    this.setData({
+      showGradeDetail: false,
+      selectedGrade: null
     })
   }
 })

@@ -1,0 +1,54 @@
+<view class="container page-enter">
+
+  <view class="content-area">
+    <view class="form-card">
+      <view class="input-row">
+        <text class="input-label">检测日期</text>
+        <picker mode="date" value="{{testTime}}" bindchange="onTestTimeChange">
+          <view class="picker-field">
+            <text class="picker-value">{{testTime}}</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="input-row">
+        <text class="input-label">检测医院</text>
+        <input class="input-field-inline" value="{{hospital}}" bindinput="onHospitalInput" placeholder="选填，可手动输入" />
+      </view>
+    </view>
+
+    <view class="indicators-card">
+      <text class="card-title">报告指标</text>
+      <text class="card-hint">带 * 为关键指标，必填</text>
+      
+      <view class="indicator-item" wx:for="{{indicators}}" wx:key="_id">
+        <view class="indicator-header">
+          <text class="indicator-name">{{item.indicator_name}}<text wx:if="{{item.isKey}}" class="required-mark">*</text></text>
+          <text class="indicator-unit">{{item.unit}}</text>
+        </view>
+        <view class="indicator-input-row">
+          <input 
+            class="indicator-value {{item.is_abnormal ? 'abnormal' : ''}}" 
+            type="digit" 
+            value="{{item.test_value}}" 
+            bindinput="onIndicatorValueInput"
+            data-id="{{item._id}}"
+            placeholder="{{item.isKey ? '必填' : '选填'}}"
+          />
+          <text class="reference-range">参考: {{item.reference_min}}-{{item.reference_max}}</text>
+        </view>
+        <view class="indicator-status" wx:if="{{item.is_abnormal}}">
+          <text class="status-badge {{item.abnormal_level}}">{{item.levelText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button class="btn-primary" bindtap="handleSave" loading="{{isSaving}}">
+      {{isSaving ? '保存中...' : '保存修改'}}
+    </button>
+
+    <view class="disclaimer">
+      <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
+    </view>
+  </view>
+</view>

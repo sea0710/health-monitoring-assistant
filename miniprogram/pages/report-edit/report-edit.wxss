@@ -1,0 +1,182 @@
+/* ============================================
+   报告编辑页面 - 视觉优化样式
+   设计原则：温暖、可靠、简洁
+   特点：表单编辑页面，需要清晰的输入引导
+   ============================================ */
+
+/* ============================================
+   1. 页面容器
+   ============================================ */
+.container {
+  min-height: 100vh;
+  background: var(--background);
+  padding: var(--spacing-lg);
+  padding-bottom: 120px;
+}
+
+/* ============================================
+   2. 内容区域
+   ============================================ */
+.content-area {
+  padding: var(--spacing-lg);
+}
+
+/* ============================================
+   4. 表单卡片
+   ============================================ */
+.form-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+}
+
+.input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.input-row:last-child {
+  border-bottom: none;
+}
+
+.input-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.input-field-inline {
+  flex: 1;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.picker-field {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.picker-value {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   5. 指标卡片
+   ============================================ */
+.indicators-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+}
+
+.card-title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+.card-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+  display: block;
+}
+
+.required-mark {
+  color: var(--critical);
+  margin-left: 2px;
+}
+
+.indicator-item {
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.indicator-item:last-child {
+  border-bottom: none;
+}
+
+.indicator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.indicator-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.indicator-unit {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.indicator-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
+.indicator-input {
+  flex: 1;
+  height: 40px;
+  background: var(--hover);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  text-align: right;
+  margin-right: var(--spacing-sm);
+}
+
+.indicator-input:focus {
+  border-color: var(--primary-color);
+  background: var(--surface);
+  outline: none;
+}
+
+.indicator-range {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ============================================
+   6. 保存按钮
+   ============================================ */
+.save-section {
+  padding: var(--spacing-lg) 0;
+}
+
+/* ============================================
+   7. 免责声明
+   ============================================ */
+.disclaimer {
+  padding: var(--spacing-lg);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  margin: var(--spacing-lg);
+}
+
+.disclaimer-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-relaxed);
+}

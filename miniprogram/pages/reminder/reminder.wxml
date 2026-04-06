@@ -1,93 +1,213 @@
-<view class="container">
-  <view class="header">
-    <text class="title">提醒设置</text>
+<view class="container page-enter">
+
+  <view class="rule-config-card">
+    <view class="mode-switch">
+      <view class="mode-option {{mode === 'blood_routine' ? 'active' : ''}} btn-press" bindtap="handleModeChange" data-mode="blood_routine">血常规复查</view>
+      <view class="mode-option {{mode === 'other_review' ? 'active' : ''}} btn-press" bindtap="handleModeChange" data-mode="other_review">其他复查</view>
+    </view>
+
+    <block wx:if="{{mode === 'blood_routine'}}">
+      <view class="config-section">
+        <view class="config-title-row">
+          <text class="config-icon icon icon-md">📅</text>
+          <text class="config-title">化疗结束时间</text>
+        </view>
+        <view class="form-label">最近一次化疗结束日期 <text class="required">*</text></view>
+        <picker mode="date" value="{{chemoEndDate}}" bindchange="onChemoDateChange">
+          <view class="date-picker-field">
+            <text class="{{chemoEndDate ? 'picker-value' : 'picker-placeholder'}}">{{chemoEndDate || '请选择日期'}}</text>
+            <text class="picker-arrow icon icon-sm">›</text>
+          </view>
+        </picker>
+        <view class="quick-hint" wx:if="{{chemoEndDate}}">基于化疗结束时间（{{chemoEndDate}})</view>
+        <view class="quick-hint-placeholder" wx:else>基于化疗结束时间</view>
+        <view class="quick-btn btn-press {{!chemoEndDate ? 'disabled' : ''}}" bindtap="handleQuickCreateBlood">
+          <text class="quick-btn-icon icon icon-sm">🔔</text>
+          <text class="quick-btn-text">一键设置复查提醒（+6天、+13天）</text>
+        </view>
+      </view>
+    </block>
+
+    <block wx:if="{{mode === 'other_review'}}">
+      <view class="config-section">
+        <view class="config-title-row">
+          <text class="config-icon icon icon-md">📅</text>
+          <text class="config-title">其他复查</text>
+        </view>
+        <view class="form-label">上次复查时间 <text class="required">*</text></view>
+        <picker mode="date" value="{{lastReviewDate}}" end="{{today}}" bindchange="onLastReviewDateChange">
+          <view class="date-picker-field">
+            <text class="{{lastReviewDate ? 'picker-value' : 'picker-placeholder'}}">{{lastReviewDate || '请选择日期'}}</text>
+            <text class="picker-arrow icon icon-sm">›</text>
+          </view>
+        </picker>
+        <view class="form-label" style="margin-top:16px;">复查频率 <text class="required">*</text></view>
+        <picker mode="selector" range="{{frequencyOptions}}" value="{{frequencyIndex}}" bindchange="onFrequencyChange">
+          <view class="date-picker-field">
+            <text class="{{frequencyIndex >= 0 ? 'picker-value' : 'picker-placeholder'}}">{{frequencyIndex >= 0 ? frequencyOptions[frequencyIndex] : '请选择复查频率'}}</text>
+            <text class="picker-arrow icon icon-sm">›</text>
+          </view>
+        </picker>
+        <view class="quick-hint" wx:if="{{lastReviewDate && frequencyIndex >= 0}}">下次复查时间:{{nextReviewPreview}}</view>
+        <view class="quick-hint-placeholder" wx:else>基于上次复查时间和频率</view>
+        <view class="quick-btn btn-press {{!lastReviewDate || frequencyIndex < 0 ? 'disabled' : ''}}" bindtap="handleQuickCreateOther">
+          <text class="quick-btn-icon icon icon-sm">🔔</text>
+          <text class="quick-btn-text">一键设置复查提醒（复查前5天提醒）</text>
+        </view>
+      </view>
+    </block>
   </view>
 
-  <view class="patient-card" wx:if="{{patient}}">
-    <text class="patient-name">{{patient.name}}</text>
-    <text class="patient-label">当前患者</text>
-  </view>
-
-  <view class="reminders-section">
+  <view class="pending-section">
     <view class="section-header">
-      <text class="section-title">复查提醒</text>
-      <view class="add-btn" bindtap="handleAddReminder">
-        <text class="add-icon">+</text>
+      <view class="section-left">
+        <text class="section-icon icon icon-md">🔔</text>
+        <text class="section-title">待提醒</text>
+        <view class="count-badge badge-pulse" wx:if="{{pendingReminders.length > 0}}">{{pendingReminders.length}}</view>
+      </view>
+      <view class="add-btn btn-press" bindtap="handleManualAdd">
+        <text class="add-icon icon icon-sm">+</text>
+        <text class="add-text">添加</text>
       </view>
     </view>
 
-    <view class="reminders-list" wx:if="{{reminders.length > 0}}">
-      <view class="reminder-item" wx:for="{{reminders}}" wx:key="reminder_id">
-        <view class="reminder-info">
-          <text class="reminder-date">{{item.reminder_date}}</text>
-          <text class="reminder-time">{{item.reminder_time}}</text>
-        </view>
-        <view class="reminder-actions">
-          <switch checked="{{item.is_enabled}}" color="#14b8a6" bindchange="handleToggleReminder" data-id="{{item.reminder_id}}" />
-          <view class="delete-btn" bindtap="handleDeleteReminder" data-id="{{item.reminder_id}}">
-            <text class="delete-icon">×</text>
+    <view class="reminders-list" wx:if="{{pendingReminders.length > 0}}">
+      <view class="reminder-item list-item-enter" wx:for="{{displayPendingReminders}}" wx:key="reminder_id" style="animation-delay: {{(index) * 0.05}}s">
+        <view class="item-header">
+          <view class="item-left">
+            <view class="item-mode-tag">{{item.mode_text}}</view>
+          </view>
+          <view class="item-action">
+            <text wx:if="{{item.status === 'pending'}}" class="save-link" catchtap="handleSaveItem" data-index="{{index}}">保存</text>
+            <text wx:if="{{item.status === 'pending'}}" class="delete-link" catchtap="handleDeleteReminder" data-id="{{item.reminder_id}}" data-status="{{item.status}}">删除</text>
+            <text wx:elif="{{item.status === 'subscribed'}}" class="cancel-link" catchtap="handleDeleteReminder" data-id="{{item.reminder_id}}" data-status="{{item.status}}">取消提醒</text>
           </view>
         </view>
+        <view class="item-pickers">
+          <view class="picker-group">
+            <text class="picker-label">日期</text>
+            <picker mode="date" value="{{item.reminder_date_display}}" start="{{today}}" bindchange="onItemDateChange" data-index="{{index}}">
+              <view class="inline-picker {{item.reminder_date_display ? '' : 'empty'}}">
+                <text>{{item.reminder_date_display || '选择日期'}}</text>
+                <text class="inline-arrow icon icon-xs">›</text>
+              </view>
+            </picker>
+          </view>
+          <view class="picker-group">
+            <text class="picker-label">时间</text>
+            <picker mode="time" value="{{item.reminder_time}}" bindchange="onItemTimeChange" data-index="{{index}}">
+              <view class="inline-picker">
+                <text>{{item.reminder_time}}</text>
+                <text class="inline-arrow icon icon-xs">›</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+      </view>
+      
+      <view class="expand-btn btn-press" wx:if="{{pendingReminders.length > 5}}" bindtap="togglePendingExpand">
+        <text>{{pendingExpanded ? '收起' : '查看更多 (' + (pendingReminders.length - 5) + '条)'}}</text>
       </view>
     </view>
 
     <view class="empty-state" wx:else>
-      <image src="/images/icon-bell-empty.svg" class="empty-icon"></image>
-      <text class="empty-title">暂无提醒</text>
-      <text class="empty-desc">点击右上角添加复查提醒</text>
+      <view class="empty-bell icon icon-xl floating">🔔</view>
+      <text class="empty-title">暂无待提醒</text>
+      <text class="empty-desc">点击"一键设置"或手动添加</text>
     </view>
   </view>
 
-  <view class="tips-section">
-    <text class="tips-title">温馨提示</text>
-    <view class="tips-content">
-      <text class="tips-text">• 提醒将在设定日期当天通过微信服务通知推送</text>
-      <text class="tips-text">• 请确保已开启小程序通知权限</text>
-      <text class="tips-text">• 建议在化疗后7-14天进行血常规复查</text>
+  <view class="history-section" wx:if="{{historyReminders.length > 0}}">
+    <view class="section-header history-header">
+      <view class="section-left">
+        <text class="section-icon history-icon icon icon-md">🕐</text>
+        <text class="section-title history-title">历史提醒</text>
+        <view class="count-badge history-badge">{{historyReminders.length}}</view>
+      </view>
     </view>
+
+    <view class="history-list">
+      <view class="history-item list-item-enter" wx:for="{{displayHistoryReminders}}" wx:key="reminder_id" style="animation-delay: {{(index) * 0.05}}s">
+        <text class="history-datetime">{{item.reminder_date_display || item.reminder_date}} {{item.reminder_time}}</text>
+        <text class="expired-tag">已过期</text>
+        <view class="history-delete-icon-wrap btn-press" catchtap="handleDeleteReminder" data-id="{{item.reminder_id}}" data-history="true" data-status="{{item.status}}">
+          <text class="delete-icon icon icon-sm">×</text>
+        </view>
+      </view>
+      
+      <view class="expand-btn btn-press" wx:if="{{historyReminders.length > 5}}" bindtap="toggleHistoryExpand">
+        <text>{{historyExpanded ? '收起' : '查看更多 (' + (historyReminders.length - 5) + '条)'}}</text>
+      </view>
+    </view>
+
+    <view class="history-footer">
+      <text class="history-hint">历史提醒仅显示，不再发送通知</text>
+    </view>
+  </view>
+
+  <view class="logout-section btn-press" bindtap="handleLogout">
+    <text class="logout-icon icon icon-md">↩</text>
+    <text class="logout-text">退出登录</text>
   </view>
 
   <view class="disclaimer">
-    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议</text>
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
   </view>
 </view>
 
-<view class="modal-mask" wx:if="{{showModal}}" bindtap="handleCloseModal">
-  <view class="modal-content" catchtap>
-    <view class="modal-header">
-      <text class="modal-title">添加提醒</text>
-      <view class="modal-close" bindtap="handleCloseModal">
-        <text>×</text>
-      </view>
+<view class="delete-confirm-mask" wx:if="{{showDeleteConfirm}}" bindtap="handleCancelDelete">
+  <view class="delete-confirm-content" catchtap>
+    <view class="delete-confirm-header">
+      <text class="delete-confirm-title">{{deleteTargetStatus === 'subscribed' ? '确认取消提醒' : '确认删除'}}</text>
     </view>
-    
-    <view class="modal-body">
-      <view class="input-group">
-        <text class="input-label">提醒日期</text>
-        <picker mode="date" value="{{newReminder.date}}" bindchange="onDateChange">
-          <view class="picker-field">
-            <text class="{{newReminder.date ? 'picker-value' : 'picker-placeholder'}}">
-              {{newReminder.date || '请选择日期'}}
-            </text>
+    <view class="delete-confirm-body">
+      <text class="delete-confirm-text" wx:if="{{deleteTargetStatus === 'subscribed'}}">确定要取消此提醒吗？取消后将不再发送提醒通知。</text>
+      <text class="delete-confirm-text" wx:else>确定要删除此提醒吗？</text>
+    </view>
+    <view class="delete-confirm-footer">
+      <button class="btn-cancel-delete" bindtap="handleCancelDelete">取消</button>
+      <button class="btn-confirm-delete" bindtap="handleConfirmDelete">{{deleteTargetStatus === 'subscribed' ? '确认取消' : '删除'}}</button>
+    </view>
+  </view>
+</view>
+
+<view class="add-modal-mask" wx:if="{{showAddModal}}" bindtap="handleCancelAdd">
+  <view class="add-modal-content" catchtap>
+    <view class="add-modal-header">
+      <text class="add-modal-title">添加提醒</text>
+    </view>
+    <view class="add-modal-body">
+      <view class="add-form-item">
+        <text class="add-form-label">提醒类型</text>
+        <picker mode="selector" range="{{addModeOptions}}" value="{{addModeIndex}}" bindchange="onAddModeChange">
+          <view class="add-date-picker">
+            <text class="picker-value">{{addModeOptions[addModeIndex]}}</text>
+            <text class="picker-arrow">›</text>
           </view>
         </picker>
       </view>
-
-      <view class="input-group mt-3">
-        <text class="input-label">提醒时间</text>
-        <picker mode="time" value="{{newReminder.time}}" bindchange="onTimeChange">
-          <view class="picker-field">
-            <text class="{{newReminder.time ? 'picker-value' : 'picker-placeholder'}}">
-              {{newReminder.time || '请选择时间'}}
-            </text>
+      <view class="add-form-item">
+        <text class="add-form-label">提醒日期</text>
+        <picker mode="date" value="{{addReminderDate}}" start="{{today}}" bindchange="onAddDateChange">
+          <view class="add-date-picker">
+            <text class="{{addReminderDate ? 'picker-value' : 'picker-placeholder'}}">{{addReminderDate || '请选择日期'}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+      <view class="add-form-item">
+        <text class="add-form-label">提醒时间</text>
+        <picker mode="time" value="{{addReminderTime}}" bindchange="onAddTimeChange">
+          <view class="add-date-picker">
+            <text class="picker-value">{{addReminderTime}}</text>
+            <text class="picker-arrow">›</text>
           </view>
         </picker>
       </view>
     </view>
-
-    <view class="modal-footer">
-      <button class="btn-cancel" bindtap="handleCloseModal">取消</button>
-      <button class="btn-confirm" bindtap="handleConfirmAdd">确定</button>
+    <view class="add-modal-footer">
+      <button class="btn-cancel-add" bindtap="handleCancelAdd">取消</button>
+      <button class="btn-confirm-add" bindtap="handleConfirmAdd">确定</button>
     </view>
   </view>
 </view>
