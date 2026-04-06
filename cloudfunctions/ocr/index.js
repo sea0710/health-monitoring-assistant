@@ -6,7 +6,7 @@ cloud.init({
 })
 
 const OCR_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation'
-const OCR_API_KEY = 'sk-501911f371d34d4f8da2959bd70b01f5'
+const OCR_API_KEY = '' // 请在部署时设置为实际的API密钥
 const OCR_MODEL = 'qwen-vl-plus'
 
 exports.main = async (event, context) => {
@@ -449,7 +449,7 @@ function extractBloodTestData(text) {
     
     // 直接在整个文本中搜索指标
     // 使用[\s\S]*?匹配任意字符（包括换行），?表示非贪婪匹配
-    const regex = new RegExp(`(${aliasPattern})[\\s\\S]*?(\\d+\\.?\\d*)`, 'i')
+    const regex = new RegExp(`(${aliasPattern})[\s\S]*?(\d+\.?\d*)`, 'i')
     const match = text.match(regex)
     
     if (match) {
