@@ -206,5 +206,9 @@ Page({
       reportsExpanded: !reportsExpanded,
       displayReports: !reportsExpanded ? reports : reports.slice(0, 5)
     })
+  },
+
+  handlePatientEdit() {
+    wx.navigateTo({ url: '/pages/patient-create/patient-create' })
   }
 })

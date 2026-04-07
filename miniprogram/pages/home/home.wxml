@@ -21,7 +21,7 @@
     </view>
   </view>
 
-  <view class="patient-card card-interactive">
+  <view class="patient-card card-interactive" bindtap="handlePatientEdit">
     <view class="patient-info">
       <view class="patient-main">
         <text class="patient-label">患者姓名</text>
