@@ -1,5 +1,17 @@
 <view class="container page-enter">
 
+  <!-- 未登录引导 -->
+  <view class="guest-guide" wx:if="{{!hasLogin}}">
+    <text class="guest-icon icon icon-xl">🔔</text>
+    <text class="guest-title">复查提醒</text>
+    <text class="guest-desc">登录后可设置复查提醒，及时了解复查时间</text>
+    <button class="btn-guide btn-press" bindtap="handleGuideLogin">
+      开始使用
+    </button>
+  </view>
+
+  <!-- 已登录内容 -->
+  <block wx:if="{{hasLogin}}">
   <view class="rule-config-card">
     <view class="mode-switch">
       <view class="mode-option {{mode === 'blood_routine' ? 'active' : ''}} btn-press" bindtap="handleModeChange" data-mode="blood_routine">血常规复查</view>
@@ -149,6 +161,7 @@
     <text class="logout-icon icon icon-md">↩</text>
     <text class="logout-text">退出登录</text>
   </view>
+  </block>
 
   <view class="disclaimer">
     <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>

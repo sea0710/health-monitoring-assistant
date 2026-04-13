@@ -1039,3 +1039,58 @@
     box-shadow: 0 0 0 2px var(--primary-color);
   }
 }
+
+/* ============================================
+   13. 未登录引导
+   ============================================ */
+.guest-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px var(--spacing-lg);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.guest-icon {
+  font-size: 56px;
+  margin-bottom: var(--spacing-md);
+}
+
+.guest-title {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.guest-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  display: block;
+}
+
+.btn-guide {
+  width: 200px;
+  height: 48px;
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  transition: all var(--transition-base);
+}
+
+.btn-guide:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}

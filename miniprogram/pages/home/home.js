@@ -253,7 +253,7 @@ Page({
   },
 
   handleGuideLogin() {
-    wx.navigateTo({ url: '/pages/login/login' })
+    wx.navigateTo({ url: '/pages/patient-create/patient-create' })
   },
 
   goToSetUserInfo() {

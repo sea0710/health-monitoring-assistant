@@ -28,7 +28,7 @@
     </view>
     <text class="guide-title">欢迎使用愈见</text>
     <text class="guide-subtitle">血常规监测助手</text>
-    <text class="guide-desc">上传您的第一份血常规报告，AI智能识别解读</text>
+    <text class="guide-desc">上传您的第一份血常规报告</text>
     <button class="btn-guide-login btn-press" bindtap="handleGuideLogin">
       开始使用
     </button>

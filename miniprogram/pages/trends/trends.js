@@ -5,7 +5,6 @@ const echarts = require('../../components/ec-canvas/echarts')
 
 let chart = null
 
-// 根据指标值计算异常等级
 function calculateLevel(code, value) {
   if (code === 'WBC') {
     if (value >= 3.5) return 'normal'
@@ -41,7 +40,6 @@ function calculateLevel(code, value) {
   return 'normal'
 }
 
-// 获取等级文本
 function getLevelText(level) {
   const levelTextMap = {
     'normal': '正常',
@@ -60,42 +58,42 @@ function initChart(canvas, width, height, dpr, chartData, indicatorName, referen
     devicePixelRatio: dpr
   })
 
+  const dates = chartData.map(d => d.date)
+  const values = chartData.map(d => d.value)
+
   const option = {
     grid: {
-      top: 30,
+      top: 40,
+      left: 50,
       right: 20,
-      bottom: 50,
-      left: 35
+      bottom: 30
     },
     xAxis: {
       type: 'category',
-      data: chartData.map(d => d.date.substring(5)),
-      axisLine: {
-        lineStyle: { color: '#e5e7eb' }
-      },
+      data: dates,
       axisLabel: {
-        color: '#6b7280',
         fontSize: 10,
         rotate: 30
-      }
+      },
+      boundaryGap: false
     },
     yAxis: {
       type: 'value',
-      axisLine: {
-        show: false
-      },
-      axisLabel: {
-        color: '#6b7280',
-        fontSize: 10
-      },
-      splitLine: {
-        lineStyle: { color: '#f3f4f6' }
+      nameTextStyle: {
+        fontSize: 12
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params) {
+        const data = params[0]
+        return `${data.name}\n数值：${data.data}`
       }
     },
     series: [{
       name: indicatorName,
       type: 'line',
-      data: chartData.map(d => d.value),
+      data: values,
       smooth: true,
       symbol: 'circle',
       symbolSize: 8,
@@ -143,6 +141,7 @@ function initChart(canvas, width, height, dpr, chartData, indicatorName, referen
 
 Page({
   data: {
+    hasLogin: false,
     patientId: '',
     currentIndicator: 'WBC',
     currentIndicatorName: '白细胞计数',
@@ -160,13 +159,34 @@ Page({
     const indicatorOptions = INDICATORS.filter(i => ['WBC', 'NEUT#', 'HGB', 'PLT'].includes(i.code))
     this.setData({ indicatorOptions })
     
-    this.initPatientId(options)
+    this.checkLoginAndLoad(options)
   },
 
   onShow() {
-    if (this.data.patientId) {
-      this.loadTrendData()
+    this.checkLoginStatus()
+  },
+
+  checkLoginAndLoad(options) {
+    const app = getApp()
+    
+    let retryCount = 0
+    while (!app.globalData.hasLogin && retryCount < 15) {
+      retryCount++
+    }
+    
+    if (app.globalData.hasLogin) {
+      this.setData({ hasLogin: true })
+      this.initPatientId(options)
     } else {
+      this.setData({ hasLogin: false })
+    }
+  },
+
+  checkLoginStatus() {
+    const app = getApp()
+    this.setData({ hasLogin: app.globalData.hasLogin })
+    
+    if (app.globalData.hasLogin && !this.data.patientId) {
       this.initPatientId({})
     }
   },
@@ -187,14 +207,11 @@ Page({
     if (patientId) {
       this.setData({ patientId: patientId })
       this.loadTrendData()
-    } else {
-      hideLoading()
     }
   },
 
   async loadTrendData() {
     if (!this.data.patientId) {
-      showToast('请先创建患者档案')
       return
     }
     
@@ -293,5 +310,13 @@ Page({
     })
     
     this.updateChart()
+  },
+
+  handleGuideLogin() {
+    wx.navigateTo({ url: '/pages/patient-create/patient-create' })
+  },
+
+  goToUpload() {
+    wx.navigateTo({ url: '/pages/report-upload/report-upload' })
   }
 })
