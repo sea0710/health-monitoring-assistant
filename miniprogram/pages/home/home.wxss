@@ -453,3 +453,137 @@
   color: var(--text-muted);
   line-height: var(--line-height-relaxed);
 }
+
+/* ============================================
+   13. 未登录引导卡片
+   ============================================ */
+.login-guide-card {
+  background: linear-gradient(135deg, var(--primary-50) 0%, rgba(20, 184, 166, 0.08) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  border: 1px solid var(--primary-100);
+}
+
+.guide-icon-wrapper {
+  margin-bottom: var(--spacing-md);
+}
+
+.guide-main-icon {
+  font-size: 56px;
+}
+
+.guide-title {
+  display: block;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.guide-subtitle {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.guide-desc {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--spacing-lg);
+}
+
+.btn-guide-login {
+  width: 100%;
+  height: 48px;
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  transition: all var(--transition-base);
+}
+
+.btn-guide-login:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* ============================================
+   14. 用户信息引导卡片
+   ============================================ */
+.user-guide-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.guide-content-row {
+  margin-bottom: var(--spacing-md);
+}
+
+.guide-info-text {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.guide-hint-text {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.guide-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-guide-action {
+  padding: 8px 24px;
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  transition: all var(--transition-base);
+}
+
+.btn-guide-action:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.btn-skip {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  padding: 8px 16px;
+}
+
+/* ============================================
+   15. 患者头像
+   ============================================ */
+.patient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  margin-right: var(--spacing-sm);
+}
+
+.patient-name-wrap {
+  display: flex;
+  flex-direction: column;
+}

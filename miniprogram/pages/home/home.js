@@ -1,7 +1,7 @@
 const { api } = require('../../utils/api')
 const { formatDate } = require('../../utils/util')
+const auth = require('../../utils/auth')
 
-// 根据指标值计算异常等级
 function calculateLevel(code, value) {
   if (code === 'WBC') {
     if (value >= 3.5) return 'normal'
@@ -31,7 +31,6 @@ function calculateLevel(code, value) {
   return 'normal'
 }
 
-// 获取等级文本
 function getLevelText(level) {
   const levelTextMap = {
     'normal': '正常',
@@ -51,20 +50,55 @@ Page({
     reportsExpanded: false,
     nextReminder: null,
     isLoading: true,
-    isFirstLoading: true
+    isFirstLoading: true,
+    hasLogin: false,
+    hasUserInfo: false,
+    showUserInfoGuide: false,
+    userInfo: null
   },
 
   onLoad() {
-    this.loadData()
+    this.checkLoginAndLoadData()
   },
 
   onShow() {
-    // 保留旧数据，只设置加载状态
     this.setData({ isLoading: true })
-    // 减少延迟，确保数据库同步完成
     setTimeout(() => {
-      this.loadData()
+      this.checkLoginAndLoadData()
     }, 100)
+  },
+  
+  async checkLoginAndLoadData() {
+    const app = getApp()
+    
+    let retryCount = 0
+    while (!app.globalData.hasLogin && retryCount < 15) {
+      await new Promise(resolve => setTimeout(resolve, 200))
+      retryCount++
+    }
+    
+    const userInfo = app.getUserInfo()
+    
+    if (!userInfo) {
+      this.setData({
+        hasLogin: false,
+        showUserInfoGuide: false,
+        patient: null,
+        reports: [],
+        isLoading: false,
+        isFirstLoading: false
+      })
+      return
+    }
+
+    this.setData({
+      hasLogin: true,
+      hasUserInfo: app.globalData.hasUserInfo,
+      userInfo: userInfo,
+      showUserInfoGuide: auth.shouldShowGuide('user_info_guide')
+    })
+
+    this.loadData()
   },
 
   async loadData(retryCount = 0) {
@@ -72,7 +106,13 @@ Page({
     const patient = app.globalData.patientInfo || wx.getStorageSync('patientInfo')
     
     if (!patient || !patient.name) {
-      wx.redirectTo({ url: '/pages/patient-create/patient-create' })
+      this.setData({ 
+        reports: [], 
+        latestReport: null,
+        nextReminder: null,
+        isLoading: false,
+        isFirstLoading: false
+      })
       return
     }
 
@@ -210,5 +250,18 @@ Page({
 
   handlePatientEdit() {
     wx.navigateTo({ url: '/pages/patient-create/patient-create' })
+  },
+
+  handleGuideLogin() {
+    wx.navigateTo({ url: '/pages/login/login' })
+  },
+
+  goToSetUserInfo() {
+    wx.navigateTo({ url: '/pages/set-user-info/set-user-info' })
+  },
+
+  skipUserInfoGuide() {
+    auth.recordGuideShown('user_info_guide', true)
+    this.setData({ showUserInfoGuide: false })
   }
 })

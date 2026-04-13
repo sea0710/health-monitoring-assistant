@@ -21,11 +21,45 @@
     </view>
   </view>
 
-  <view class="patient-card card-interactive" bindtap="handlePatientEdit">
+  <!-- 未登录引导 -->
+  <view class="login-guide-card" wx:if="{{!hasLogin && !isFirstLoading}}">
+    <view class="guide-icon-wrapper">
+      <text class="guide-main-icon icon icon-xl">👤</text>
+    </view>
+    <text class="guide-title">欢迎使用愈见</text>
+    <text class="guide-subtitle">血常规监测助手</text>
+    <text class="guide-desc">上传您的第一份血常规报告，AI智能识别解读</text>
+    <button class="btn-guide-login btn-press" bindtap="handleGuideLogin">
+      开始使用
+    </button>
+  </view>
+
+  <!-- 已登录但未设置头像昵称 -->
+  <view class="user-guide-card" wx:if="{{hasLogin && !hasUserInfo && showUserInfoGuide}}">
+    <view class="guide-content-row">
+      <text class="guide-info-text">完善信息，获得更好体验</text>
+      <text class="guide-hint-text">设置昵称和头像，让使用更个性化</text>
+    </view>
+    <view class="guide-actions-row">
+      <button class="btn-guide-action btn-press" bindtap="goToSetUserInfo">去设置</button>
+      <text class="btn-skip" bindtap="skipUserInfoGuide">跳过</text>
+    </view>
+  </view>
+
+  <!-- 患者信息卡片 -->
+  <view class="patient-card card-interactive" bindtap="handlePatientEdit" wx:if="{{hasLogin}}">
     <view class="patient-info">
       <view class="patient-main">
-        <text class="patient-label">患者姓名</text>
-        <text class="patient-name">{{patient.name || '未知患者'}}</text>
+        <image 
+          wx:if="{{userInfo.avatar_url}}" 
+          src="{{userInfo.avatar_url}}" 
+          mode="aspectFill"
+          class="patient-avatar"
+        ></image>
+        <view class="patient-name-wrap">
+          <text class="patient-label">患者姓名</text>
+          <text class="patient-name">{{patient.name || '未知患者'}}</text>
+        </view>
       </view>
       <view class="patient-stats">
         <text class="stats-label">报告总数</text>
@@ -43,7 +77,7 @@
     </view>
   </view>
 
-  <view class="reports-section">
+  <view class="reports-section" wx:if="{{hasLogin}}">
     <view class="section-header-row">
       <text class="section-title">历史报告</text>
       <view class="add-btn-small btn-press" bindtap="handleAddReport">
@@ -53,7 +87,6 @@
     </view>
     
     <view class="reports-content-wrapper">
-      <!-- 骨架屏 -->
       <view class="skeleton-container" wx:if="{{isFirstLoading}}">
         <view class="skeleton-card" wx:for="{{3}}" wx:key="index">
           <view class="skeleton-header">
@@ -66,7 +99,6 @@
         </view>
       </view>
       
-      <!-- 报告列表 -->
       <view class="reports-list" wx:elif="{{reports.length > 0}}">
         <view 
           class="report-item list-item-enter" 
@@ -100,14 +132,12 @@
         </view>
       </view>
 
-      <!-- 空状态 -->
       <view class="empty-state" wx:else>
         <text class="empty-icon icon icon-xl floating">📄</text>
         <text class="empty-title">暂无报告</text>
         <text class="empty-desc">点击右上角添加第一份报告</text>
       </view>
       
-      <!-- 加载动画 - 只在历史报告区域显示 -->
       <view class="loading-overlay-local" wx:if="{{isLoading && !isFirstLoading}}">
         <view class="loading-spinner-local loading-spin"></view>
         <text class="loading-text-local">加载中...</text>

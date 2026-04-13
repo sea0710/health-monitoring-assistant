@@ -59,7 +59,7 @@ Page({
       if (!userId) {
         showToast('用户未登录，请重新登录')
         setTimeout(() => {
-          wx.redirectTo({ url: '/pages/login/login' })
+          wx.switchTab({ url: '/pages/home/home' })
         }, 1000)
         return
       }

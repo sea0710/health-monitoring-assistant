@@ -1,0 +1,129 @@
+.container {
+  min-height: 100vh;
+  background: var(--background);
+  padding: var(--spacing-lg);
+  padding-bottom: 120px;
+}
+
+.header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.title {
+  display: block;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.subtitle {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.form-section {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-item {
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.form-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.avatar-btn {
+  width: 100%;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  line-height: normal;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-btn::after {
+  border: none;
+}
+
+.avatar-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--border-light);
+  margin-bottom: var(--spacing-sm);
+}
+
+.avatar-hint {
+  font-size: var(--font-size-xs);
+  color: var(--primary-color);
+}
+
+.nickname-input {
+  height: 44px;
+  background: var(--hover);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.nickname-input:focus {
+  border-color: var(--primary-color);
+}
+
+.hidden-submit {
+  display: none;
+}
+
+.privacy-notice {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.notice-title {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.notice-text {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--spacing-xs);
+}
+
+.btn-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  border-radius: 0;
+  margin: 0;
+}
