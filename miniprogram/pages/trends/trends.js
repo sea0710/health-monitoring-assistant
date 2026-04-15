@@ -1,54 +1,20 @@
 const { api } = require('../../utils/api')
 const { showLoading, hideLoading, showToast } = require('../../utils/util')
-const { INDICATORS } = require('../../utils/constants')
+const { INDICATORS, calculateLevel, getLevelText, getLevelClass, CORE_INDICATOR_CODES } = require('../../utils/constants')
 const echarts = require('../../components/ec-canvas/echarts')
 
 let chart = null
 
-function calculateLevel(code, value) {
-  if (code === 'WBC') {
-    if (value >= 3.5) return 'normal'
-    if (value >= 3.0) return 'warning'
-    if (value >= 2.0) return 'danger2'
-    if (value >= 1.0) return 'danger3'
-    return 'critical'
-  } else if (code === 'NEUT#') {
-    if (value >= 1.8) return 'normal'
-    if (value >= 1.5) return 'warning'
-    if (value >= 1.0) return 'danger2'
-    if (value >= 0.5) return 'danger3'
-    return 'critical'
-  } else if (code === 'PLT') {
-    if (value >= 125) return 'normal'
-    if (value >= 100) return 'warning'
-    if (value >= 50) return 'danger2'
-    if (value >= 25) return 'danger3'
-    return 'critical'
-  } else if (code === 'HGB') {
-    if (value >= 130) return 'normal'
-    if (value >= 95) return 'warning'
-    if (value >= 80) return 'danger2'
-    if (value >= 65) return 'danger3'
-    return 'critical'
-  } else if (code === 'NEUT%') {
-    if (value >= 40 && value <= 75) return 'normal'
-    return 'warning'
-  } else if (code === 'RBC') {
-    if (value >= 4.3 && value <= 5.8) return 'normal'
-    return 'warning'
+// 根据异常等级获取颜色
+function getLevelColor(level) {
+  const levelClass = getLevelClass(level)
+  const colorMap = {
+    'normal': '#2eb8aa',
+    'warning': '#f59e0b',
+    'danger': '#f97415',
+    'critical': '#dc2626'
   }
-  return 'normal'
-}
-
-function getLevelText(level) {
-  const levelTextMap = {
-    'normal': '正常',
-    'warning': 'Ⅰ度',
-    'danger2': 'Ⅱ度',
-    'danger3': 'Ⅲ度',
-    'critical': 'Ⅳ度'
-  }
-  return levelTextMap[level] || '正常'
+  return colorMap[levelClass] || '#2eb8aa'
 }
 
 function initChart(canvas, width, height, dpr, chartData, indicatorName, referenceMin, referenceMax) {
@@ -58,42 +24,50 @@ function initChart(canvas, width, height, dpr, chartData, indicatorName, referen
     devicePixelRatio: dpr
   })
 
-  const dates = chartData.map(d => d.date)
-  const values = chartData.map(d => d.value)
+  // 为每个数据点设置异常颜色
+  const itemColors = chartData.map(d => getLevelColor(d.level))
 
   const option = {
     grid: {
-      top: 40,
-      left: 50,
+      top: 30,
       right: 20,
-      bottom: 30
+      bottom: 50,
+      left: 35
     },
     xAxis: {
       type: 'category',
-      data: dates,
+      data: chartData.map(d => d.date.substring(5)),
+      axisLine: {
+        lineStyle: { color: '#e5e7eb' }
+      },
       axisLabel: {
+        color: '#6b7280',
         fontSize: 10,
         rotate: 30
-      },
-      boundaryGap: false
+      }
     },
     yAxis: {
       type: 'value',
-      nameTextStyle: {
-        fontSize: 12
-      }
-    },
-    tooltip: {
-      trigger: 'axis',
-      formatter: function(params) {
-        const data = params[0]
-        return `${data.name}\n数值：${data.data}`
+      axisLine: {
+        show: false
+      },
+      axisLabel: {
+        color: '#6b7280',
+        fontSize: 10
+      },
+      splitLine: {
+        lineStyle: { color: '#f3f4f6' }
       }
     },
     series: [{
       name: indicatorName,
       type: 'line',
-      data: values,
+      data: chartData.map((d, idx) => ({
+        value: d.value,
+        itemStyle: {
+          color: itemColors[idx]
+        }
+      })),
       smooth: true,
       symbol: 'circle',
       symbolSize: 8,
@@ -141,7 +115,6 @@ function initChart(canvas, width, height, dpr, chartData, indicatorName, referen
 
 Page({
   data: {
-    hasLogin: false,
     patientId: '',
     currentIndicator: 'WBC',
     currentIndicatorName: '白细胞计数',
@@ -156,37 +129,16 @@ Page({
   },
 
   onLoad(options) {
-    const indicatorOptions = INDICATORS.filter(i => ['WBC', 'NEUT#', 'HGB', 'PLT'].includes(i.code))
+    const indicatorOptions = INDICATORS.filter(i => CORE_INDICATOR_CODES.includes(i.code))
     this.setData({ indicatorOptions })
     
-    this.checkLoginAndLoad(options)
+    this.initPatientId(options)
   },
 
   onShow() {
-    this.checkLoginStatus()
-  },
-
-  checkLoginAndLoad(options) {
-    const app = getApp()
-    
-    let retryCount = 0
-    while (!app.globalData.hasLogin && retryCount < 15) {
-      retryCount++
-    }
-    
-    if (app.globalData.hasLogin) {
-      this.setData({ hasLogin: true })
-      this.initPatientId(options)
+    if (this.data.patientId) {
+      this.loadTrendData()
     } else {
-      this.setData({ hasLogin: false })
-    }
-  },
-
-  checkLoginStatus() {
-    const app = getApp()
-    this.setData({ hasLogin: app.globalData.hasLogin })
-    
-    if (app.globalData.hasLogin && !this.data.patientId) {
       this.initPatientId({})
     }
   },
@@ -203,15 +155,18 @@ Page({
     const storagePatient = wx.getStorageSync('patientInfo')
     
     const patient = globalPatient || storagePatient
-    const patientId = patient && (patient.patient_id || patient._id)
+    const patientId = patient && (patient._id || patient.patient_id)
     if (patientId) {
       this.setData({ patientId: patientId })
       this.loadTrendData()
+    } else {
+      hideLoading()
     }
   },
 
   async loadTrendData() {
     if (!this.data.patientId) {
+      showToast('请先创建患者档案')
       return
     }
     
@@ -250,7 +205,7 @@ Page({
     const chartData = indicatorTrend
       .map(d => {
         const value = d.value || d.test_value || 0
-        const level = calculateLevel(currentIndicator, value)
+        const { level, isAbnormal } = calculateLevel(currentIndicator, value)
         return {
           date: d.test_time || d.date || '',
           value: value,
@@ -310,13 +265,5 @@ Page({
     })
     
     this.updateChart()
-  },
-
-  handleGuideLogin() {
-    wx.navigateTo({ url: '/pages/patient-create/patient-create' })
-  },
-
-  goToUpload() {
-    wx.navigateTo({ url: '/pages/report-upload/report-upload' })
   }
 })

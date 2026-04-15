@@ -1,100 +1,101 @@
-const app = getApp()
+const { api } = require('../../utils/api')
+const { validatePassword, showToast, showLoading, hideLoading } = require('../../utils/util')
 
 Page({
   data: {
     oldPassword: '',
     newPassword: '',
     confirmPassword: '',
-    isChanging: false,
-    canSubmit: false
+    showOldPassword: false,
+    showNewPassword: false,
+    showConfirmPassword: false,
+    isLoading: false
   },
 
   onOldPasswordInput(e) {
     this.setData({ oldPassword: e.detail.value })
-    this.checkCanSubmit()
   },
 
   onNewPasswordInput(e) {
     this.setData({ newPassword: e.detail.value })
-    this.checkCanSubmit()
   },
 
   onConfirmPasswordInput(e) {
     this.setData({ confirmPassword: e.detail.value })
-    this.checkCanSubmit()
   },
 
-  checkCanSubmit() {
-    const { oldPassword, newPassword, confirmPassword } = this.data
-    
-    const canSubmit = oldPassword.length > 0 &&
-                      newPassword.length >= 6 &&
-                      newPassword === confirmPassword &&
-                      oldPassword !== newPassword
-    
-    this.setData({ canSubmit })
+  toggleOldPassword() {
+    this.setData({ showOldPassword: !this.data.showOldPassword })
   },
 
-  async handleChangePassword() {
+  toggleNewPassword() {
+    this.setData({ showNewPassword: !this.data.showNewPassword })
+  },
+
+  toggleConfirmPassword() {
+    this.setData({ showConfirmPassword: !this.data.showConfirmPassword })
+  },
+
+  async handleChange() {
     const { oldPassword, newPassword, confirmPassword } = this.data
 
     if (!oldPassword) {
-      wx.showToast({ title: '请输入原密码', icon: 'none' })
+      showToast('请输入当前密码')
       return
     }
 
-    if (newPassword.length < 6) {
-      wx.showToast({ title: '新密码至少6位', icon: 'none' })
+    if (!validatePassword(newPassword)) {
+      showToast('新密码至少6位，需包含数字和字母')
       return
     }
 
     if (newPassword !== confirmPassword) {
-      wx.showToast({ title: '两次密码不一致', icon: 'none' })
+      showToast('两次输入的新密码不一致')
       return
     }
 
     if (oldPassword === newPassword) {
-      wx.showToast({ title: '新密码不能与原密码相同', icon: 'none' })
+      showToast('新密码不能与当前密码相同')
       return
     }
 
-    this.setData({ isChanging: true })
-    wx.showLoading({ title: '修改中...', mask: true })
+    this.setData({ isLoading: true })
+    showLoading('修改中...')
 
     try {
-      const userInfo = app.getUserInfo()
-      
-      const res = await wx.cloud.callFunction({
-        name: 'login',
-        data: {
-          action: 'changePassword',
-          userId: userInfo._id,
-          oldPassword: oldPassword,
-          newPassword: newPassword
-        }
+      const app = getApp()
+      const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
+      const userId = userInfo?._id || userInfo?.user_id
+
+      if (!userId) {
+        showToast('用户信息异常，请重新登录')
+        setTimeout(() => {
+          const app = getApp()
+          app.clearUserInfo()
+          wx.switchTab({ url: '/pages/home/home' })
+        }, 1500)
+        return
+      }
+
+      const res = await api.auth.changePassword({
+        userId: userId,
+        oldPassword: oldPassword,
+        newPassword: newPassword
       })
 
-      if (res.result && res.result.code === 0) {
-        wx.showToast({
-          title: '密码修改成功',
-          icon: 'success'
-        })
-
+      if (res.code === 0) {
+        showToast('密码修改成功')
         setTimeout(() => {
           wx.navigateBack()
-        }, 1500)
+        }, 1000)
       } else {
-        throw new Error(res.result?.message || '修改失败')
+        showToast(res.message || '修改失败')
       }
     } catch (error) {
-      console.error('修改密码失败:', error)
-      wx.showToast({
-        title: error.message || '修改失败，请重试',
-        icon: 'none'
-      })
+      showToast(error.message || '修改失败，请重试')
     } finally {
-      this.setData({ isChanging: false })
-      wx.hideLoading()
+      hideLoading()
+      this.setData({ isLoading: false })
     }
   }
 })

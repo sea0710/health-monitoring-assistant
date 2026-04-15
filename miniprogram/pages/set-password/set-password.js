@@ -1,121 +1,119 @@
-const app = getApp()
-
-const SECURITY_QUESTIONS = [
-  { id: 1, question: '您的小学学校名称？', hint: '例如：北京市第一小学' },
-  { id: 2, question: '您的宠物名字？', hint: '例如：旺财' },
-  { id: 3, question: '您母亲的生日？', hint: '格式：YYYYMMDD，例如：19900101' },
-  { id: 4, question: '您出生的城市？', hint: '例如：北京' },
-  { id: 5, question: '您最喜欢的电影？', hint: '例如：阿甘正传' }
-]
+const { api } = require('../../utils/api')
+const { validatePassword, showToast, showLoading, hideLoading } = require('../../utils/util')
+const { SECURITY_QUESTIONS } = require('../../utils/constants')
 
 Page({
   data: {
-    newPassword: '',
+    password: '',
     confirmPassword: '',
-    selectedQuestion: null,
-    questionIndex: -1,
-    answer: '',
+    showPassword: false,
+    showConfirmPassword: false,
+    showAnswer: true,
     questionList: SECURITY_QUESTIONS,
-    isSetting: false,
-    canSubmit: false
+    questionIndex: -1,
+    securityAnswer: '',
+    isLoading: false
   },
 
-  onNewPasswordInput(e) {
-    this.setData({ newPassword: e.detail.value })
-    this.checkCanSubmit()
+  onPasswordInput(e) {
+    this.setData({ password: e.detail.value })
   },
 
   onConfirmPasswordInput(e) {
     this.setData({ confirmPassword: e.detail.value })
-    this.checkCanSubmit()
+  },
+
+  togglePassword() {
+    this.setData({ showPassword: !this.data.showPassword })
+  },
+
+  toggleConfirmPassword() {
+    this.setData({ showConfirmPassword: !this.data.showConfirmPassword })
+  },
+
+  toggleAnswer() {
+    this.setData({ showAnswer: !this.data.showAnswer })
   },
 
   onQuestionChange(e) {
-    const index = parseInt(e.detail.value)
     this.setData({
-      selectedQuestion: SECURITY_QUESTIONS[index],
-      questionIndex: index
+      questionIndex: Number(e.detail.value),
+      securityAnswer: ''
     })
-    this.checkCanSubmit()
   },
 
   onAnswerInput(e) {
-    this.setData({ answer: e.detail.value })
-    this.checkCanSubmit()
+    this.setData({ securityAnswer: e.detail.value })
   },
 
-  checkCanSubmit() {
-    const { newPassword, confirmPassword, selectedQuestion, answer } = this.data
-    
-    const canSubmit = newPassword.length >= 6 &&
-                      newPassword === confirmPassword &&
-                      !!selectedQuestion &&
-                      answer.trim().length > 0
-    
-    this.setData({ canSubmit })
-  },
+  async handleConfirm() {
+    const { password, confirmPassword, questionIndex, questionList, securityAnswer } = this.data
 
-  async handleSetPassword() {
-    const { newPassword, confirmPassword, selectedQuestion, questionIndex, answer } = this.data
-
-    if (newPassword.length < 6) {
-      wx.showToast({ title: '密码至少6位', icon: 'none' })
+    if (!validatePassword(password)) {
+      showToast('密码至少6位，需包含数字和字母')
       return
     }
 
-    if (newPassword !== confirmPassword) {
-      wx.showToast({ title: '两次密码不一致', icon: 'none' })
+    if (password !== confirmPassword) {
+      showToast('两次输入的密码不一致')
       return
     }
 
-    if (!selectedQuestion) {
-      wx.showToast({ title: '请选择安全问题', icon: 'none' })
+    if (questionIndex < 0) {
+      showToast('请选择安全问题')
       return
     }
 
-    if (!answer.trim()) {
-      wx.showToast({ title: '请输入答案', icon: 'none' })
+    if (!securityAnswer.trim()) {
+      showToast('请输入安全问题的答案')
       return
     }
 
-    this.setData({ isSetting: true })
-    wx.showLoading({ title: '设置中...', mask: true })
+    this.setData({ isLoading: true })
+    showLoading('设置中...')
 
     try {
-      const userInfo = app.getUserInfo()
-      
-      const res = await wx.cloud.callFunction({
-        name: 'login',
-        data: {
-          action: 'setPassword',
-          userId: userInfo._id,
-          password: newPassword,
-          questionId: selectedQuestion.id,
-          answer: answer.trim()
-        }
+      const app = getApp()
+      const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
+      const userId = userInfo?._id || userInfo?.user_id
+
+      if (!userId) {
+        showToast('用户信息异常，请重新登录')
+        setTimeout(() => {
+          const app = getApp()
+          app.clearUserInfo()
+          wx.switchTab({ url: '/pages/home/home' })
+        }, 1500)
+        return
+      }
+
+      const res = await api.auth.setPassword({
+        userId: userId,
+        password: password,
+        securityQuestionId: questionList[questionIndex].id,
+        securityAnswer: securityAnswer.trim()
       })
 
-      if (res.result && res.result.code === 0) {
-        wx.showToast({
-          title: '密码设置成功',
-          icon: 'success'
-        })
-
+      if (res.code === 0) {
+        const updatedUser = {
+          ...userInfo,
+          password: '******',
+          security_question_id: questionList[questionIndex].id,
+          security_question: questionList[questionIndex].question
+        }
+        app.setUserInfo(updatedUser)
+        showToast('密码设置成功')
         setTimeout(() => {
           wx.navigateBack()
-        }, 1500)
+        }, 1000)
       } else {
-        throw new Error(res.result?.message || '设置失败')
+        showToast(res.message || '设置失败')
       }
     } catch (error) {
-      console.error('设置密码失败:', error)
-      wx.showToast({
-        title: error.message || '设置失败，请重试',
-        icon: 'none'
-      })
+      showToast(error.message || '设置失败，请重试')
     } finally {
-      this.setData({ isSetting: false })
-      wx.hideLoading()
+      hideLoading()
+      this.setData({ isLoading: false })
     }
   }
 })

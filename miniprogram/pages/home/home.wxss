@@ -10,8 +10,10 @@
 .container {
   min-height: 100vh;
   padding: var(--spacing-lg);
-  padding-bottom: 100px;
+  padding-bottom: 0;
   background: var(--background);
+  display: flex;
+  flex-direction: column;
 }
 
 /* ============================================
@@ -26,7 +28,7 @@
 
 .section-title {
   font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
 }
 
@@ -54,7 +56,7 @@
 }
 
 .add-text-small {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--primary-color);
   font-weight: 600;
 }
@@ -72,7 +74,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  border: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-base);
 }
@@ -127,72 +128,207 @@
    6. 患者信息卡片
    ============================================ */
 .patient-card {
-  background: #5ec4a8;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  position: relative;
+  border-radius: var(--radius-xl);
   margin-bottom: var(--spacing-lg);
+  overflow: hidden;
 }
 
-.patient-info {
+.patient-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary-50);
+  z-index: 0;
+}
+
+.patient-card-content {
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+}
+
+.patient-card:active {
+  opacity: 0.95;
+  transform: scale(0.99);
+  transition: all 0.15s ease;
+}
+
+.patient-top-row {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
 
-.patient-main {
-  flex: 1;
-}
-
-.patient-label {
-  font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.85);
-  display: block;
-  margin-bottom: var(--spacing-xs);
-}
-
-.patient-name {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-semibold);
-  color: #ffffff;
-  display: block;
-}
-
-.patient-stats {
-  text-align: right;
-}
-
-.stats-label {
-  font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.85);
-  display: block;
-  margin-bottom: var(--spacing-xs);
-}
-
-.stats-value {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: #ffffff;
-  display: block;
-}
-
-.patient-meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.meta-row {
+.patient-user-section {
   display: flex;
   align-items: center;
-  font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+  min-width: 0;
 }
 
-.bell-icon {
-  margin-right: var(--spacing-xs);
+.patient-avatar-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.patient-avatar-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.avatar-setting-hint {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  background: #f59e0b;
+  border-radius: 50%;
+  border: 2px solid #0d9488;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hint-dot {
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.patient-user-info {
+  flex: 1;
+  margin-left: 12px;
+  min-width: 0;
+}
+
+.patient-nickname {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.patient-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.patient-name-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(20, 184, 166, 0.1);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.patient-name-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.patient-settings-entry {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 184, 166, 0.1);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.settings-icon {
+  font-size: 18px;
+  color: var(--primary-color);
+}
+
+.settings-icon-img {
+  width: 20px;
+  height: 20px;
+}
+
+.patient-stats-row {
+  display: flex;
+  align-items: center;
+  background: rgba(20, 184, 166, 0.08);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.stat-item-patient {
+  min-width: 60px;
+}
+
+.stat-patient-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.stat-value-sm {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(20, 184, 166, 0.2);
+  flex-shrink: 0;
+}
+
+.patient-guide-tip {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(20, 184, 166, 0.1);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.guide-tip-text {
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 /* ============================================
@@ -228,7 +364,6 @@
   background: var(--surface);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
-  border: 1px solid var(--border-light);
 }
 
 .skeleton-header {
@@ -287,7 +422,6 @@
 .report-item {
   background: var(--surface);
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   display: flex;
@@ -357,6 +491,16 @@
   color: var(--warning);
 }
 
+.badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.badge-critical {
+  background: var(--critical-bg);
+  color: var(--critical);
+}
+
 .report-delete {
   padding: var(--spacing-md);
   display: flex;
@@ -415,7 +559,12 @@
   padding: 48px var(--spacing-lg);
   background: var(--surface);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .empty-icon {
@@ -438,152 +587,334 @@
 }
 
 /* ============================================
-   12. 免责声明
+   患者更新提示卡片
    ============================================ */
-.disclaimer {
-  padding: var(--spacing-lg);
-  text-align: center;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
-  margin: var(--spacing-lg);
+.patient-update-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--spacing-md);
+  transition: all var(--transition-base);
 }
 
+.patient-update-hint:active {
+  background: var(--hover);
+  transform: scale(0.98);
+}
+
+.hint-edit-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.hint-text-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hint-main-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: block;
+}
+
+.hint-sub-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  display: block;
+}
+
+.hint-arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   12. 免责声明
+   ============================================ */
 .disclaimer-text {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   line-height: var(--line-height-relaxed);
 }
 
-/* ============================================
-   13. 未登录引导卡片
-   ============================================ */
 .login-guide-card {
-  background: linear-gradient(135deg, var(--primary-50) 0%, rgba(20, 184, 166, 0.08) 100%);
+  position: relative;
   border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
+  overflow: hidden;
   margin-bottom: var(--spacing-lg);
+}
+
+.login-guide-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary-50);
+  z-index: 0;
+}
+
+.login-guide-content {
+  position: relative;
+  z-index: 1;
+  padding: 28px 20px;
   text-align: center;
-  border: 1px solid var(--primary-100);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.guide-icon-wrapper {
-  margin-bottom: var(--spacing-md);
+.guide-avatar-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.guide-main-icon {
-  font-size: 56px;
+.guide-avatar-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
 }
 
-.guide-title {
-  display: block;
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
+.login-guide-card .guide-title {
+  font-size: 20px;
+  font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
+  display: block;
+  margin-bottom: 8px;
 }
 
-.guide-subtitle {
-  display: block;
-  font-size: var(--font-size-sm);
+.login-guide-card .guide-desc {
+  font-size: 14px;
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-}
-
-.guide-desc {
   display: block;
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  line-height: var(--line-height-normal);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 24px;
+  line-height: 1.5;
 }
 
-.btn-guide-login {
-  width: 100%;
+.guide-login-btn {
+  width: 220px;
   height: 48px;
+  margin: 0 auto 12px;
+  font-size: 16px;
   background: var(--primary-color);
-  border-radius: var(--radius-full);
+  color: var(--primary-foreground, #ffffff);
+  border-radius: 24px;
+}
+
+.guide-login-btn:active {
+  background: var(--primary-dark);
+  transform: scale(0.97);
+}
+
+.login-guide-card .guide-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.patient-avatar {
+  display: none;
+}
+
+.patient-text {
+  display: none;
+}
+
+.patient-sub {
+  display: none;
+}
+
+.patient-arrow {
+  display: none;
+}
+
+.meta-text {
+  display: none;
+}
+
+/* ============================================
+   协议勾选区域
+   ============================================ */
+.agreement-area {
+  margin-top: 12px;
+  padding: 0 4px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.agreement-checkbox {
+  flex-shrink: 0;
+  padding: 2px;
+  margin-top: -1px;
+}
+
+.checkbox-icon {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  border: 1.5px solid var(--primary-color);
+  position: relative;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.checkbox-icon.checked {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.check-mark {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: 4px;
+  height: 7px;
+  border: solid #ffffff;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.agreement-text-wrap {
+  display: flex;
+  align-items: center;
+  line-height: 18px;
+  max-width: 100%;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.agreement-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.agreement-link {
+  font-size: 12px;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.password-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: white;
-  transition: all var(--transition-base);
 }
 
-.btn-guide-login:active {
-  transform: scale(0.96);
-  opacity: 0.9;
+.password-modal-content {
+  width: 300px;
+  background: var(--surface, #ffffff);
+  border-radius: 16px;
+  overflow: hidden;
 }
 
-/* ============================================
-   14. 用户信息引导卡片
-   ============================================ */
-.user-guide-card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-sm);
+.password-modal-header {
+  padding: 24px 24px 12px;
+  text-align: center;
 }
 
-.guide-content-row {
-  margin-bottom: var(--spacing-md);
-}
-
-.guide-info-text {
-  display: block;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+.password-modal-title {
+  font-size: 17px;
+  font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
 }
 
-.guide-hint-text {
-  display: block;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
+.password-modal-body {
+  padding: 8px 24px 16px;
 }
 
-.guide-actions-row {
+.password-modal-input-wrap {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
-.btn-guide-action {
-  padding: 8px 24px;
-  background: var(--primary-color);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: white;
-  transition: all var(--transition-base);
+.password-modal-input {
+  width: 100%;
+  height: 48px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0 40px 0 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  box-sizing: border-box;
 }
 
-.btn-guide-action:active {
-  transform: scale(0.96);
-  opacity: 0.9;
+.password-modal-input:focus {
+  border-color: var(--primary-color);
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(46, 184, 170, 0.2);
 }
 
-.btn-skip {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  padding: 8px 16px;
-}
-
-/* ============================================
-   15. 患者头像
-   ============================================ */
-.patient-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  margin-right: var(--spacing-sm);
-}
-
-.patient-name-wrap {
+.password-modal-eye {
+  position: absolute;
+  right: 8px;
+  width: 32px;
+  height: 32px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-modal-eye-img {
+  width: 18px;
+  height: 18px;
+}
+
+.password-modal-error {
+  margin-top: 8px;
+}
+
+.password-modal-error-text {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.password-modal-footer {
+  display: flex;
+  border-top: 1px solid var(--border-light);
+}
+
+.password-modal-btn {
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.password-modal-btn-cancel {
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-light);
+}
+
+.password-modal-btn-confirm {
+  color: var(--primary-color);
+  font-weight: 600;
 }

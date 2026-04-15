@@ -1,6 +1,6 @@
 const { api } = require('../../utils/api')
 const { showLoading, hideLoading, showToast } = require('../../utils/util')
-const { INDICATORS } = require('../../utils/constants')
+const { INDICATORS, calculateAbnormalLevel } = require('../../utils/constants')
 
 const KEY_INDICATORS = ['WBC', 'HGB', 'PLT', 'NEUT#']
 
@@ -17,6 +17,29 @@ Page({
   },
 
   onLoad() {
+    const app = getApp()
+    const patient = app.globalData.patientInfo || wx.getStorageSync('patientInfo')
+
+    if (!patient) {
+      wx.showModal({
+        title: '需要创建患者',
+        content: '请先创建患者档案，才能上传报告',
+        confirmText: '去创建',
+        cancelText: '返回',
+        confirmColor: '#14b8a6',
+        cancelColor: '#999',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/patient-create/patient-create' })
+          }
+        },
+        complete: () => {
+          wx.navigateBack()
+        }
+      })
+      return
+    }
+
     this.initIndicators()
     this.setData({ testTime: this.formatDate(new Date()) })
   },
@@ -55,7 +78,7 @@ Page({
       
       await this.handleOCR()
     } catch (error) {
-      console.log('用户取消选择图片')
+      // 用户取消选择图片
     }
   },
 
@@ -203,7 +226,7 @@ Page({
   async handleSave() {
     const { testTime, hospital, indicators, previewImage, fileID } = this.data
     const app = getApp()
-    const patient = app.globalData.patientInfo || wx.getStorageSync('patientInfo')
+    let patient = app.globalData.patientInfo || wx.getStorageSync('patientInfo')
     const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
 
     if (!patient) {
@@ -211,13 +234,35 @@ Page({
       return
     }
 
-    const patientId = patient.patient_id || patient._id
+    let patientId = patient._id || patient.patient_id
+
     if (!patientId) {
-      showToast('患者信息不完整，请重新创建档案')
-      return
+      try {
+        const { api } = require('../../utils/api')
+        const userId = userInfo?._id || userInfo?.user_id
+
+        if (userId) {
+          const res = await api.patients.get(userId)
+
+          if (res.data && res.data._id) {
+            patient = res.data
+            app.setPatientInfo(patient)
+            patientId = patient._id
+          }
+        }
+      } catch (e) {
+        console.error('重新加载患者信息失败:', e)
+      }
+
+      if (!patientId) {
+        showToast('患者信息异常，请在个人设置中重新创建')
+        return
+      }
     }
 
-    if (!userInfo || !userInfo.user_id) {
+    const userId = userInfo?._id || userInfo?.user_id
+
+    if (!userInfo || !userId) {
       showToast('用户信息不完整，请重新登录')
       return
     }
@@ -244,29 +289,29 @@ Page({
 
     try {
       const reportData = {
-        user_id: userInfo.user_id,
+        user_id: userId,
         patient_id: patientId,
         report_type: '血常规',
         test_time: testTime,
         test_hospital: hospital,
         raw_image_url: fileID || previewImage,
-        indicators: validIndicators.map(ind => ({
-          indicator_code: ind.code,
-          indicator_name: ind.name,
-          test_value: parseFloat(ind.value),
-          reference_min: INDICATORS.find(i => i.code === ind.code)?.min || 0,
-          reference_max: INDICATORS.find(i => i.code === ind.code)?.max || 0,
-          unit: ind.unit,
-          is_abnormal: false,
-          abnormal_level: 'normal'
-        }))
+        indicators: validIndicators.map(ind => {
+          const refIndicator = INDICATORS.find(i => i.code === ind.code)
+          const { is_abnormal, abnormal_level } = calculateAbnormalLevel(ind.code, ind.value)
+          return {
+            indicator_code: ind.code,
+            indicator_name: ind.name,
+            test_value: parseFloat(ind.value),
+            reference_min: refIndicator?.min || 0,
+            reference_max: refIndicator?.max || 0,
+            unit: ind.unit,
+            is_abnormal,
+            abnormal_level
+          }
+        })
       }
       
-      console.log('保存报告 - 请求数据:', reportData)
-      
       const res = await api.reports.create(reportData)
-      
-      console.log('保存报告 - 响应:', res)
 
       if (res.code === 0) {
         showToast('保存成功')

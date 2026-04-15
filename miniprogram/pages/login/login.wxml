@@ -10,10 +10,10 @@
   <view class="form-section">
     <view class="input-group">
       <text class="input-label">手机号</text>
-      <input 
-        class="input-field input-glow" 
-        type="number" 
-        placeholder="请输入11位手机号" 
+      <input
+        class="input-field input-glow"
+        type="number"
+        placeholder="请输入11位手机号"
         maxlength="11"
         value="{{phone}}"
         bindinput="onPhoneInput"
@@ -23,16 +23,16 @@
     <view class="input-group mt-3">
       <text class="input-label">密码</text>
       <view class="password-input-wrapper">
-        <input 
-          class="input-field password-input input-glow" 
-          type="{{showPassword ? 'text' : 'password'}}" 
+        <input
+          class="input-field password-input input-glow"
+          type="{{showPassword ? 'text' : 'password'}}"
           placeholder="请输入密码（至少6位）"
           value="{{password}}"
           bindinput="onPasswordInput"
         />
         <view class="password-toggle btn-press" bindtap="togglePassword">
-          <image 
-            src="{{showPassword ? '/images/eye-off.svg' : '/images/eye.svg'}}" 
+          <image
+            src="{{showPassword ? '/images/eye-off.svg' : '/images/eye.svg'}}"
             class="toggle-icon icon icon-sm"
           ></image>
         </view>
@@ -43,12 +43,26 @@
       {{isLoading ? '请稍候...' : '登录 / 注册'}}
     </button>
 
+    <view class="login-footer">
+      <text class="forgot-link" bindtap="goToResetPassword">忘记密码？</text>
+    </view>
+
+    <view class="divider-section">
+      <view class="divider-line"></view>
+      <text class="divider-text">或</text>
+      <view class="divider-line"></view>
+    </view>
+
+    <view class="wechat-login-hint">
+      <text class="hint-text">使用微信即可自动登录，无需输入账号密码</text>
+    </view>
+
     <view class="agreement-text">
       <text>登录即表示您同意相关服务条款</text>
     </view>
   </view>
 
-  <view class="disclaimer-section">
+  <view class="disclaimer">
     <text class="disclaimer-text">{{disclaimerText}}</text>
   </view>
 </view>

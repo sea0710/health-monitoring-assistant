@@ -4,7 +4,10 @@ const validatePhone = (phone) => {
 }
 
 const validatePassword = (password) => {
-  return password && password.length >= 6
+  if (!password || password.length < 6) return false
+  const hasLetter = /[a-zA-Z]/.test(password)
+  const hasNumber = /[0-9]/.test(password)
+  return hasLetter && hasNumber
 }
 
 const formatDate = (date) => {

@@ -9,47 +9,59 @@
    1. CSS变量定义 - 设计系统核心
    ============================================ */
 page {
-  /* 主色调系统 */
-  --primary-50: #f0fdfa;
-  --primary-100: #ccfbf1;
-  --primary-200: #99f6e4;
-  --primary-500: #14b8a6;
-  --primary-600: #0d9488;
-  --primary-700: #0f766e;
-  --primary-800: #115e59;
+  /* 主色调系统 - 蓝绿色 hsl(174, 60%, 45%) */
+  --primary-50: #f0fbf9;
+  --primary-100: #d4f3ee;
+  --primary-200: #a8e6dd;
+  --primary-500: #2eb8aa;
+  --primary-600: #279a8e;
+  --primary-700: #208173;
+  --primary-800: #19685d;
   
-  --primary-color: #14b8a6;
-  --primary-light: #5eead4;
-  --primary-dark: #0f766e;
+  --primary-color: #2eb8aa;
+  --primary-light: #6dd3c7;
+  --primary-dark: #208173;
   
-  /* 功能色 */
+  /* 功能色 - 医疗分级预警系统 */
   --success: #22c55e;
   --warning: #f59e0b;
-  --danger: #ef4444;
+  --danger: #f97415;
   --critical: #dc2626;
   
-  /* 功能色背景 */
-  --success-bg: rgba(34, 197, 94, 0.05);
-  --warning-bg: rgba(245, 158, 11, 0.05);
-  --danger-bg: rgba(239, 68, 68, 0.05);
-  --critical-bg: rgba(220, 38, 38, 0.05);
+  /* 功能色背景 - 10%透明度 */
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --danger-bg: rgba(249, 116, 21, 0.1);
+  --critical-bg: rgba(220, 38, 38, 0.1);
   
-  /* 背景与表面 */
-  --background: #f8faf9;
+  /* 功能色10%透明度 */
+  --success-10: rgba(34, 197, 94, 0.1);
+  --warning-10: rgba(245, 158, 11, 0.1);
+  --danger-10: rgba(249, 116, 21, 0.1);
+  --critical-10: rgba(220, 38, 38, 0.1);
+  
+  /* 功能色20%透明度 */
+  --success-20: rgba(34, 197, 94, 0.2);
+  --warning-20: rgba(245, 158, 11, 0.2);
+  --danger-20: rgba(249, 116, 21, 0.2);
+  --critical-20: rgba(220, 38, 38, 0.2);
+  
+  /* 背景与表面 - 暖调米灰 hsl(40, 20%, 98%) */
+  --background: #fbfaf8;
   --surface: #ffffff;
   --card: #ffffff;
-  --hover: #f3f4f6;
+  --hover: #f5f4f2;
   
   /* 文字颜色层级 */
-  --text-primary: #1f2937;
+  --text-primary: #2a2f3a;
   --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-muted: #73798c;
   --text-disabled: #d1d5db;
   
-  /* 边框与分割线 */
-  --border-color: #e5e7eb;
-  --border-light: #f3f4f6;
-  --divider-color: #f3f4f6;
+  /* 边框与分割线 - hsl(220, 13%, 90%) */
+  --border-color: #dde0e8;
+  --border-light: #eceef2;
+  --divider-color: #eceef2;
   
   /* 阴影系统 */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -61,7 +73,7 @@ page {
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
   
   /* 间距系统 */
@@ -116,9 +128,11 @@ page {
 .container {
   min-height: 100vh;
   padding: var(--spacing-lg);
-  padding-bottom: 120px;
+  padding-bottom: 0;
   background: var(--background);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ============================================
@@ -130,12 +144,11 @@ page {
   box-shadow: var(--shadow-sm);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
-  border: 1px solid var(--border-light);
   transition: box-shadow var(--transition-slow);
 }
 
-.card:hover {
-  box-shadow: var(--shadow-md);
+.card:active {
+  box-shadow: var(--shadow-sm);
 }
 
 .card-lg {
@@ -153,7 +166,7 @@ page {
   background: var(--primary-color);
   border-radius: var(--radius-full);
   border: none;
-  color: #ffffff;
+  color: var(--primary-foreground, #ffffff);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-wide);
@@ -174,8 +187,8 @@ page {
 }
 
 .btn-primary[disabled] {
-  background: var(--text-disabled);
-  color: #ffffff;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 次要按钮 */
@@ -185,7 +198,7 @@ page {
   background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   text-align: center;
@@ -244,6 +257,7 @@ page {
 .input-field:focus {
   border-color: var(--primary-color);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(46, 184, 170, 0.2);
 }
 
 .input-field::placeholder {
@@ -311,14 +325,20 @@ page {
 }
 
 /* ============================================
-   8. 免责声明
+   8. 免责声明 - 文档流底部（AGENTS.md §7.9）
    ============================================ */
 .disclaimer {
+  margin-top: auto;
   font-size: var(--font-size-xs);
   color: var(--text-muted);
+  opacity: 0.5;
   text-align: center;
-  padding: var(--spacing-lg);
+  padding: 24px 16px 16px;
   line-height: var(--line-height-relaxed);
+}
+
+.disclaimer-tabbar {
+  padding-bottom: calc(50px + env(safe-area-inset-bottom) + 16px);
 }
 
 /* ============================================
@@ -666,7 +686,7 @@ page {
 
 /* 输入框聚焦效果 */
 .input-glow:focus {
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  box-shadow: 0 0 0 2px rgba(46, 184, 170, 0.2);
 }
 
 /* 开关切换动画 */

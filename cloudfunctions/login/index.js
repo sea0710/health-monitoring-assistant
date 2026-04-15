@@ -8,6 +8,7 @@ const db = cloud.database()
 
 exports.main = async (event, context) => {
   const { action } = event
+  const _version = 2
   
   if (action === 'wechatLogin') {
     return await handleWechatLogin(event, context)
@@ -33,7 +34,23 @@ exports.main = async (event, context) => {
     return await handleResetPassword(event)
   }
 
-  return { code: 400, message: '未知操作类型' }
+  if (action === 'verifyPassword') {
+    return await handleVerifyPassword(event)
+  }
+
+  if (action === 'checkPasswordSet') {
+    return await handleCheckPasswordSet(event)
+  }
+
+  if (action === 'getUserInfo') {
+    return await handleGetUserInfo(event)
+  }
+
+  if (action === 'setSecurityQuestion') {
+    return await handleSetSecurityQuestion(event)
+  }
+
+  return { code: 400, message: '未知操作类型', _version }
 }
 
 async function handleWechatLogin(event, context) {
@@ -145,15 +162,24 @@ async function handlePhoneLogin(event) {
 }
 
 async function handleSetUserInfo(event) {
-  const { userId, nickname, avatarUrl } = event
+  const { userId, nickname, avatarUrl, avatar_url } = event
+  const finalAvatarUrl = avatarUrl || avatar_url
   
   try {
+    const updateData = {
+      updated_at: new Date()
+    }
+    
+    if (nickname !== undefined && nickname !== null) {
+      updateData.nickname = nickname
+    }
+    
+    if (finalAvatarUrl !== undefined && finalAvatarUrl !== null) {
+      updateData.avatar_url = finalAvatarUrl
+    }
+    
     await db.collection('users').doc(userId).update({
-      data: {
-        nickname: nickname,
-        avatar_url: avatarUrl,
-        updated_at: new Date()
-      }
+      data: updateData
     })
     
     const userResult = await db.collection('users').doc(userId).get()
@@ -173,27 +199,41 @@ async function handleSetPassword(event) {
   const { userId, password, questionId, answer } = event
   
   try {
-    const bcrypt = require('bcryptjs')
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const hashedAnswer = answer ? await bcrypt.hash(answer, 10) : ''
-    
-    const SECURITY_QUESTIONS = [
-      { id: 1, question: '您的小学学校名称？' },
-      { id: 2, question: '您的宠物名字？' },
-      { id: 3, question: '您母亲的生日？' },
-      { id: 4, question: '您出生的城市？' },
-      { id: 5, question: '您最喜欢的电影？' }
-    ]
-    
-    const questionObj = SECURITY_QUESTIONS.find(q => q.id === questionId)
+    const updateData = {
+      updated_at: new Date()
+    }
+
+    if (password === '') {
+      updateData.password = ''
+      updateData.security_question = ''
+      updateData.security_answer = ''
+      updateData.security_question_id = 0
+    } else {
+      const bcrypt = require('bcryptjs')
+      const hashedPassword = await bcrypt.hash(password, 10)
+      const hashedAnswer = answer ? await bcrypt.hash(answer, 10) : ''
+      
+      const SECURITY_QUESTIONS = [
+        { id: 1, question: '您的小学学校名称？' },
+        { id: 2, question: '您的宠物名字？' },
+        { id: 3, question: '您母亲的生日？' },
+        { id: 4, question: '您出生的城市？' },
+        { id: 5, question: '您最喜欢的电影？' }
+      ]
+      
+      const questionObj = SECURITY_QUESTIONS.find(q => q.id === questionId)
+      
+      updateData.password = hashedPassword
+      updateData.security_question = questionObj ? questionObj.question : ''
+      updateData.security_answer = hashedAnswer
+
+      if (questionId) {
+        updateData.security_question_id = questionId
+      }
+    }
     
     await db.collection('users').doc(userId).update({
-      data: {
-        password: hashedPassword,
-        security_question: questionObj ? questionObj.question : '',
-        security_answer: hashedAnswer,
-        updated_at: new Date()
-      }
+      data: updateData
     })
     
     return { code: 0, message: '密码设置成功' }
@@ -238,7 +278,8 @@ async function handleChangePassword(event) {
 }
 
 async function handleResetPassword(event) {
-  const { userId, answer, newPassword } = event
+  const { userId, answer, securityAnswer, newPassword } = event
+  const finalAnswer = answer || securityAnswer
   
   try {
     const userResult = await db.collection('users').doc(userId).get()
@@ -248,8 +289,12 @@ async function handleResetPassword(event) {
       return { code: 400, message: '未设置安全问题' }
     }
     
+    if (!finalAnswer) {
+      return { code: 400, message: '请输入安全问题的答案' }
+    }
+    
     const bcrypt = require('bcryptjs')
-    const isAnswerCorrect = await bcrypt.compare(answer, user.security_answer)
+    const isAnswerCorrect = await bcrypt.compare(finalAnswer, user.security_answer)
     
     if (!isAnswerCorrect) {
       return { code: 401, message: '安全问题答案错误' }
@@ -268,5 +313,149 @@ async function handleResetPassword(event) {
   } catch (error) {
     console.error('重置密码失败:', error)
     return { code: 500, message: '重置密码失败', error: error.message }
+  }
+}
+
+async function handleVerifyPassword(event) {
+  const { userId, password } = event
+  
+  try {
+    if (!userId || !password) {
+      return { code: 400, message: '参数不完整' }
+    }
+
+    const userResult = await db.collection('users').doc(userId).get()
+    if (!userResult.data) {
+      return { code: 404, message: '用户不存在' }
+    }
+
+    const user = userResult.data
+
+    if (!user.password) {
+      return { code: 0, data: { valid: true, hasPassword: false } }
+    }
+
+    const bcrypt = require('bcryptjs')
+    const isValid = await bcrypt.compare(password, user.password)
+
+    return {
+      code: 0,
+      data: { valid: isValid, hasPassword: true }
+    }
+  } catch (error) {
+    console.error('验证密码失败:', error)
+    return { code: 500, message: '验证密码失败', error: error.message }
+  }
+}
+
+async function handleCheckPasswordSet(event) {
+  const userId = event.userId || event
+  
+  try {
+    if (!userId) {
+      return { code: 400, message: '用户ID不能为空' }
+    }
+
+    const userResult = await db.collection('users').doc(userId).get()
+    
+    if (!userResult.data) {
+      return { code: 404, message: '用户不存在' }
+    }
+
+    const user = userResult.data
+    const hasPassword = !!user.password
+    const securityQuestionId = user.security_question_id || 0
+    const hasSecurityQuestion = securityQuestionId > 0 || !!(user.security_question && user.security_answer)
+
+    return {
+      code: 0,
+      data: {
+        hasPassword,
+        securityQuestionId,
+        hasSecurityQuestion
+      }
+    }
+  } catch (error) {
+    console.error('检查密码设置状态失败:', error)
+    return { code: 500, message: '检查密码设置状态失败' }
+  }
+}
+
+async function handleGetUserInfo(event) {
+  const userId = event.userId || event
+  
+  try {
+    if (!userId) {
+      return { code: 400, message: '用户ID不能为空' }
+    }
+
+    const userResult = await db.collection('users').doc(userId).get()
+    
+    if (!userResult.data) {
+      return { code: 404, message: '用户不存在' }
+    }
+
+    const user = userResult.data
+    return {
+      code: 0,
+      data: {
+        _id: user._id,
+        openid: user.openid,
+        nickname: user.nickname || '',
+        avatar_url: user.avatar_url || '',
+        hasPassword: !!user.password,
+        security_question_id: user.security_question_id || 0,
+        security_question: user.security_question || '',
+        hasSecurityQuestion: !!(user.security_question && user.security_answer)
+      }
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+    return { code: 500, message: '获取用户信息失败' }
+  }
+}
+
+async function handleSetSecurityQuestion(event) {
+  const { userId, securityQuestionId, securityAnswer } = event
+  
+  try {
+    if (!userId) {
+      return { code: 400, message: '用户ID不能为空' }
+    }
+
+    if (!securityQuestionId) {
+      return { code: 400, message: '请选择安全问题' }
+    }
+
+    if (!securityAnswer) {
+      return { code: 400, message: '请输入安全问题的答案' }
+    }
+
+    const bcrypt = require('bcryptjs')
+    const hashedAnswer = await bcrypt.hash(securityAnswer, 10)
+
+    const SECURITY_QUESTIONS = [
+      { id: 1, question: '您的小学学校名称？' },
+      { id: 2, question: '您的宠物名字？' },
+      { id: 3, question: '您母亲的生日？' },
+      { id: 4, question: '您出生的城市？' },
+      { id: 5, question: '您最喜欢的电影？' }
+    ]
+
+    const questionObj = SECURITY_QUESTIONS.find(q => q.id === securityQuestionId)
+
+    await db.collection('users').doc(userId).update({
+      data: {
+        security_question_id: securityQuestionId,
+        security_question: questionObj ? questionObj.question : '',
+        security_answer: hashedAnswer,
+        updated_at: new Date()
+      }
+    })
+
+    return { code: 0, message: '密保问题设置成功' }
+  } catch (error) {
+    console.error('设置密保问题失败:', error)
+    return { code: 500, message: '设置密保问题失败: ' + (error.message || '未知错误') }
   }
 }

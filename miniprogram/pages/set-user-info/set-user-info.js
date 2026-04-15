@@ -1,182 +1,127 @@
-const app = getApp()
+const { api } = require('../../utils/api')
+const { showToast, showLoading, hideLoading } = require('../../utils/util')
 
 Page({
   data: {
     avatarUrl: '',
-    avatarDisplayUrl: '',
     nickname: '',
-    tempAvatarUrl: '',
-    isSaving: false,
-    canSave: false
+    tempAvatarPath: '',
+    isLoading: false
   },
 
   onLoad() {
-    this.loadCurrentUserInfo()
-  },
-
-  loadCurrentUserInfo() {
-    const userInfo = app.getUserInfo()
-    
+    const app = getApp()
+    const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
     if (userInfo) {
       this.setData({
-        nickname: userInfo.nickname || '',
-        avatarUrl: userInfo.avatar_url || ''
+        avatarUrl: userInfo.avatar_url || '',
+        nickname: userInfo.nickname || ''
       })
-
-      if (userInfo.avatar_url) {
-        this.getAvatarDisplayUrl(userInfo.avatar_url)
-      }
     }
   },
 
-  async getAvatarDisplayUrl(fileID) {
-    try {
-      const res = await wx.cloud.getTempFileURL({
-        fileList: [fileID]
-      })
-      if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
-        this.setData({ avatarDisplayUrl: res.fileList[0].tempFileURL })
-      }
-    } catch (error) {
-      console.error('获取头像显示地址失败:', error)
-    }
-  },
-
-  async onChooseAvatar(e) {
+  onChooseAvatar(e) {
     const { avatarUrl } = e.detail
-    
-    if (!avatarUrl) return
+    if (avatarUrl) {
+      this.setData({
+        avatarUrl: avatarUrl,
+        tempAvatarPath: avatarUrl
+      })
+    }
+  },
 
-    this.setData({ 
-      tempAvatarUrl: avatarUrl,
-      avatarDisplayUrl: avatarUrl
-    })
-    this.checkCanSave()
+  onNicknameInput(e) {
+    this.setData({ nickname: e.detail.value })
   },
 
   onNicknameBlur(e) {
     const nickname = e.detail.value
-    this.setData({ nickname })
-    this.checkCanSave()
-  },
-
-  onSubmitNickname(e) {
-    const nickname = e.detail.value.nickname
     if (nickname) {
-      this.setData({ nickname })
-      this.checkCanSave()
+      this.setData({ nickname: nickname.trim() })
     }
   },
 
-  checkCanSave() {
-    const { nickname, tempAvatarUrl, avatarUrl } = this.data
-    const hasChanges = (nickname && nickname !== (app.getUserInfo()?.nickname || '')) ||
-                      !!tempAvatarUrl
-    
-    this.setData({ canSave: hasChanges || !!(nickname || tempAvatarUrl || avatarUrl) })
+  async uploadAvatar(filePath) {
+    if (!filePath) return ''
+
+    const cloudPath = 'avatars/' + Date.now() + '-' + Math.floor(Math.random() * 1000) + filePath.match(/\.\w+$/)[0]
+
+    try {
+      const res = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: filePath
+      })
+      return res.fileID
+    } catch (error) {
+      console.error('头像上传失败:', error)
+      throw error
+    }
   },
 
   async saveUserInfo() {
-    const { nickname, tempAvatarUrl, avatarUrl } = this.data
+    const { nickname, tempAvatarPath } = this.data
 
-    if (!nickname && !tempAvatarUrl && !avatarUrl) {
-      wx.showToast({
-        title: '请至少填写一项信息',
-        icon: 'none'
-      })
+    if (!nickname.trim()) {
+      showToast('请输入昵称')
       return
     }
 
-    const userInfo = app.getUserInfo()
-    if (!userInfo || !userInfo._id) {
-      wx.showToast({
-        title: '用户未登录，请重试',
-        icon: 'none'
-      })
-      return
-    }
-
-    this.setData({ isSaving: true })
-    wx.showLoading({ title: '保存中...', mask: true })
+    this.setData({ isLoading: true })
+    showLoading('保存中...')
 
     try {
-      let finalAvatarUrl = avatarUrl
+      const app = getApp()
+      const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
+      const userId = userInfo?.user_id
 
-      if (tempAvatarUrl) {
+      if (!userId) {
+        showToast('用户未登录，请重新登录')
+        setTimeout(() => {
+          wx.redirectTo({ url: '/pages/login/login' })
+        }, 1500)
+        return
+      }
+
+      let avatarFileId = userInfo.avatar_url || ''
+
+      if (tempAvatarPath) {
         try {
-          const uploadRes = await wx.cloud.uploadFile({
-            cloudPath: `avatars/${Date.now()}-${Math.random().toString(36).substr(2)}.jpg`,
-            filePath: tempAvatarUrl
-          })
-          finalAvatarUrl = uploadRes.fileID
+          avatarFileId = await this.uploadAvatar(tempAvatarPath)
         } catch (uploadError) {
-          console.error('头像上传失败:', uploadError)
-          wx.hideLoading()
-          wx.showToast({
-            title: '头像上传失败，请重试',
-            icon: 'none'
-          })
-          this.setData({ isSaving: false })
-          return
+          console.error('头像上传失败，继续保存其他信息:', uploadError)
         }
       }
 
-      const userId = userInfo._id
-
-      const res = await wx.cloud.callFunction({
-        name: 'login',
-        data: {
-          action: 'setUserInfo',
-          userId: userId,
-          nickname: nickname,
-          avatarUrl: finalAvatarUrl
-        }
+      const res = await api.auth.setUserInfo({
+        user_id: userId,
+        nickname: nickname.trim(),
+        avatar_url: avatarFileId
       })
 
-      if (!res.result) {
-        throw new Error('云函数无响应，请检查网络连接')
-      }
-
-      if (res.result.code === 0) {
-        const updatedUser = res.result.data
-        
+      if (res.code === 0) {
+        const updatedUser = {
+          ...userInfo,
+          nickname: nickname.trim(),
+          avatar_url: avatarFileId
+        }
         app.setUserInfo(updatedUser)
-        
-        wx.hideLoading()
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success'
-        })
+        app.globalData.hasUserInfo = true
+        app.globalData.needUserInfo = false
+
+        showToast('保存成功')
 
         setTimeout(() => {
           wx.navigateBack()
-        }, 1500)
+        }, 1000)
       } else {
-        throw new Error(res.result.message || '操作失败')
+        showToast(res.message || '保存失败')
       }
     } catch (error) {
       console.error('保存用户信息失败:', error)
-      wx.hideLoading()
-      
-      let errorMsg = '保存失败，请重试'
-      if (error.message.includes('登录')) {
-        errorMsg = '会话已过期，正在重新登录...'
-        setTimeout(() => {
-          app.autoLogin().then(() => {
-            wx.showToast({ title: '请重新操作', icon: 'none' })
-          }).catch(() => {})
-        }, 500)
-      } else if (error.message) {
-        errorMsg = error.message
-      }
-      
-      wx.showToast({
-        title: errorMsg,
-        icon: 'none',
-        duration: 2000
-      })
+      showToast('保存失败，请重试')
     } finally {
-      this.setData({ isSaving: false })
+      hideLoading()
+      this.setData({ isLoading: false })
     }
   }
 })

@@ -87,10 +87,10 @@
         </view>
       </view>
     </view>
+  </view>
 
-    <view class="disclaimer">
-      本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断
-    </view>
+  <view class="disclaimer">
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
   </view>
 
   <view class="fab-container">

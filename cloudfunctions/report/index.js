@@ -26,6 +26,8 @@ exports.main = async (event, context) => {
       return await createPatient(params)
     case 'updatePatient':
       return await updatePatient(params)
+    case 'deletePatient':
+      return await deletePatient(params)
     case 'getTrends':
       return await getTrends(params)
     case 'getBatchDetails':
@@ -301,7 +303,18 @@ async function createPatient(params) {
     return {
       code: 0,
       message: '创建成功',
-      data: { patient_id: result._id }
+      data: {
+        _id: result._id,
+        patient_id: result._id,
+        user_id,
+        name,
+        gender,
+        birthday: birthday || null,
+        tumor_type: tumor_type || null,
+        treatment_plan: treatment_plan || null,
+        created_at: new Date(),
+        updated_at: new Date()
+      }
     }
   } catch (error) {
     console.error('创建患者信息失败:', error)
@@ -314,6 +327,10 @@ async function createPatient(params) {
 
 async function updatePatient(params) {
   const { patient_id, name, gender, birthday, tumor_type, treatment_plan, chemotherapy_cycles, last_chemo_end_date } = params
+  
+  if (!patient_id) {
+    return { code: 400, message: '患者ID不能为空' }
+  }
   
   try {
     await db.collection('patients')
@@ -336,11 +353,45 @@ async function updatePatient(params) {
       message: '更新成功'
     }
   } catch (error) {
-    console.error('更新患者信息失败:', error)
+    console.error('更新患者信息失败:', error, 'patient_id:', patient_id)
+    
+    if (error.message && error.message.includes('does not exist')) {
+      return { code: 404, message: '患者记录不存在，请重新创建' }
+    }
+    
     return {
       code: 500,
-      message: '更新患者信息失败'
+      message: '更新患者信息失败: ' + (error.message || '未知错误')
     }
+  }
+}
+
+async function deletePatient(params) {
+  const { patientId } = params
+  
+  if (!patientId) {
+    return { code: 400, message: '患者ID不能为空' }
+  }
+  
+  try {
+    await db.collection('patients').doc(patientId).remove()
+    
+    const reportsResult = await db.collection('reports').where({ patient_id: patientId }).get()
+    const deletePromises = reportsResult.data.map(report => 
+      db.collection('reports').doc(report._id).remove()
+    )
+    await Promise.all(deletePromises)
+    
+    const remindersResult = await db.collection('reminders').where({ patient_id: patientId }).get()
+    const deleteReminderPromises = remindersResult.data.map(reminder => 
+      db.collection('reminders').doc(reminder._id).remove()
+    )
+    await Promise.all(deleteReminderPromises)
+    
+    return { code: 0, message: '删除成功' }
+  } catch (error) {
+    console.error('删除患者失败:', error)
+    return { code: 500, message: '删除患者失败: ' + (error.message || '未知错误') }
   }
 }
 

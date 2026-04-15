@@ -5,7 +5,8 @@
   min-height: 100vh;
   background: var(--background);
   padding: var(--spacing-lg);
-  padding-bottom: 120px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ============================================   2. 内容区域   ============================================ */
@@ -20,7 +21,6 @@
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
 }
 
 .input-row {
@@ -63,7 +63,6 @@
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
 }
 
 .card-title {
@@ -122,12 +121,13 @@
 
 .indicator-input {
   flex: 1;
-  height: 40px;
-  background: var(--hover);
+  height: 48px;
+  background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: 0 var(--spacing-md);
   font-size: var(--font-size-sm);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   color: var(--text-primary);
   text-align: right;
   margin-right: var(--spacing-sm);
@@ -137,6 +137,7 @@
   border-color: var(--primary-color);
   background: var(--surface);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(46, 184, 170, 0.2);
 }
 
 .indicator-range {
@@ -157,14 +158,6 @@
 }
 
 /* ============================================   7. 免责声明   ============================================ */
-.disclaimer {
-  padding: var(--spacing-lg);
-  text-align: center;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
-  margin: var(--spacing-lg);
-}
-
 .disclaimer-text {
   font-size: var(--font-size-xs);
   color: var(--text-muted);

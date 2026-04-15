@@ -118,5 +118,9 @@ Page({
 
   navigateToPatientCreate() {
     wx.redirectTo({ url: '/pages/patient-create/patient-create' })
+  },
+
+  goToResetPassword() {
+    wx.navigateTo({ url: '/pages/reset-password/reset-password' })
   }
 })

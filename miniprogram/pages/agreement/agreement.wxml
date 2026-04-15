@@ -1,0 +1,179 @@
+<view class="agreement-page">
+  <!-- 标签切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'terms' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="terms">
+      <text class="tab-text">用户服务协议</text>
+      <view class="tab-indicator" wx:if="{{activeTab === 'terms'}}"></view>
+    </view>
+    <view class="tab-item {{activeTab === 'privacy' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="privacy">
+      <text class="tab-text">隐私政策</text>
+      <view class="tab-indicator" wx:if="{{activeTab === 'privacy'}}"></view>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view class="content-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 用户服务协议 -->
+    <view class="content-wrapper" wx:if="{{activeTab === 'terms'}}">
+      <view class="update-date">更新日期：2026年4月14日</view>
+      <view class="update-date">生效日期：2026年4月14日</view>
+
+      <view class="section">
+        <text class="section-title">一、总则</text>
+        <text class="section-text">欢迎您使用「愈见·血常规监测助手」（以下简称"本产品"）。本产品由个人开发者运营，仅供内部测试与健康科普参考使用。</text>
+        <text class="section-text">请您在使用本产品前，仔细阅读并充分理解本协议。您一旦使用本产品，即视为您已阅读并同意本协议的约束。如果您不同意本协议的任何内容，请立即停止使用本产品。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">二、服务内容</text>
+        <text class="section-text">本产品为肿瘤患者及家属提供以下服务：</text>
+        <text class="section-text">1. 血常规报告图片上传与OCR识别：通过拍照或选择相册图片，自动识别血常规报告中的各项指标数据；</text>
+        <text class="section-text">2. 指标解读：基于识别结果，对异常指标进行分级标注与健康科普解读；</text>
+        <text class="section-text">3. 趋势分析：对历史检测数据进行可视化趋势展示，辅助长期监测；</text>
+        <text class="section-text">4. 复查提醒：帮助用户设置复查时间提醒，避免遗漏重要检查。</text>
+        <text class="section-text important-text">本产品提供的所有内容仅供健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断。如有健康问题，请务必咨询专业医疗机构。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">三、用户账号</text>
+        <text class="section-text">1. 本产品通过微信授权登录，使用您的微信OpenID作为系统唯一标识；</text>
+        <text class="section-text">2. 您可以选择通过微信头像昵称填写能力设置昵称和头像，该信息为可选项；</text>
+        <text class="section-text">3. 您应妥善保管自己的微信账号，因账号保管不善造成的损失由您自行承担；</text>
+        <text class="section-text">4. 您不得将账号出借、赠与、出售或以其他方式许可他人使用。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">四、用户行为规范</text>
+        <text class="section-text">您在使用本产品时，应遵守以下规范：</text>
+        <text class="section-text">1. 遵守中华人民共和国相关法律法规；</text>
+        <text class="section-text">2. 不得上传虚假、伪造的血常规报告数据；</text>
+        <text class="section-text">3. 不得利用本产品从事任何违法违规活动；</text>
+        <text class="section-text">4. 不得对本产品进行反编译、反汇编或其他逆向工程；</text>
+        <text class="section-text">5. 不得以任何方式干扰本产品的正常运行。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">五、免责声明</text>
+        <text class="section-text">1. 本产品OCR识别结果可能存在误差，您应在使用前核实识别数据的准确性；</text>
+        <text class="section-text">2. 本产品的指标解读基于公开的医学参考范围，仅为科普性质，不构成医疗诊断或治疗建议；</text>
+        <text class="section-text">3. 因网络环境、设备差异等因素导致的服务中断或数据丢失，运营方不承担责任；</text>
+        <text class="section-text">4. 您基于本产品信息做出的任何决策，由您自行承担全部责任。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">六、服务变更与终止</text>
+        <text class="section-text">1. 运营方有权根据需要修改、暂停或终止本产品的部分或全部服务；</text>
+        <text class="section-text">2. 重大变更将通过产品内通知的方式告知用户；</text>
+        <text class="section-text">3. 本协议的修改自公布之日起生效，继续使用本产品即视为同意修改后的协议。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">七、法律适用与争议解决</text>
+        <text class="section-text">本协议的订立、执行和解释均适用中华人民共和国法律。如发生争议，双方应友好协商解决；协商不成的，任何一方均可向运营方所在地有管辖权的人民法院提起诉讼。</text>
+      </view>
+    </view>
+
+    <!-- 隐私政策 -->
+    <view class="content-wrapper" wx:if="{{activeTab === 'privacy'}}">
+      <view class="update-date">更新日期：2026年4月14日</view>
+      <view class="update-date">生效日期：2026年4月14日</view>
+
+      <view class="section">
+        <text class="section-title">一、我们如何收集和使用您的个人信息</text>
+        <text class="section-text">「愈见·血常规监测助手」由个人开发者运营。我们深知个人信息对您的重要性，将按照法律法规的规定，保护您的个人信息及隐私安全。</text>
+        <text class="section-text">我们会收集以下信息用于产品核心功能的运行：</text>
+
+        <view class="info-table">
+          <view class="info-row info-header-row">
+            <text class="info-cell info-cell-name">信息类型</text>
+            <text class="info-cell info-cell-desc">说明</text>
+            <text class="info-cell info-cell-required">是否必填</text>
+          </view>
+          <view class="info-row">
+            <text class="info-cell info-cell-name">微信OpenID</text>
+            <text class="info-cell info-cell-desc">系统唯一标识，用于账号识别与数据关联</text>
+            <text class="info-cell info-cell-required">是</text>
+          </view>
+          <view class="info-row">
+            <text class="info-cell info-cell-name">用户昵称</text>
+            <text class="info-cell info-cell-desc">通过微信头像昵称填写能力获取，用于个性化展示</text>
+            <text class="info-cell info-cell-required">否</text>
+          </view>
+          <view class="info-row">
+            <text class="info-cell info-cell-name">用户头像</text>
+            <text class="info-cell info-cell-desc">通过微信头像昵称填写能力获取，用于个性化展示</text>
+            <text class="info-cell info-cell-required">否</text>
+          </view>
+          <view class="info-row">
+            <text class="info-cell info-cell-name">血常规报告数据</text>
+            <text class="info-cell info-cell-desc">您主动上传的报告图片及OCR识别结果</text>
+            <text class="info-cell info-cell-required">否</text>
+          </view>
+          <view class="info-row">
+            <text class="info-cell info-cell-name">患者档案信息</text>
+            <text class="info-cell info-cell-desc">您主动填写的患者姓名等基础信息</text>
+            <text class="info-cell info-cell-required">否</text>
+          </view>
+        </view>
+
+        <text class="section-text subtitle-text">我们不会收集以下信息：</text>
+        <text class="section-text">- 手机号码：我们不会请求或收集您的手机号码；</text>
+        <text class="section-text">- 地理位置：我们不会获取您的位置信息；</text>
+        <text class="section-text">- 通讯录：我们不会读取您的通讯录数据。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">二、我们如何使用您的个人信息</text>
+        <text class="section-text">我们收集的信息将用于以下目的：</text>
+        <text class="section-text">1. 血常规报告OCR识别：对您上传的报告图片进行文字识别，提取结构化指标数据；</text>
+        <text class="section-text">2. 指标解读：基于识别结果，提供异常指标分级标注与健康科普解读；</text>
+        <text class="section-text">3. 趋势分析：对您的历史检测数据进行可视化趋势展示，辅助长期健康监测；</text>
+        <text class="section-text">4. 复查提醒：根据您设置的提醒时间，发送复查提醒通知；</text>
+        <text class="section-text">5. 账号管理：识别您的身份，保障数据安全与账号归属。</text>
+        <text class="section-text">我们不会将您的个人信息用于上述目的以外的其他用途。如需扩展使用范围，我们将再次征得您的同意。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">三、我们如何存储和保护您的个人信息</text>
+        <text class="section-text">1. 数据存储：您的个人信息存储在微信云开发平台（基于阿里云基础设施），数据存储于中华人民共和国境内；</text>
+        <text class="section-text">2. 安全措施：我们采用bcrypt算法对敏感信息（如密码、安全问题答案）进行加密存储，确保即使数据被非法获取也无法还原明文；</text>
+        <text class="section-text">3. 访问控制：仅授权的开发者账号可以访问云数据库，且访问操作有完整的日志记录；</text>
+        <text class="section-text">4. 数据保留：在您使用本产品期间，我们将保留您的个人信息。如您注销账号或要求删除数据，我们将在合理期限内完成删除。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">四、我们如何共享、转让和公开披露您的个人信息</text>
+        <text class="section-text">1. 我们不会将您的个人信息出售给任何第三方；</text>
+        <text class="section-text">2. 我们不会与任何第三方共享您的个人信息，除非获得您的明确同意；</text>
+        <text class="section-text">3. 在以下法定情形下，我们可能会共享您的个人信息：与国家安全、国防安全直接相关的；与公共安全、公共卫生、重大公共利益直接相关的；与刑事侦查、起诉、审判和判决执行等直接相关的；法律法规规定的其他情形。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">五、您的权利</text>
+        <text class="section-text">根据相关法律法规，您享有以下权利：</text>
+        <text class="section-text">1. 查询和更正：您可以在产品内查看和修改您的个人信息；</text>
+        <text class="section-text">2. 删除：您可以请求我们删除您的个人信息，我们将在合理期限内完成；</text>
+        <text class="section-text">3. 撤回同意：您可以撤回之前给予的授权同意，撤回后我们将不再处理相应的个人信息；</text>
+        <text class="section-text">4. 注销账号：您可以申请注销账号，注销后我们将删除或匿名化处理您的个人信息。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">六、未成年人保护</text>
+        <text class="section-text">本产品主要面向成年肿瘤患者及家属。如果我们发现在未获得法定监护人同意的情况下收集了未成年人的个人信息，我们将尽快删除相关信息。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">七、隐私政策的更新</text>
+        <text class="section-text">我们可能会适时修订本隐私政策。当政策条款发生重大变更时，我们会通过产品内通知的方式告知您。若您在政策修订后继续使用本产品，即视为您同意修订后的隐私政策。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">八、联系我们</text>
+        <text class="section-text">如您对本隐私政策有任何疑问、意见或建议，请通过本产品内的反馈渠道与我们联系。我们将在收到您的反馈后尽快处理并回复。</text>
+      </view>
+    </view>
+
+    <!-- 底部安全区 -->
+    <view class="bottom-safe-area"></view>
+  </scroll-view>
+</view>

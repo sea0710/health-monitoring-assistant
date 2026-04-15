@@ -59,7 +59,7 @@
     </view>
   </view>
 
-  <view class="disclaimer">
+  <view class="disclaimer disclaimer-tabbar">
     <text class="disclaimer-text">{{disclaimer}}</text>
   </view>
 </view>

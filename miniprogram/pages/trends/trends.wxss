@@ -10,8 +10,10 @@
 .container {
   min-height: 100vh;
   padding: var(--spacing-lg);
-  padding-bottom: 100px;
+  padding-bottom: 0;
   background: var(--background);
+  display: flex;
+  flex-direction: column;
 }
 
 /* ============================================
@@ -62,7 +64,6 @@
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
 }
 
 .chart-info {
@@ -99,7 +100,6 @@
   background: var(--surface);
   border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-lg);
-  border: 1px solid var(--border-light);
 }
 
 .empty-icon {
@@ -129,7 +129,6 @@
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
 }
 
 .table-title {
@@ -177,23 +176,19 @@
 }
 
 .status-dot.normal {
-  background: #10b981;
+  background: var(--success);
 }
 
 .status-dot.warning {
-  background: #fbbf24;
+  background: var(--warning);
 }
 
-.status-dot.danger2 {
-  background: #f97316;
-}
-
-.status-dot.danger3 {
-  background: #ef4444;
+.status-dot.danger {
+  background: var(--danger);
 }
 
 .status-dot.critical {
-  background: #991b1b;
+  background: var(--critical);
 }
 
 .status-text {
@@ -202,103 +197,26 @@
 }
 
 .status-text.normal {
-  color: #10b981;
+  color: var(--success);
 }
 
 .status-text.warning {
-  color: #d97706;
+  color: var(--warning);
 }
 
-.status-text.danger2 {
-  color: #ea580c;
-}
-
-.status-text.danger3 {
-  color: #dc2626;
+.status-text.danger {
+  color: var(--danger);
 }
 
 .status-text.critical {
-  color: #991b1b;
+  color: var(--critical);
 }
 
 /* ============================================
    7. 免责声明
    ============================================ */
-.disclaimer {
-  padding: var(--spacing-lg);
-  text-align: center;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
-  margin: var(--spacing-lg);
-}
-
 .disclaimer-text {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   line-height: var(--line-height-relaxed);
-}
-
-/* ============================================
-   8. 未登录引导
-   ============================================ */
-.guest-guide {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px var(--spacing-lg);
-  background: var(--surface);
-  border-radius: var(--radius-xl);
-  margin-top: var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.guest-icon {
-  font-size: 56px;
-  margin-bottom: var(--spacing-md);
-}
-
-.guest-title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
-  display: block;
-}
-
-.guest-desc {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
-  display: block;
-}
-
-.btn-guide {
-  width: 200px;
-  height: 48px;
-  background: var(--primary-color);
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: white;
-  transition: all var(--transition-base);
-}
-
-.btn-guide:active {
-  transform: scale(0.96);
-  opacity: 0.9;
-}
-
-.btn-upload {
-  margin-top: var(--spacing-md);
-  padding: 10px 24px;
-  background: var(--primary-50);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--primary-color);
 }

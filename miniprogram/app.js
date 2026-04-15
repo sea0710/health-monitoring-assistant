@@ -1,169 +1,130 @@
+// app.js
 App({
   globalData: {
     userInfo: null,
+    patient: null,
     patientInfo: null,
-    token: null,
-    openid: null,
     hasLogin: false,
-    needUserInfo: false,
-    hasUserInfo: false
+    cloudReady: false
   },
 
   onLaunch() {
-    wx.cloud.init({
-      env: 'cloud1-1gbuq7na412c0c74',
-      traceUser: true
-    })
-    this.autoLogin()
+    this.initCloud()
   },
 
-  async autoLogin() {
+  async initCloud() {
     try {
-      const cachedUser = wx.getStorageSync('userInfo')
-      const cachedOpenid = wx.getStorageSync('openid')
-      
-      if (cachedUser && cachedOpenid) {
-        this.globalData.userInfo = cachedUser
-        this.globalData.openid = cachedOpenid
-        this.globalData.hasLogin = true
-        this.globalData.hasUserInfo = !!(cachedUser.nickname && cachedUser.avatar_url)
-        
-        if (!this.globalData.hasUserInfo) {
-          this.globalData.needUserInfo = true
-        }
-        
-        this.silentRefreshLogin()
-        return
-      }
-
-      const loginRes = await new Promise((resolve, reject) => {
-        wx.login({ success: resolve, fail: reject })
-      })
-
-      const res = await wx.cloud.callFunction({
-        name: 'login',
-        data: { action: 'wechatLogin', code: loginRes.code }
-      })
-
-      if (res.result && res.result.code === 0) {
-        const data = res.result.data
-        this.globalData.userInfo = data.user
-        this.globalData.openid = data.openid
-        this.globalData.hasLogin = true
-        this.globalData.hasUserInfo = data.hasUserInfo || false
-
-        wx.setStorageSync('userInfo', data.user)
-        wx.setStorageSync('openid', data.openid)
-
-        if (!this.globalData.hasUserInfo) {
-          this.globalData.needUserInfo = true
-        }
-      } else {
-        this.globalData.hasLogin = false
-      }
+      wx.cloud.init({ traceUser: true })
+      this.globalData.cloudReady = true
     } catch (error) {
-      console.error('自动登录失败:', error)
-      this.globalData.hasLogin = false
+      console.error('云服务初始化失败:', error)
+    }
+    this.checkLoginStatus()
+  },
+
+  checkLoginStatus() {
+    const userInfo = wx.getStorageSync('userInfo')
+    if (userInfo) {
+      this.globalData.userInfo = userInfo
+      this.globalData.hasLogin = true
+      this.globalData.patientInfo = wx.getStorageSync('patientInfo') || null
     }
   },
 
-  silentRefreshLogin() {
-    try {
-      wx.login({
-        success: (loginRes) => {
-          wx.cloud.callFunction({
-            name: 'login',
-            data: { action: 'wechatLogin', code: loginRes.code }
-          }).then((res) => {
-            if (res.result && res.result.code === 0) {
-              const data = res.result.data
-              this.setUserInfo(data.user)
-              wx.setStorageSync('openid', data.openid)
-            }
-          }).catch(() => {})
-        }
-      })
-    } catch (e) {}
-  },
-
-  onError(error) {
-    console.error('[全局错误]', error)
-    const errorInfo = this.parseError(error)
-    this.reportError(errorInfo)
-  },
-
-  onPageNotFound(res) {
-    console.error('[页面不存在]', res)
-    wx.redirectTo({
-      url: '/pages/home/home'
-    })
-  },
-
-  parseError(error) {
-    if (typeof error === 'string') {
-      return {
-        message: error,
-        stack: '',
-        time: new Date().toISOString()
-      }
-    }
-    return {
-      message: error.message || '未知错误',
-      stack: error.stack || '',
-      time: new Date().toISOString()
+  setUserInfo(userInfo) {
+    this.globalData.userInfo = userInfo
+    this.globalData.hasLogin = !!userInfo
+    if (userInfo) {
+      wx.setStorageSync('userInfo', userInfo)
+    } else {
+      wx.removeStorageSync('userInfo')
     }
   },
 
-  reportError(errorInfo) {
-    console.error('[错误上报]', errorInfo)
-  },
-
-  setToken(token) {
-    this.globalData.token = token
-    wx.setStorageSync('token', token)
-  },
-
-  setUserInfo(user) {
-    this.globalData.userInfo = user
-    wx.setStorageSync('userInfo', user)
-    if (user) {
-      this.globalData.hasUserInfo = !!(user.nickname && user.avatar_url)
-      if (!this.globalData.hasUserInfo) {
-        this.globalData.needUserInfo = true
-      } else {
-        this.globalData.needUserInfo = false
-      }
+  setPatientInfo(patientInfo) {
+    this.globalData.patientInfo = patientInfo
+    this.globalData.patient = patientInfo
+    if (patientInfo) {
+      wx.setStorageSync('patientInfo', patientInfo)
+    } else {
+      wx.removeStorageSync('patientInfo')
     }
-  },
-
-  setPatientInfo(patient) {
-    this.globalData.patientInfo = patient
-    wx.setStorageSync('patientInfo', patient)
-  },
-
-  getToken() {
-    return this.globalData.token || wx.getStorageSync('token')
-  },
-
-  getUserInfo() {
-    return this.globalData.userInfo || wx.getStorageSync('userInfo')
-  },
-
-  getPatientInfo() {
-    return this.globalData.patientInfo || wx.getStorageSync('patientInfo')
   },
 
   clearUserInfo() {
     this.globalData.userInfo = null
-    this.globalData.patientInfo = null
-    this.globalData.token = null
-    this.globalData.openid = null
     this.globalData.hasLogin = false
-    this.globalData.needUserInfo = false
-    this.globalData.hasUserInfo = false
+    this.globalData.patientInfo = null
+    this.globalData.patient = null
     wx.removeStorageSync('userInfo')
     wx.removeStorageSync('patientInfo')
-    wx.removeStorageSync('token')
-    wx.removeStorageSync('openid')
+  },
+
+  async loadPatientInfo(userId) {
+    try {
+      const { api } = require('./utils/api')
+      const patientRes = await api.patients.get(userId)
+      if (patientRes.code === 0 && patientRes.data) {
+        this.setPatientInfo(patientRes.data)
+      }
+    } catch (e) {
+      console.error('加载患者信息失败:', e)
+    }
+  },
+
+  async performLogin() {
+    try {
+      const loginRes = await wx.login()
+      if (!loginRes.code) throw new Error('wx.login 失败')
+
+      const { api } = require('./utils/api')
+      const res = await api.auth.wechatLogin(loginRes.code)
+
+      if (res.code === 0 && res.data) {
+        const userData = res.data.user || res.data
+        userData._id = userData._id || res.data.user_id
+
+        if (userData.password) {
+          const checkRes = await api.auth.checkPasswordSet(userData._id)
+          if (checkRes.code === 0 && checkRes.data && checkRes.data.hasPassword) {
+            const verified = await this.promptPassword(userData)
+            if (!verified) {
+              return null
+            }
+          }
+        }
+
+        this.setUserInfo(userData)
+
+        try {
+          const patientRes = await api.patients.get(userData._id || res.data.user_id)
+          if (patientRes.code === 0 && patientRes.data) {
+            this.setPatientInfo(patientRes.data)
+          }
+        } catch (e) {
+          console.error('加载患者信息失败:', e)
+        }
+
+        return res.data
+      }
+      throw new Error(res.message || '登录失败')
+    } catch (error) {
+      console.error('微信一键登录失败:', error)
+      throw error
+    }
+  },
+
+  promptPassword(user) {
+    return new Promise((resolve) => {
+      wx.hideLoading()
+      const pages = getCurrentPages()
+      const currentPage = pages[pages.length - 1]
+      
+      if (currentPage && currentPage.showPasswordModal) {
+        currentPage.showPasswordModal(user, resolve)
+      } else {
+        resolve(false)
+      }
+    })
   }
 })

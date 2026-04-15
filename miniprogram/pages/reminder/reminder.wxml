@@ -1,17 +1,5 @@
 <view class="container page-enter">
 
-  <!-- 未登录引导 -->
-  <view class="guest-guide" wx:if="{{!hasLogin}}">
-    <text class="guest-icon icon icon-xl">🔔</text>
-    <text class="guest-title">复查提醒</text>
-    <text class="guest-desc">登录后可设置复查提醒，及时了解复查时间</text>
-    <button class="btn-guide btn-press" bindtap="handleGuideLogin">
-      开始使用
-    </button>
-  </view>
-
-  <!-- 已登录内容 -->
-  <block wx:if="{{hasLogin}}">
   <view class="rule-config-card">
     <view class="mode-switch">
       <view class="mode-option {{mode === 'blood_routine' ? 'active' : ''}} btn-press" bindtap="handleModeChange" data-mode="blood_routine">血常规复查</view>
@@ -21,7 +9,7 @@
     <block wx:if="{{mode === 'blood_routine'}}">
       <view class="config-section">
         <view class="config-title-row">
-          <text class="config-icon icon icon-md">📅</text>
+          <image src="/images/icon-reminder.svg" class="config-icon-img"></image>
           <text class="config-title">化疗结束时间</text>
         </view>
         <view class="form-label">最近一次化疗结束日期 <text class="required">*</text></view>
@@ -34,7 +22,7 @@
         <view class="quick-hint" wx:if="{{chemoEndDate}}">基于化疗结束时间（{{chemoEndDate}})</view>
         <view class="quick-hint-placeholder" wx:else>基于化疗结束时间</view>
         <view class="quick-btn btn-press {{!chemoEndDate ? 'disabled' : ''}}" bindtap="handleQuickCreateBlood">
-          <text class="quick-btn-icon icon icon-sm">🔔</text>
+          <image src="/images/icon-reminder.svg" class="quick-btn-icon-img"></image>
           <text class="quick-btn-text">一键设置复查提醒（+6天、+13天）</text>
         </view>
       </view>
@@ -43,7 +31,7 @@
     <block wx:if="{{mode === 'other_review'}}">
       <view class="config-section">
         <view class="config-title-row">
-          <text class="config-icon icon icon-md">📅</text>
+          <image src="/images/icon-reminder.svg" class="config-icon-img"></image>
           <text class="config-title">其他复查</text>
         </view>
         <view class="form-label">上次复查时间 <text class="required">*</text></view>
@@ -63,7 +51,7 @@
         <view class="quick-hint" wx:if="{{lastReviewDate && frequencyIndex >= 0}}">下次复查时间:{{nextReviewPreview}}</view>
         <view class="quick-hint-placeholder" wx:else>基于上次复查时间和频率</view>
         <view class="quick-btn btn-press {{!lastReviewDate || frequencyIndex < 0 ? 'disabled' : ''}}" bindtap="handleQuickCreateOther">
-          <text class="quick-btn-icon icon icon-sm">🔔</text>
+          <image src="/images/icon-reminder.svg" class="quick-btn-icon-img"></image>
           <text class="quick-btn-text">一键设置复查提醒（复查前5天提醒）</text>
         </view>
       </view>
@@ -73,7 +61,7 @@
   <view class="pending-section">
     <view class="section-header">
       <view class="section-left">
-        <text class="section-icon icon icon-md">🔔</text>
+        <text class="section-icon"><image src="/images/icon-reminder.svg" class="section-icon-img"></image></text>
         <text class="section-title">待提醒</text>
         <view class="count-badge badge-pulse" wx:if="{{pendingReminders.length > 0}}">{{pendingReminders.length}}</view>
       </view>
@@ -123,7 +111,7 @@
     </view>
 
     <view class="empty-state" wx:else>
-      <view class="empty-bell icon icon-xl floating">🔔</view>
+      <image src="/images/icon-reminder-empty.svg" class="empty-state-icon"></image>
       <text class="empty-title">暂无待提醒</text>
       <text class="empty-desc">点击"一键设置"或手动添加</text>
     </view>
@@ -132,7 +120,7 @@
   <view class="history-section" wx:if="{{historyReminders.length > 0}}">
     <view class="section-header history-header">
       <view class="section-left">
-        <text class="section-icon history-icon icon icon-md">🕐</text>
+        <text class="section-icon history-icon"><image src="/images/icon-history.svg" class="section-icon-img"></image></text>
         <text class="section-title history-title">历史提醒</text>
         <view class="count-badge history-badge">{{historyReminders.length}}</view>
       </view>
@@ -157,13 +145,7 @@
     </view>
   </view>
 
-  <view class="logout-section btn-press" bindtap="handleLogout">
-    <text class="logout-icon icon icon-md">↩</text>
-    <text class="logout-text">退出登录</text>
-  </view>
-  </block>
-
-  <view class="disclaimer">
+  <view class="disclaimer disclaimer-tabbar">
     <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
   </view>
 </view>

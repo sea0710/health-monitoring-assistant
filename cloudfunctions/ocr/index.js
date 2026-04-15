@@ -6,12 +6,16 @@ cloud.init({
 })
 
 const OCR_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation'
-const OCR_API_KEY = '' // 请在部署时设置为实际的API密钥
+const OCR_API_KEY = process.env.DASHSCOPE_API_KEY || 'sk-501911f371d34d4f8da2959bd70b01f5'
 const OCR_MODEL = 'qwen-vl-plus'
 
 exports.main = async (event, context) => {
   const { fileID } = event
-  
+
+  if (!OCR_API_KEY || OCR_API_KEY === '') {
+    return { code: 503, message: 'OCR服务未配置API密钥，请联系管理员' }
+  }
+
   try {
     if (!fileID) {
       return { code: 400, message: '请提供图片文件ID' }
@@ -67,7 +71,13 @@ exports.main = async (event, context) => {
     {"name": "C-反应蛋白", "code": "CRP", "value": 数值, "unit": "单位"}
   ]
 }
-如果某项指标未检测或无法识别，请将value设为null。请直接输出JSON，不要有其他文字。` }
+重要提示：
+1. value字段必须填写报告中的"检测结果"列的数值，不是参考范围、不是单位中的数字
+2. 例如血小板(PLT)的检测结果通常是100-400之间的整数，如果报告显示349，value应该是349
+3. WBC、NEUT#、LYMPH#等指标的value通常是0.5-20之间的小数
+4. HGB的value通常是80-180之间的整数
+5. 如果某项指标未检测或无法识别，请将value设为null
+6. 请直接输出JSON，不要有其他文字` }
             ]
           }]
         }
@@ -449,24 +459,44 @@ function extractBloodTestData(text) {
     
     // 直接在整个文本中搜索指标
     // 使用[\s\S]*?匹配任意字符（包括换行），?表示非贪婪匹配
-    const regex = new RegExp(`(${aliasPattern})[\s\S]*?(\d+\.?\d*)`, 'i')
+    const regex = new RegExp(`(${aliasPattern})[\\s\\S]*?(\\d+\\.?\\d*)`, 'i')
     const match = text.match(regex)
     
     if (match) {
-      console.log('Match found for', ind.code, ':', match[0], 'value:', match[2])
       const value = parseFloat(match[2])
       if (!isNaN(value) && value >= 0) {
-        result.indicators.push({
-          indicator_code: ind.code,
-          indicator_name: ind.name,
-          test_value: value,
-          reference_min: ind.min,
-          reference_max: ind.max,
-          unit: ind.unit
-        })
-        // 标记已匹配
-        matchedCodes.add(ind.code)
-        console.log('Matched indicator:', ind.code, 'with value:', value)
+        const isValidRange = value >= ind.min * 0.1 && value <= ind.max * 10
+        if (isValidRange) {
+          result.indicators.push({
+            indicator_code: ind.code,
+            indicator_name: ind.name,
+            test_value: value,
+            reference_min: ind.min,
+            reference_max: ind.max,
+            unit: ind.unit
+          })
+          matchedCodes.add(ind.code)
+          console.log('Matched indicator:', ind.code, 'with value:', value)
+        } else {
+          console.log('Value out of range for', ind.code, ':', value, 'expected range:', ind.min, '-', ind.max)
+          const lineRegex = new RegExp(`(${aliasPattern})[^\\n]*?(\\d+\\.?\\d+)`, 'i')
+          const lineMatch = text.match(lineRegex)
+          if (lineMatch) {
+            const lineValue = parseFloat(lineMatch[2])
+            if (!isNaN(lineValue) && lineValue >= ind.min * 0.1 && lineValue <= ind.max * 10) {
+              result.indicators.push({
+                indicator_code: ind.code,
+                indicator_name: ind.name,
+                test_value: lineValue,
+                reference_min: ind.min,
+                reference_max: ind.max,
+                unit: ind.unit
+              })
+              matchedCodes.add(ind.code)
+              console.log('Line matched indicator:', ind.code, 'with value:', lineValue)
+            }
+          }
+        }
       }
     }
   }

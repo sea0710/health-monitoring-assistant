@@ -1,6 +1,6 @@
 const { api } = require('../../utils/api')
 const { showLoading, hideLoading, showToast } = require('../../utils/util')
-const { INDICATORS } = require('../../utils/constants')
+const { INDICATORS, calculateAbnormalLevel } = require('../../utils/constants')
 
 const KEY_INDICATORS = ['WBC', 'HGB', 'PLT', 'NEUT#']
 
@@ -123,16 +123,19 @@ Page({
         reportId: reportId,
         test_time: testTime,
         test_hospital: hospital,
-        indicators: validIndicators.map(ind => ({
-          indicator_code: ind.indicator_code,
-          indicator_name: ind.indicator_name,
-          test_value: parseFloat(ind.test_value),
-          reference_min: ind.reference_min,
-          reference_max: ind.reference_max,
-          unit: ind.unit,
-          is_abnormal: false,
-          abnormal_level: 'normal'
-        }))
+        indicators: validIndicators.map(ind => {
+          const { is_abnormal, abnormal_level } = calculateAbnormalLevel(ind.indicator_code, ind.test_value)
+          return {
+            indicator_code: ind.indicator_code,
+            indicator_name: ind.indicator_name,
+            test_value: parseFloat(ind.test_value),
+            reference_min: ind.reference_min,
+            reference_max: ind.reference_max,
+            unit: ind.unit,
+            is_abnormal,
+            abnormal_level
+          }
+        })
       })
 
       if (res.code === 0) {

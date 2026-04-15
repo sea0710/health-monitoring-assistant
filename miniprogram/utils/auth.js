@@ -1,27 +1,23 @@
-const app = getApp()
-
-function checkLoginStatus() {
+const checkLoginStatus = () => {
+  const app = getApp()
   return app.globalData.hasLogin
 }
 
-function requireAuth() {
+const requireAuth = () => {
   return new Promise((resolve, reject) => {
-    if (app.globalData.hasLogin) {
+    if (checkLoginStatus()) {
       resolve(true)
       return
     }
-    
+
     wx.showModal({
       title: '需要登录',
-      content: '此功能需要登录后使用',
+      content: '登录后可以使用此功能保存您的数据',
       confirmText: '去登录',
-      cancelText: '取消',
+      confirmColor: '#14b8a6',
       success: (res) => {
         if (res.confirm) {
-          const pages = getCurrentPages()
-          const currentPage = pages[pages.length - 1]
-          wx.setStorageSync('loginCallback', '/' + currentPage.route)
-          wx.navigateTo({ url: '/pages/login/login' })
+          wx.switchTab({ url: '/pages/home/home' })
           reject(new Error('NOT_LOGGED_IN'))
         } else {
           reject(new Error('USER_CANCELLED'))
@@ -31,53 +27,24 @@ function requireAuth() {
   })
 }
 
-function shouldShowGuide(guideKey) {
-  const guideStatus = wx.getStorageSync('guide_status') || {}
-  const guide = guideStatus[guideKey] || {}
-  
-  if (guide.permanent_skip) {
-    return false
-  }
-  
-  if (!guide.last_show_time) {
-    return true
-  }
-  
-  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
-  const timeSinceLastShow = Date.now() - guide.last_show_time
-  
-  return timeSinceLastShow > THREE_DAYS_MS
+const waitForLogin = (maxWait = 3000) => {
+  return new Promise((resolve) => {
+    const app = getApp()
+    if (app.globalData.hasLogin) {
+      resolve(true)
+      return
+    }
+
+    let elapsed = 0
+    const interval = 200
+    const timer = setInterval(() => {
+      elapsed += interval
+      if (app.globalData.hasLogin || elapsed >= maxWait) {
+        clearInterval(timer)
+        resolve(app.globalData.hasLogin)
+      }
+    }, interval)
+  })
 }
 
-function recordGuideShown(guideKey, skipped = false) {
-  const guideStatus = wx.getStorageSync('guide_status') || {}
-  
-  if (!guideStatus[guideKey]) {
-    guideStatus[guideKey] = {}
-  }
-  
-  guideStatus[guideKey].last_show_time = Date.now()
-  guideStatus[guideKey].skip_count = (guideStatus[guideKey].skip_count || 0) + (skipped ? 1 : 0)
-  
-  wx.setStorageSync('guide_status', guideStatus)
-}
-
-function permanentSkipGuide(guideKey) {
-  const guideStatus = wx.getStorageSync('guide_status') || {}
-  
-  if (!guideStatus[guideKey]) {
-    guideStatus[guideKey] = {}
-  }
-  
-  guideStatus[guideKey].permanent_skip = true
-  
-  wx.setStorageSync('guide_status', guideStatus)
-}
-
-module.exports = {
-  checkLoginStatus,
-  requireAuth,
-  shouldShowGuide,
-  recordGuideShown,
-  permanentSkipGuide
-}
+module.exports = { checkLoginStatus, requireAuth, waitForLogin }

@@ -1,0 +1,113 @@
+<view class="container page-enter">
+
+  <view class="profile-header-card">
+    <view class="profile-header-bg"></view>
+    <view class="profile-header-content">
+      <view class="profile-top-row">
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image src="{{avatarUrl || '/images/default-avatar.svg'}}" mode="aspectFill" class="avatar-image"></image>
+          <view class="avatar-edit-overlay" wx:if="{{!avatarUrl}}">
+            <text class="overlay-text">点击设置</text>
+          </view>
+          <view class="avatar-check-badge" wx:if="{{avatarUrl}}">
+            <text class="check-icon">✓</text>
+          </view>
+        </button>
+
+        <view class="profile-nickname-section">
+          <input
+            type="nickname"
+            placeholder="点击设置昵称"
+            value="{{nickname}}"
+            bindblur="onNicknameBlur"
+            bindconfirm="onNicknameConfirm"
+            class="nickname-input-field"
+          />
+          <view class="profile-status-row">
+            <view class="status-tag {{avatarUrl ? 'status-ok' : 'status-empty'}}">
+              <text>{{avatarUrl ? '头像已设置' : '未设置头像'}}</text>
+            </view>
+            <view class="status-tag {{nickname ? 'status-ok' : 'status-empty'}}">
+              <text>{{nickname ? '昵称已设置' : '未设置昵称'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="save-btn-wrap" wx:if="{{hasUnsavedChanges}}">
+        <button class="btn-save-profile btn-press" bindtap="handleSaveProfile">保存修改</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-title-row">
+      <view class="section-icon-wrap section-icon-patient">
+        <image src="/images/icon-patient.svg" class="section-icon-img"></image>
+      </view>
+      <text class="section-title-text">患者管理</text>
+    </view>
+    <view class="menu-item" bindtap="goToPatientCreate" wx:if="{{!patient}}">
+      <view class="menu-left">
+        <text class="menu-text">创建患者档案</text>
+        <text class="menu-desc">添加患者信息</text>
+      </view>
+      <view class="menu-arrow-wrap">
+        <text class="menu-arrow-icon">›</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goToPatientEdit" wx:if="{{patient}}">
+      <view class="menu-left">
+        <text class="menu-text">更新患者档案</text>
+        <text class="menu-desc">修改患者信息</text>
+      </view>
+      <view class="menu-arrow-wrap">
+        <text class="menu-arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-title-row">
+      <view class="section-icon-wrap section-icon-security">
+        <image src="/images/icon-security.svg" class="section-icon-img"></image>
+      </view>
+      <text class="section-title-text">账号安全</text>
+    </view>
+    <view class="menu-item" bindtap="goToSetPassword" wx:if="{{!hasPassword}}">
+      <view class="menu-left">
+        <text class="menu-text">设置登录密码</text>
+        <text class="menu-desc">设置后登录时需输入密码验证</text>
+      </view>
+      <view class="menu-arrow-wrap">
+        <text class="menu-arrow-icon">›</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goToResetPassword" wx:if="{{hasPassword}}">
+      <view class="menu-left">
+        <text class="menu-text">修改密码</text>
+        <text class="menu-desc">通过验证后重置</text>
+      </view>
+      <view class="menu-arrow-wrap">
+        <text class="menu-arrow-icon">›</text>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="goToSecurityQuestion" wx:if="{{hasPassword}}">
+      <view class="menu-left">
+        <text class="menu-text">密保问题</text>
+        <text class="menu-desc">{{hasSecurityQuestion ? '已设置，可更新' : '设置安全问题'}}</text>
+      </view>
+      <view class="menu-arrow-wrap">
+        <text class="menu-arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="logout-section">
+    <view class="btn-logout btn-press" bindtap="handleLogout">退出登录</view>
+  </view>
+
+  <view class="disclaimer">
+    <text class="disclaimer-text">本工具仅供内部测试与健康科普参考，不构成任何诊疗建议，不能替代执业医师的专业判断</text>
+  </view>
+</view>

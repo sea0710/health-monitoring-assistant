@@ -1,17 +1,28 @@
 const timeout = 120000
 
+const CLOUD_FUNCTION_VERSIONS = {
+  login: 2,
+  report: 2,
+  ocr: 2
+}
+
 const callFunction = (name, data, customTimeout = timeout) => {
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
       name: name,
-      data: data,
+      data: {
+        ...data,
+        _clientVersion: CLOUD_FUNCTION_VERSIONS[name] || 1
+      },
       timeout: customTimeout,
       success: (res) => {
-        if (res.result && (res.result.code === 0 || res.result.code === 200)) {
+        if (res.result) {
+          if (res.result._version && CLOUD_FUNCTION_VERSIONS[name] < res.result._version) {
+            console.warn(`云函数 ${name} 有新版本可用: ${res.result._version}`)
+          }
           resolve(res.result)
         } else {
-          const error = res.result || { code: -1, message: '请求失败' }
-          reject(error)
+          reject({ code: -1, message: '请求失败' })
         }
       },
       fail: (err) => {
@@ -26,16 +37,63 @@ const callFunction = (name, data, customTimeout = timeout) => {
   })
 }
 
+const normalizeUserParams = (data) => {
+  const result = { ...data }
+  if (result.avatar_url !== undefined && result.avatarUrl === undefined) {
+    result.avatarUrl = result.avatar_url
+  }
+  if (result.avatarUrl !== undefined && result.avatar_url === undefined) {
+    result.avatar_url = result.avatarUrl
+  }
+  if (result.securityAnswer !== undefined && result.answer === undefined) {
+    result.answer = result.securityAnswer
+  }
+  if (result.answer !== undefined && result.securityAnswer === undefined) {
+    result.securityAnswer = result.answer
+  }
+  if (result.questionId !== undefined && result.securityQuestionId === undefined) {
+    result.securityQuestionId = result.questionId
+  }
+  if (result.securityQuestionId !== undefined && result.questionId === undefined) {
+    result.questionId = result.securityQuestionId
+  }
+  return result
+}
+
+const filterUndefined = (obj) => {
+  const result = {}
+  for (const key in obj) {
+    if (obj[key] !== undefined && obj[key] !== null) {
+      result[key] = obj[key]
+    }
+  }
+  return result
+}
+
 const api = {
   auth: {
     login: (data) => callFunction('login', data),
-    register: (data) => callFunction('login', data)
+    register: (data) => callFunction('login', data),
+    wechatLogin: (code) => callFunction('login', { action: 'wechatLogin', code }),
+    setUserInfo: (data) => callFunction('login', { action: 'setUserInfo', ...normalizeUserParams(filterUndefined(data)) }),
+    setPassword: (data) => callFunction('login', { action: 'setPassword', ...normalizeUserParams(data) }),
+    changePassword: (data) => callFunction('login', { action: 'changePassword', ...data }),
+    resetPassword: (data) => callFunction('login', { action: 'resetPassword', ...normalizeUserParams(data) }),
+    verifyPassword: (data) => callFunction('login', { action: 'verifyPassword', ...data }),
+    checkPasswordSet: (userId) => callFunction('login', { action: 'checkPasswordSet', userId }),
+    getUserInfo: (userId) => callFunction('login', { action: 'getUserInfo', userId }),
+    setSecurityQuestion: (data) => callFunction('login', { action: 'setSecurityQuestion', ...normalizeUserParams(data) })
   },
   
   patients: {
     get: (userId) => callFunction('report', { action: 'getPatient', userId }),
     create: (data) => callFunction('report', { action: 'createPatient', ...data }),
-    update: (data) => callFunction('report', { action: 'updatePatient', ...data })
+    update: (data) => callFunction('report', { action: 'updatePatient', ...data }),
+    delete: (patientId) => callFunction('report', { action: 'deletePatient', patientId })
+  },
+
+  users: {
+    update: (data) => callFunction('login', { action: 'setUserInfo', ...normalizeUserParams(filterUndefined(data)) })
   },
   
   reports: {

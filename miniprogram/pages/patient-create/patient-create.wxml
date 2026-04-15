@@ -1,5 +1,10 @@
 <view class="container page-enter">
 
+  <view class="page-header">
+    <text class="page-title">{{isEditMode ? '修改患者基本信息' : '创建患者档案'}}</text>
+    <text class="page-subtitle" wx:if="{{isEditMode}}">修改后将更新所有关联数据</text>
+  </view>
+
   <view class="form-section">
     <view class="input-group">
       <text class="input-label">患者姓名 *</text>
@@ -28,6 +33,10 @@
     <button class="btn-primary" bindtap="handleSave" loading="{{isLoading}}">
       {{isLoading ? '保存中...' : '保存档案'}}
     </button>
+  </view>
+
+  <view class="danger-section" wx:if="{{isEditMode}}">
+    <view class="btn-delete-patient btn-press" bindtap="handleDeletePatient">删除此患者档案</view>
   </view>
 
   <view class="disclaimer">

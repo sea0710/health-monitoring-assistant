@@ -1,51 +1,46 @@
 <view class="container page-enter">
-  <view class="header">
-    <text class="title">完善个人信息</text>
-    <text class="subtitle">设置昵称和头像，获得更好的使用体验</text>
+
+  <view class="header-section animate-fade-in">
+    <text class="header-title">完善个人信息</text>
+    <text class="header-subtitle">设置您的头像和昵称，让体验更完整</text>
   </view>
 
-  <view class="form-section">
-    <view class="form-item">
-      <text class="form-label">头像</text>
-      <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-        <image 
-          src="{{avatarDisplayUrl || avatarUrl || '/images/default-avatar.png'}}" 
-          mode="aspectFill"
-          class="avatar-image"
-        ></image>
-        <text class="avatar-hint">点击更换头像</text>
+  <view class="form-card animate-slide-up">
+    <view class="avatar-section">
+      <text class="input-label">头像</text>
+      <button class="avatar-btn btn-press" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar-image" src="{{avatarUrl || '/images/logo.svg'}}" mode="aspectFill"></image>
+        <view class="avatar-edit-badge">
+          <image class="avatar-edit-icon" src="/images/icon-camera.svg" mode="aspectFit"></image>
+        </view>
       </button>
+      <text class="avatar-hint">点击更换头像</text>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">昵称</text>
-      <form bindsubmit="onSubmitNickname">
-        <input 
-          type="nickname" 
-          name="nickname"
-          placeholder="请输入您的昵称"
-          value="{{nickname}}"
-          class="nickname-input"
-          bindblur="onNicknameBlur"
-        />
-        <button form-type="submit" class="hidden-submit">保存昵称</button>
-      </form>
+    <view class="divider"></view>
+
+    <view class="input-group">
+      <text class="input-label">昵称</text>
+      <input
+        class="input-field input-glow"
+        type="nickname"
+        placeholder="请输入昵称"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        bindblur="onNicknameBlur"
+      />
     </view>
   </view>
 
-  <view class="privacy-notice">
-    <text class="notice-title">📋 隐私说明</text>
-    <text class="notice-text">• 我们仅收集昵称和头像，用于界面个性化展示</text>
-    <text class="notice-text">• 不会用于其他用途，您可以随时修改或删除</text>
-    <text class="notice-text">• 数据保留期限：账户注销后30天内永久删除</text>
+  <view class="privacy-notice animate-fade-in">
+    <text class="privacy-icon">◈</text>
+    <text class="privacy-text">您的个人信息仅用于展示，我们不会向第三方泄露您的隐私数据</text>
   </view>
 
-  <button 
-    class="btn-primary btn-bottom" 
-    bindtap="saveUserInfo" 
-    loading="{{isSaving}}"
-    disabled="{{!canSave}}"
-  >
-    {{isSaving ? '保存中...' : '保存'}}
-  </button>
+  <view class="action-section">
+    <button class="btn-primary btn-press" bindtap="saveUserInfo" loading="{{isLoading}}" disabled="{{isLoading}}">
+      {{isLoading ? '保存中...' : '保存信息'}}
+    </button>
+  </view>
+
 </view>
